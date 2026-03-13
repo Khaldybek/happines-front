@@ -1,59 +1,9 @@
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
-import { readFileSync, writeFileSync, existsSync } from 'node:fs'
-
-const projectRoot = fileURLToPath(new URL('.', import.meta.url))
-
-const isPublicAsset = (id: string) =>
-  id.startsWith('/images/') || (/^\/[^/]*\.(png|jpg|jpeg|gif|svg|webp|ico)(\?|$)/i.test(id))
-
+// https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  ssr: true,
-  compatibilityDate: '2024-06-01',
+  compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   devServer: { port: 3010 },
   srcDir: 'app',
-  hooks: {
-    'vite:config'(viteConfig) {
-      const root = path.resolve(projectRoot)
-      const mainPath = path.join(root, '.nuxt/tsconfig.json')
-      if (existsSync(mainPath)) {
-        const content = readFileSync(mainPath, 'utf-8')
-        for (const name of ['tsconfig.app.json', 'tsconfig.shared.json', 'tsconfig.node.json']) {
-          const outPath = path.join(root, '.nuxt', name)
-          if (!existsSync(outPath)) writeFileSync(outPath, content)
-        }
-      }
-    },
-  },
-  vite: {
-    plugins: [
-      {
-        name: 'nuxt-tsconfig-copy',
-        enforce: 'pre',
-        configResolved() {
-          const root = path.resolve(projectRoot)
-          const mainPath = path.join(root, '.nuxt/tsconfig.json')
-          if (!existsSync(mainPath)) return
-          const content = readFileSync(mainPath, 'utf-8')
-          for (const name of ['tsconfig.app.json', 'tsconfig.shared.json', 'tsconfig.node.json']) {
-            const outPath = path.join(root, '.nuxt', name)
-            if (!existsSync(outPath)) writeFileSync(outPath, content)
-          }
-        },
-      },
-      {
-        name: 'resolve-public-assets',
-        enforce: 'pre',
-        resolveId(id) {
-          if (typeof id !== 'string' || !isPublicAsset(id)) return null
-          const fullPath = path.join(projectRoot, 'public', id)
-          if (existsSync(fullPath)) return fullPath
-          return { id, external: true }
-        },
-      },
-    ],
-  },
   app: {
     head: {
       title: 'Happiness',
@@ -72,4 +22,7 @@ export default defineNuxtConfig({
     },
   },
   css: ['~/assets/css/variables.css', '~/assets/css/main.css'],
+  nitro: {
+    devServer: { port: 3010 },
+  },
 })
