@@ -5,8 +5,10 @@
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
+    "start": "PORT=3010 node .output/server/index.mjs",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
+    "start:prod": "PORT=3010 node .output/server/index.mjs",
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
