@@ -44,16 +44,17 @@
 
 <style scoped>
 .people-section {
-  padding: 80px 0;
+  padding: clamp(72px, 8vw, 116px) 0;
   background: #fff;
 }
 
 .people-title {
-  font-size: 48px;
-  font-weight: 700;
-  margin: 0 0 20px 0;
+  font-size: clamp(48px, 6.4vw, 92px);
+  font-weight: 800;
+  margin: 0 0 clamp(18px, 2.4vw, 30px);
   text-transform: uppercase;
-  letter-spacing: 0.02em;
+  letter-spacing: -0.02em;
+  line-height: 0.95;
 }
 
 .title-orange {
@@ -65,52 +66,65 @@
 }
 
 .people-intro {
-  font-size: 16px;
+  font-size: clamp(28px, 2.15vw, 41px);
   color: #121212;
-  line-height: 1.6;
-  margin: 0 0 40px 0;
-  max-width: 100%;
+  font-weight: 600;
+  line-height: 1.03;
+  margin: 0 auto clamp(42px, 4.4vw, 62px);
+  max-width: 980px;
+  text-align: center;
+  letter-spacing: -0.01em;
 }
 
 .people-layout {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 60px;
+  grid-template-columns: minmax(340px, 1.05fr) minmax(520px, 1fr);
+  gap: clamp(34px, 4vw, 70px);
   align-items: start;
 }
 
 .people-left {
-  padding-right: 20px;
+  padding-right: clamp(8px, 1.2vw, 20px);
 }
 
 .people-subheading {
-  font-size: 22px;
+  font-size: clamp(36px, 3.35vw, 58px);
   font-weight: 700;
   color: #121212;
-  margin: 0 0 16px 0;
+  margin: 0 0 clamp(12px, 1.6vw, 20px);
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+  max-width: 620px;
 }
 
 .people-desc {
-  font-size: 16px;
+  font-size: clamp(24px, 1.85vw, 32px);
   color: #121212;
-  line-height: 1.6;
-  margin: 0 0 30px 0;
+  line-height: 1.12;
+  margin: 0 0 clamp(24px, 2.8vw, 42px);
+  max-width: 640px;
+  letter-spacing: -0.01em;
 }
 
 .people-btn {
   text-transform: uppercase;
   display: inline-flex;
   align-items: center;
-  gap: 14px;
-  padding: 16px 28px;
+  gap: 12px;
+  padding: 8px 20px 8px 8px;
+  border-radius: 999px;
+  font-size: clamp(18px, 1.2vw, 24px);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1;
 }
 
 .btn-icon-wrap {
-  width: 44px;
-  height: 44px;
+  width: clamp(42px, 2.7vw, 54px);
+  height: clamp(42px, 2.7vw, 54px);
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.25);
-  border: 2px solid rgba(255, 255, 255, 0.5);
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -118,42 +132,43 @@
 }
 
 .btn-arrow {
-  width: 20px;
-  height: 20px;
+  width: clamp(18px, 1.3vw, 24px);
+  height: clamp(18px, 1.3vw, 24px);
   filter: brightness(0) invert(1);
 }
 
 .people-blocks {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 24px;
+  gap: clamp(16px, 1.7vw, 24px);
 }
 
 .people-block {
-  border-radius: 24px;
-  padding: 32px 28px;
+  border-radius: clamp(26px, 2.1vw, 34px);
+  padding: clamp(24px, 2.1vw, 34px) clamp(22px, 1.9vw, 30px);
   color: #fff;
-  min-height: 180px;
+  min-height: clamp(180px, 15.6vw, 245px);
   display: flex;
   flex-direction: column;
   justify-content: center;
-  text-align: center;
+  text-align: left;
 }
 
 .people-block h4 {
-  font-size: 18px;
+  font-size: clamp(30px, 1.95vw, 37px);
   font-weight: 700;
-  margin: 0 0 12px 0;
+  margin: 0 0 clamp(8px, 0.9vw, 14px);
   text-transform: uppercase;
-  letter-spacing: 0.02em;
-  line-height: 1.3;
+  letter-spacing: -0.01em;
+  line-height: 1.02;
 }
 
 .people-block p {
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 1.5;
+  font-size: clamp(26px, 1.55vw, 30px);
+  font-weight: 500;
+  line-height: 1.08;
   margin: 0;
+  letter-spacing: -0.01em;
 }
 
 .block-blue {
@@ -184,28 +199,83 @@
 @media (max-width: 968px) {
   .people-layout {
     grid-template-columns: 1fr;
+    gap: 28px;
   }
 
   .people-left {
     padding-right: 0;
   }
 
+  .people-intro {
+    max-width: 760px;
+  }
+
+  .people-subheading,
+  .people-desc {
+    max-width: none;
+  }
+
   .people-blocks {
     gap: 20px;
+  }
+
+  .people-block {
+    min-height: 200px;
   }
 }
 
 @media (max-width: 600px) {
+  .people-section {
+    padding: 58px 0 64px;
+  }
+
   .people-blocks {
     grid-template-columns: 1fr;
   }
 
   .people-title {
-    font-size: 32px;
+    font-size: clamp(34px, 11vw, 52px);
+  }
+
+  .people-intro {
+    font-size: clamp(20px, 6.1vw, 30px);
+    line-height: 1.12;
+    margin-bottom: 28px;
   }
 
   .people-subheading {
-    font-size: 18px;
+    font-size: clamp(30px, 8.8vw, 42px);
+    line-height: 1.04;
+  }
+
+  .people-desc {
+    font-size: clamp(18px, 5.2vw, 24px);
+    line-height: 1.2;
+    margin-bottom: 22px;
+  }
+
+  .people-btn {
+    font-size: 16px;
+    padding: 7px 16px 7px 7px;
+  }
+
+  .btn-icon-wrap {
+    width: 38px;
+    height: 38px;
+  }
+
+  .people-block {
+    min-height: 172px;
+    text-align: center;
+  }
+
+  .people-block h4 {
+    font-size: clamp(24px, 7vw, 32px);
+  }
+
+  .people-block p {
+    font-size: clamp(20px, 5.8vw, 28px);
+    line-height: 1.12;
   }
 }
 </style>

@@ -8,12 +8,14 @@
         class="menu-item"
         :class="{ active: active === item.key }"
       >
-        <span class="menu-icon" aria-hidden="true">{{ item.icon }}</span>
+        <span class="menu-icon" aria-hidden="true">
+          <component :is="item.icon" />
+        </span>
         <span>{{ item.label }}</span>
       </NuxtLink>
     </nav>
 
-    <button class="logout-btn" type="button">
+    <button class="logout-btn" type="button" @click="handleLogout">
       <span class="logout-arrow"></span>
       <span>ВЫЙТИ</span>
     </button>
@@ -21,17 +23,75 @@
 </template>
 
 <script setup lang="ts">
+import { defineComponent, h } from 'vue'
+import { useAuthStore } from '~/stores/useAuthStore'
+
 withDefaults(defineProps<{
   active?: 'orders' | 'favorites' | 'cart' | 'profile'
 }>(), {
   active: 'orders',
 })
 
+const authStore = useAuthStore()
+const router = useRouter()
+
+async function handleLogout() {
+  authStore.logout()
+  await router.push('/login')
+}
+
+function svgIcon(paths: string[]) {
+  return defineComponent({
+    render() {
+      return h(
+        'svg',
+        { viewBox: '0 0 24 24', fill: 'none', xmlns: 'http://www.w3.org/2000/svg', 'aria-hidden': 'true' },
+        paths.map(d => h('path', { d, stroke: 'currentColor', 'stroke-width': '1.8', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' })),
+      )
+    },
+  })
+}
+
+const IconOrders = svgIcon([
+  'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2',
+  'M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2',
+  'M9 12h6M9 16h4',
+])
+
+const IconHeart = defineComponent({
+  render() {
+    return h(
+      'svg',
+      { viewBox: '0 0 24 24', fill: 'none', xmlns: 'http://www.w3.org/2000/svg', 'aria-hidden': 'true' },
+      [
+        h('path', {
+          d: 'M12 20.5C8.4 17.8 4 14.2 4 9.8 4 7.2 6 5 8.6 5c1.4 0 2.7.6 3.6 1.7C13.1 5.6 14.4 5 15.8 5 18.4 5 20.4 7.2 20.4 9.8c0 4.4-4.4 8-7.2 10.4-.6.5-1.2.3-1.2.3z',
+          stroke: 'currentColor',
+          'stroke-width': '1.8',
+          'stroke-linecap': 'round',
+          'stroke-linejoin': 'round',
+        }),
+      ],
+    )
+  },
+})
+
+const IconCart = svgIcon([
+  'M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z',
+  'M3 6h18',
+  'M16 10a4 4 0 01-8 0',
+])
+
+const IconProfile = svgIcon([
+  'M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2',
+  'M12 11a4 4 0 100-8 4 4 0 000 8z',
+])
+
 const menuItems = [
-  { key: 'orders', label: 'Мои заказы', to: '/cabinet/orders', icon: '◫' },
-  { key: 'favorites', label: 'Мои избранные', to: '/cabinet/favorites', icon: '♡' },
-  { key: 'cart', label: 'Моя корзина', to: '/cabinet/cart', icon: '🛒' },
-  { key: 'profile', label: 'Профиль', to: '/cabinet/profile', icon: '◌' },
+  { key: 'orders', label: 'Мои заказы', to: '/lk/orders', icon: IconOrders },
+  { key: 'favorites', label: 'Мои избранные', to: '/lk/favorites', icon: IconHeart },
+  { key: 'cart', label: 'Моя корзина', to: '/lk/cart', icon: IconCart },
+  { key: 'profile', label: 'Профиль', to: '/lk/profile', icon: IconProfile },
 ] as const
 </script>
 
@@ -67,9 +127,16 @@ const menuItems = [
 
 .menu-icon {
   width: 24px;
-  text-align: center;
-  font-size: 23px;
-  line-height: 1;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.menu-icon :deep(svg) {
+  width: 22px;
+  height: 22px;
 }
 
 .logout-btn {

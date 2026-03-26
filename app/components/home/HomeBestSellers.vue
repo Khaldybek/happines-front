@@ -2,31 +2,26 @@
   <section class="bestseller-section">
     <div class="container">
       <h2 class="bs-section-title">
-        <span class="bs-title-orange">ХИТЫ</span>
-        <span class="bs-title-black"> ПРОДАЖ</span>
+        <span class="bs-title-orange">{{ titlePrimary }}</span>
+        <span class="bs-title-black"> {{ titleSecondary }}</span>
       </h2>
 
       <div class="bestseller-layout">
-        <div class="bs-decor bs-decor-left" aria-hidden="true"></div>
-        <div class="bs-decor bs-decor-right" aria-hidden="true"></div>
-
         <div class="bs-showcase">
-          <img class="bs-pack bs-pack-back-1" src="/images/85c8bf8dc68bb639314f07e0e6692e7fcf1c80d9.png" alt="">
-          <img class="bs-pack bs-pack-back-2" src="/images/85c8bf8dc68bb639314f07e0e6692e7fcf1c80d9.png" alt="">
-          <img class="bs-pack bs-pack-main" src="/images/85c8bf8dc68bb639314f07e0e6692e7fcf1c80d9.png" alt="Шенлунгский чай Баланс+">
+          <img class="bs-pack bs-pack-main" :src="showcaseImage" :alt="showcaseTitle">
         </div>
 
         <div class="bs-nav">
-          <button class="bs-nav-btn is-prev" aria-label="Предыдущий товар"></button>
-          <button class="bs-nav-btn is-next" aria-label="Следующий товар"></button>
+          <button class="bs-nav-btn is-prev" aria-label="Предыдущий товар" @click="showPrev"></button>
+          <button class="bs-nav-btn is-next" aria-label="Следующий товар" @click="showNext"></button>
         </div>
 
         <div class="bs-details-card">
           <div class="bs-card-content">
-            <h3>ШЕНЛУНГСКИЙ ЧАЙ «БАЛАНС+»</h3>
-            <p>Травяной чай на основе красного бурят-монгольского риса и чёрного горного гречиха. Помогает мягко поддерживать пищеварение, улучшает тонус и способствует общему балансу организма.</p>
+            <h3>{{ showcaseTitle }}</h3>
+            <p>{{ showcaseDescription }}</p>
             <div class="bs-actions">
-              <div class="bs-price">Цена: 5 000 ₸</div>
+              <div class="bs-price">Цена: {{ showcasePrice }}</div>
               <div class="quantity-selector">
                 <button type="button" @click="quantity = Math.max(0, quantity - 1)">−</button>
                 <span>{{ quantity }}</span>
@@ -45,7 +40,93 @@
 </template>
 
 <script setup lang="ts">
+import type { HomeEighthItem } from '~/types/homePage'
+
 const quantity = ref(0)
+const currentIndex = ref(0)
+
+const props = defineProps<{
+  title?: string | null
+  items?: HomeEighthItem[]
+}>()
+
+const fallbackShowcase = {
+  title: 'ШЕНЛУНГСКИЙ ЧАЙ «БАЛАНС+»',
+  description: 'Травяной чай на основе красного бурят-монгольского риса и чёрного горного гречиха. Помогает мягко поддерживать пищеварение, улучшает тонус и способствует общему балансу организма.',
+  price: '5 000 ₸',
+  image: '/images/85c8bf8dc68bb639314f07e0e6692e7fcf1c80d9.png',
+}
+
+function formatPrice(value: number | null | undefined) {
+  const n = Number(value)
+  if (!Number.isFinite(n)) return fallbackShowcase.price
+  return `${new Intl.NumberFormat('ru-RU').format(n)} ₸`
+}
+
+const normalizedItems = computed(() => {
+  const fromApi = props.items
+    ?.map((item) => {
+      const product = item?.product
+      if (!product) return null
+      return {
+        title: (product.short_title || product.title || fallbackShowcase.title).toUpperCase(),
+        description: product.card_description || product.short_description || product.description || fallbackShowcase.description,
+        price: formatPrice(product.discount_price > 0 ? product.discount_price : product.price),
+        image: item.block_image || product.image_orig || product.image || fallbackShowcase.image,
+      }
+    })
+    .filter((item): item is NonNullable<typeof item> => Boolean(item))
+
+  return fromApi?.length ? fromApi : [fallbackShowcase]
+})
+
+watch(normalizedItems, (items) => {
+  if (!items.length) {
+    currentIndex.value = 0
+    return
+  }
+  if (currentIndex.value > items.length - 1) currentIndex.value = 0
+}, { immediate: true })
+
+const showcase = computed(() => {
+  const items = normalizedItems.value
+  if (!items.length) return fallbackShowcase
+  const safeIndex = Math.max(0, Math.min(items.length - 1, currentIndex.value))
+  return items[safeIndex] || fallbackShowcase
+})
+
+function showPrev() {
+  const total = normalizedItems.value.length
+  if (total <= 1) return
+  currentIndex.value = (currentIndex.value - 1 + total) % total
+}
+
+function showNext() {
+  const total = normalizedItems.value.length
+  if (total <= 1) return
+  currentIndex.value = (currentIndex.value + 1) % total
+}
+
+watch(currentIndex, () => {
+  quantity.value = 0
+})
+
+const showcaseTitle = computed(() => showcase.value.title)
+const showcaseDescription = computed(() => showcase.value.description)
+const showcasePrice = computed(() => showcase.value.price)
+const showcaseImage = computed(() => showcase.value.image)
+
+const titlePrimary = computed(() => {
+  const title = String(props.title || '').trim()
+  if (!title) return 'ХИТЫ'
+  return title.split(/\s+/)[0]?.toUpperCase() || 'ХИТЫ'
+})
+
+const titleSecondary = computed(() => {
+  const title = String(props.title || '').trim()
+  if (!title) return 'ПРОДАЖ'
+  return title.split(/\s+/).slice(1).join(' ').toUpperCase() || 'ПРОДАЖ'
+})
 </script>
 
 <style scoped>
@@ -77,27 +158,6 @@ const quantity = ref(0)
   position: relative;
   padding-top: 34px;
   min-height: 975px;
-}
-
-.bs-decor {
-  position: absolute;
-  width: 150px;
-  height: 250px;
-  border-radius: 999px;
-  transform: rotate(28deg);
-  background: linear-gradient(158deg, #ffd76a 8%, #ffb300 42%, #d78000 92%);
-  box-shadow: inset 0 2px 8px rgba(255, 255, 255, 0.65), 0 10px 18px rgba(180, 108, 8, 0.24);
-  z-index: 1;
-}
-
-.bs-decor-left {
-  left: -48px;
-  top: -22px;
-}
-
-.bs-decor-right {
-  right: -52px;
-  bottom: 210px;
 }
 
 .bs-showcase {
@@ -327,8 +387,7 @@ const quantity = ref(0)
   }
 
   .bs-pack-back-1,
-  .bs-pack-back-2,
-  .bs-decor {
+  .bs-pack-back-2 {
     display: none;
   }
 

@@ -26,7 +26,11 @@
 .about-company-section {
   margin-bottom: 100px;
   position: relative;
-  background: linear-gradient(180deg, #d4e8f7 0%, #c5dff2 50%, #b8d6eb 100%);
+  overflow: hidden;
+  background:
+    radial-gradient(42% 42% at 0% 100%, rgba(75, 147, 215, 0.74) 0%, rgba(75, 147, 215, 0) 70%),
+    radial-gradient(34% 34% at 100% 100%, rgba(119, 179, 65, 0.72) 0%, rgba(119, 179, 65, 0) 68%),
+    #fff;
   padding: 60px 0 80px;
 }
 

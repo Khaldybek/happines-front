@@ -6,7 +6,6 @@
       <AboutHero />
       <AboutCompany />
       <AboutMission />
-      <AboutBenefits />
       <AboutGeography />
       <AboutHappinessToday />
       <AboutPeople />

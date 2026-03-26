@@ -4,6 +4,12 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   devServer: { port: 3010 },
   srcDir: 'app',
+  runtimeConfig: {
+    public: {
+      /** NUXT_PUBLIC_API_BASE — без завершающего слэша */
+      apiBase: 'http://127.0.0.1:8000',
+    },
+  },
   app: {
     head: {
       title: 'Happiness',
@@ -21,7 +27,11 @@ export default defineNuxtConfig({
       ],
     },
   },
-  css: ['~/assets/css/variables.css', '~/assets/css/main.css'],
+  css: [
+    '~/assets/css/variables.css',
+    '~/assets/css/main.css',
+    '~/assets/css/page-hero-catalog.css',
+  ],
   nitro: {
     devServer: { port: 3010 },
   },

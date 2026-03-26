@@ -2,41 +2,48 @@
   <div>
     <TheHeader />
     <main class="news-article-page">
-      <section class="breadcrumbs-section">
-        <div class="container">
-          <nav class="breadcrumbs-list" aria-label="Хлебные крошки">
+      <!-- Как в Figma: белая полоса только с крошками под шапкой -->
+      <section class="news-breadcrumbs-bar" aria-label="Навигация по разделу">
+        <div class="container article-content">
+          <nav class="news-breadcrumbs" aria-label="Хлебные крошки">
             <NuxtLink to="/" class="crumb-item">Главная</NuxtLink>
             <img src="/images/16_552.svg" alt="">
             <NuxtLink to="/news" class="crumb-item">Новости</NuxtLink>
             <img src="/images/16_552.svg" alt="">
-            <span class="crumb-item active">{{ article.title }}</span>
+            <span class="crumb-item active">{{ articleTitle }}</span>
           </nav>
         </div>
       </section>
 
-      <article class="article-content">
-        <div class="container">
-          <h1 class="article-title">{{ article.title }}</h1>
-          <p class="article-date">{{ article.date }}</p>
-          <p class="article-intro">{{ article.intro }}</p>
+      <!-- Серая зона: первым идёт фото, затем заголовок и текст (node 748-14826) -->
+      <article class="page-hero-catalog news-article-panel">
+        <div class="container article-content">
+          <div class="hero-content">
+            <div v-if="articleMainImage" class="hero-image-container">
+              <img
+                :src="articleMainImage"
+                :alt="articleTitle"
+                class="hero-bg-img"
+              >
+            </div>
 
-          <div class="article-image article-image--full">
-            <img :src="article.images[0]" :alt="article.title">
+            <h1 class="article-title">{{ articleTitle }}</h1>
+            <p v-if="articleDate" class="article-date">{{ articleDate }}</p>
           </div>
 
-          <div class="article-image">
-            <img :src="article.images[1]" :alt="article.title">
+          <div v-if="articleIntro" class="article-prose">
+            <p class="article-intro">{{ articleIntro }}</p>
           </div>
 
-          <div class="article-images-row">
-            <img :src="article.images[2]" :alt="article.title">
-            <img :src="article.images[3]" :alt="article.title">
+          <div v-if="articleBetweenImage" class="article-image article-image--between">
+            <img :src="articleBetweenImage" :alt="articleTitle">
           </div>
 
-          <div class="article-body">
-            <p>Сиань — древняя столица Китая, один из ключевых пунктов Великого шёлкового пути. Партнёры HAPPINESS увидели терракотовую армию, старинные стены города, оживлённые рынки и храмы. Поездка в Сиань вновь показала: с HAPPINESS мечты становятся реальностью! Компания не только даёт финансовые возможности, но и открывает мир, создаёт моменты счастья и вдохновляет на новые достижения.</p>
-            <p>Путешествие с HAPPINESS — это не только экскурсии, но и тёплые встречи, душевные разговоры, моменты, которые сближают. Партнёры делились успехами, строили планы на будущее. Руководство компании было рядом с участниками поездки, поддерживая командный дух.</p>
-            <p class="article-highlight">Благодарим каждого участника за энергию, стремление к успеху и веру в наши общие ценности. Впереди – еще больше ярких путешествий, побед и совместных радостей! HAPPINESS – там, где сбываются мечты!</p>
+          <div class="article-prose">
+            <div v-if="articleSecondHtml" class="article-body" v-html="articleSecondHtml" />
+            <div v-else class="article-body">
+              <p>Новость пока не содержит полного описания.</p>
+            </div>
           </div>
         </div>
       </article>
@@ -57,17 +64,17 @@
           <div ref="carouselRef" class="other-news-carousel">
             <NuxtLink
               v-for="(item, i) in otherNews"
-              :key="i"
-              :to="`/news/${item.slug}`"
+              :key="item.id || i"
+              :to="`/news/${item.id}`"
               class="news-card"
             >
               <div class="news-card-img">
-                <img :src="item.image" :alt="item.title">
+                <img :src="item.main_image || '/images/342d0f8b9544d8dc8e8678f3302ca4864aa11e04.png'" :alt="item.title">
               </div>
               <div class="news-card-content">
                 <h3>{{ item.title }}</h3>
-                <p>{{ item.excerpt }}</p>
-                <span class="news-card-date">{{ item.date }}</span>
+                <p>{{ excerpt(item) }}</p>
+                <span class="news-card-date">{{ formatDate(item.display_date) }}</span>
               </div>
             </NuxtLink>
           </div>
@@ -79,34 +86,70 @@
 </template>
 
 <script setup lang="ts">
+import type { NewsItem } from '~/types/newsPage'
+
 definePageMeta({
   layout: false,
 })
 
 const route = useRoute()
-const slug = route.params.slug as string
+const id = computed(() => String(route.params.slug || '').trim())
 
-const article = {
-  title: 'ПАРТНЕРЫ HAPPINESS В СИАНЕ 2025Г.',
-  date: '24 декабря 2025',
-  intro: '2025 год уже стал для партнеров HAPPINESS по-настоящему ярким и запоминающимся! 21 партнёр успешно завершили промоушен на путешествие в древний Сиань – город, где история и современность гармонично переплетаются. Вместе с представителями руководства и генеральным директором партнёры отправились в незабываемую поездку, полную открытий, тёплых встреч и вдохновляющих моментов.',
-  images: [
-    '/images/342d0f8b9544d8dc8e8678f3302ca4864aa11e04.png',
-    '/images/342d0f8b9544d8dc8e8678f3302ca4864aa11e04.png',
-    '/images/342d0f8b9544d8dc8e8678f3302ca4864aa11e04.png',
-    '/images/342d0f8b9544d8dc8e8678f3302ca4864aa11e04.png',
-  ],
+const { data: articleData } = useNewsItem(id)
+const { data: listData } = useNewsPage()
+
+const article = computed<NewsItem | null>(() => articleData.value ?? null)
+const otherNews = computed<NewsItem[]>(() => {
+  const all = listData.value?.news?.items ?? []
+  const currentId = Number.parseInt(id.value, 10)
+  return all.filter((x) => x.id !== currentId).slice(0, 6)
+})
+
+function decodeHtml(value: string) {
+  return value
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&ndash;/g, '–')
+    .replace(/&laquo;/g, '«')
+    .replace(/&raquo;/g, '»')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, '\'')
+    .replace(/&amp;/g, '&')
 }
 
-const otherNews = [
-  { slug: 'partnery-happiness-v-siane-2025', title: 'ПАРТНЕРЫ HAPPINESS В СИАНЕ 2025Г.', excerpt: '2025 год уже стал для партнеров HAPPINESS по-настоящему ярким и запоминающимся! 21 партнёр успешно завершили промоушен на пут...', date: '24 декабря 2025', image: '/images/342d0f8b9544d8dc8e8678f3302ca4864aa11e04.png' },
-  { slug: 'partnery-happiness-v-siane-2025', title: 'ПАРТНЕРЫ HAPPINESS В СИАНЕ 2025Г.', excerpt: '2025 год уже стал для партнеров HAPPINESS по-настоящему ярким и запоминающимся! 21 партнёр успешно завершили промоушен на пут...', date: '24 декабря 2025', image: '/images/342d0f8b9544d8dc8e8678f3302ca4864aa11e04.png' },
-  { slug: 'partnery-happiness-v-siane-2025', title: 'ПАРТНЕРЫ HAPPINESS В СИАНЕ 2025Г.', excerpt: '2025 год уже стал для партнеров HAPPINESS по-настоящему ярким и запоминающимся! 21 партнёр успешно завершили промоушен на пут...', date: '24 декабря 2025', image: '/images/342d0f8b9544d8dc8e8678f3302ca4864aa11e04.png' },
-]
+function stripHtml(value: string) {
+  return decodeHtml(value)
+    .replace(/<br\s*\/?>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
 
-useHead({
-  title: `${article.title} — Новости — Happiness`,
-})
+function excerpt(item: NewsItem) {
+  const raw = item.first_description || item.second_description || ''
+  const txt = stripHtml(raw)
+  return txt.length > 160 ? `${txt.slice(0, 157)}…` : txt
+}
+
+function formatDate(iso: string) {
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return iso
+  return new Intl.DateTimeFormat('ru-RU', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  }).format(d)
+}
+
+const articleTitle = computed(() => article.value?.title || 'Новость')
+const articleDate = computed(() => article.value?.display_date ? formatDate(article.value.display_date) : '')
+const articleMainImage = computed(() => article.value?.main_image || '')
+const articleBetweenImage = computed(() => article.value?.between_descriptions_image || '')
+const articleIntro = computed(() => stripHtml(article.value?.first_description || ''))
+const articleSecondHtml = computed(() => (article.value?.second_description || '').trim())
+
+useHead(() => ({
+  title: `${articleTitle.value} — Новости — Happiness`,
+}))
 
 const carouselRef = ref<HTMLElement | null>(null)
 function scrollPrev() {
@@ -124,29 +167,40 @@ function scrollNext() {
   padding-bottom: 80px;
 }
 
-.breadcrumbs-section {
-  padding: 20px 0;
+.news-breadcrumbs-bar {
+  background: #fff;
 }
 
-.breadcrumbs-list {
+.news-breadcrumbs {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
   flex-wrap: wrap;
+  font-size: 14px;
+  padding: 20px 0;
+  margin: 0;
 }
 
-.crumb-item {
+.news-breadcrumbs .crumb-item {
   color: #282828;
 }
 
-.crumb-item.active {
+.news-breadcrumbs .crumb-item.active {
   color: #7f7f7f;
 }
 
 .article-content {
-  max-width: 900px;
-  margin: 0 auto 60px;
+  max-width: none;
+  margin: 0 auto;
+}
+
+/* Убираем второй внутренний отступ, чтобы блок не "сжимался" по бокам */
+.news-article-panel .hero-content {
+  padding: 0;
+}
+
+.hero-content .article-title:first-child {
+  margin-top: 0;
 }
 
 .article-title {
@@ -154,29 +208,39 @@ function scrollNext() {
   font-weight: 700;
   color: var(--primary-orange);
   text-align: center;
-  margin: 0 0 16px 0;
+  margin: 30px 0 16px 0;
   line-height: 1.2;
   text-transform: uppercase;
 }
 
 .article-date {
   text-align: center;
-  font-size: 16px;
+  font-size: 15px;
+  font-weight: 400;
   color: #666;
-  margin: 0 0 32px 0;
+  margin: 0 0 28px 0;
+}
+
+/* Узкая колонка текста по макету (шире фото по ширине контейнера) */
+.article-prose {
+  max-width: 760px;
+  margin: 0 auto;
+  text-align: left;
 }
 
 .article-intro {
   font-size: 18px;
   color: #121212;
   line-height: 1.7;
-  margin: 0 0 40px 0;
+  margin: 0 0 32px 0;
+  text-align: left;
 }
 
 .article-image {
   margin-bottom: 24px;
   border-radius: 16px;
   overflow: hidden;
+  background: #fff;
 }
 
 .article-image img {
@@ -185,8 +249,10 @@ function scrollNext() {
   display: block;
 }
 
-.article-image--full {
-  margin-bottom: 32px;
+.article-image--between {
+  margin: 0 auto 28px;
+  max-width: 760px;
+  width: 100%;
 }
 
 .article-images-row {
@@ -207,10 +273,15 @@ function scrollNext() {
   font-size: 16px;
   color: #121212;
   line-height: 1.7;
+  text-align: left;
 }
 
-.article-body p {
+.article-body :deep(p) {
   margin: 0 0 20px 0;
+}
+
+.article-body :deep(p:last-child) {
+  margin-bottom: 0;
 }
 
 .article-highlight {
@@ -345,8 +416,25 @@ function scrollNext() {
 }
 
 @media (max-width: 768px) {
+  .news-breadcrumbs {
+    padding: 20px 16px;
+  }
+
+  .article-title {
+    margin: 22px 0 14px;
+  }
+
+  .hero-content .article-title:first-child {
+    margin-top: 0;
+  }
+
   .article-images-row {
     grid-template-columns: 1fr;
+  }
+
+  .article-prose,
+  .article-image--between {
+    max-width: 100%;
   }
 }
 </style>

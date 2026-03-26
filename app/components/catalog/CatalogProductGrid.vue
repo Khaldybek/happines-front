@@ -83,13 +83,14 @@ function onAddToCart(product: Product) {
 
 <style scoped>
 .products-section {
-  padding: 40px 0;
+  padding: 96px 0 40px;
 }
 
 .product-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 25px;
+  column-gap: 25px;
+  row-gap: 96px;
   margin-bottom: 50px;
 }
 
@@ -150,18 +151,29 @@ function onAddToCart(product: Product) {
 @media (max-width: 1200px) {
   .product-grid {
     grid-template-columns: repeat(3, 1fr);
+    row-gap: 82px;
   }
 }
 
 @media (max-width: 900px) {
+  .products-section {
+    padding-top: 72px;
+  }
+
   .product-grid {
     grid-template-columns: repeat(2, 1fr);
+    row-gap: 68px;
   }
 }
 
 @media (max-width: 600px) {
+  .products-section {
+    padding-top: 56px;
+  }
+
   .product-grid {
     grid-template-columns: 1fr;
+    row-gap: 54px;
   }
 }
 </style>

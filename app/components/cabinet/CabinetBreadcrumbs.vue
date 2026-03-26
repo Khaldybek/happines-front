@@ -41,7 +41,7 @@ const resolvedItems = computed<BreadcrumbItem[]>(() => {
 
   return [
     { label: 'Главная', to: '/' },
-    { label: 'Личный кабинет', to: '/cabinet/orders' },
+    { label: 'Личный кабинет', to: '/lk/orders' },
     { label: props.current },
   ]
 })

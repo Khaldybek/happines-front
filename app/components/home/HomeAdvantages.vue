@@ -12,55 +12,19 @@
   >
     <div class="adv-bg" />
     <div class="container">
-      <h2 class="section-title adv-section-title">НАШИ<br>ПРЕИМУЩЕСТВА</h2>
+      <h2 class="section-title adv-section-title">{{ sectionTitle }}</h2>
       <div class="adv-grid">
-        <div class="adv-card">
+        <div v-for="(card, idx) in displayedCards" :key="`adv-${idx}`" class="adv-card">
           <div class="adv-header">
-            <h3>Контроль качества</h3>
+            <h3>{{ card.title }}</h3>
             <div class="adv-icon-wrapper">
-              <img src="/images/1_522.svg" alt="Icon">
+              <img :src="card.icon || '/images/1_522.svg'" alt="Icon">
             </div>
           </div>
           <div class="adv-image">
-            <img src="/images/69cf93d5c69623a31e7db4dd8ccc43d122c79be6.png" alt="Quality Control">
+            <img :src="card.image || '/images/69cf93d5c69623a31e7db4dd8ccc43d122c79be6.png'" :alt="card.title">
           </div>
-          <p class="adv-desc">Производство соответствует международным стандартам безопасности.</p>
-        </div>
-        <div class="adv-card">
-          <div class="adv-header">
-            <h3>Восточные традиции</h3>
-            <div class="adv-icon-wrapper">
-              <img src="/images/1_522.svg" alt="Icon">
-            </div>
-          </div>
-          <div class="adv-image">
-            <img src="/images/69cf93d5c69623a31e7db4dd8ccc43d122c79be6.png" alt="Traditions">
-          </div>
-          <p class="adv-desc">Основаны на многовековом опыте и натуральных ингредиентах.</p>
-        </div>
-        <div class="adv-card">
-          <div class="adv-header">
-            <h3>Натуральный состав</h3>
-            <div class="adv-icon-wrapper">
-              <img src="/images/1_522.svg" alt="Icon">
-            </div>
-          </div>
-          <div class="adv-image">
-            <img src="/images/acebc31125238ea02c6f2327a533eed417235ba7.png" alt="Natural">
-          </div>
-          <p class="adv-desc">Без лишних добавок - только тщательно отобранные компоненты.</p>
-        </div>
-        <div class="adv-card">
-          <div class="adv-header">
-            <h3>Поддержка организма</h3>
-            <div class="adv-icon-wrapper">
-              <img src="/images/1_522.svg" alt="Icon">
-            </div>
-          </div>
-          <div class="adv-image">
-            <img src="/images/acebc31125238ea02c6f2327a533eed417235ba7.png" alt="Support">
-          </div>
-          <p class="adv-desc">Продукция направлена на общее благополучие и жизненный тонус.</p>
+          <p class="adv-desc">{{ card.description }}</p>
         </div>
       </div>
     </div>
@@ -68,10 +32,23 @@
 </template>
 
 <script setup lang="ts">
-const props = withDefaults(defineProps<{ dimmed?: boolean, transitionProgress?: number, exitProgress?: number }>(), {
+interface AdvantageCard {
+  title: string
+  description: string
+  image: string | null
+  icon: string | null
+}
+
+const props = withDefaults(defineProps<{
+  dimmed?: boolean
+  transitionProgress?: number
+  exitProgress?: number
+  title?: string | null
+  cards?: Array<{ title: string | null, description: string | null, image: string | null, icon: string | null }>
+}>(), {
   dimmed: false,
   transitionProgress: 0,
-  exitProgress: 0
+  exitProgress: 0,
 })
 
 const transitionValue = computed(() => {
@@ -90,6 +67,30 @@ const exitValue = computed(() => {
   const val = props.exitProgress
   if (Number.isNaN(val)) return 0
   return Math.max(0, Math.min(1, val))
+})
+
+const defaultCards: AdvantageCard[] = [
+  { title: 'Контроль качества', description: 'Производство соответствует международным стандартам безопасности.', image: '/images/69cf93d5c69623a31e7db4dd8ccc43d122c79be6.png', icon: '/images/1_522.svg' },
+  { title: 'Восточные традиции', description: 'Основаны на многовековом опыте и натуральных ингредиентах.', image: '/images/69cf93d5c69623a31e7db4dd8ccc43d122c79be6.png', icon: '/images/1_522.svg' },
+  { title: 'Натуральный состав', description: 'Без лишних добавок - только тщательно отобранные компоненты.', image: '/images/acebc31125238ea02c6f2327a533eed417235ba7.png', icon: '/images/1_522.svg' },
+  { title: 'Поддержка организма', description: 'Продукция направлена на общее благополучие и жизненный тонус.', image: '/images/acebc31125238ea02c6f2327a533eed417235ba7.png', icon: '/images/1_522.svg' },
+]
+
+const displayedCards = computed<AdvantageCard[]>(() => {
+  const fromApi = props.cards
+    ?.map((card) => ({
+      title: String(card?.title || '').trim(),
+      description: String(card?.description || '').trim(),
+      image: card?.image || null,
+      icon: card?.icon || null,
+    }))
+    .filter((card) => card.title || card.description)
+  return fromApi?.length ? fromApi.slice(0, 4) : defaultCards
+})
+
+const sectionTitle = computed(() => {
+  const title = String(props.title || '').trim()
+  return title ? title.replace(/\s{2,}/g, ' ').toUpperCase() : 'НАШИ ПРЕИМУЩЕСТВА'
 })
 </script>
 
@@ -114,6 +115,10 @@ const exitValue = computed(() => {
 }
 
 .adv-section .container {
+  width: min(1480px, 100%);
+  max-width: 1480px;
+  padding-left: clamp(18px, 3vw, 36px);
+  padding-right: clamp(18px, 3vw, 36px);
   opacity: calc((0.08 + (var(--adv-progress) * 0.92)) * (1 - (var(--adv-exit) * 0.9)));
   transform: translateY(calc(((1 - var(--adv-progress)) * 52px) - (var(--adv-exit) * 26px))) scale(calc(1 - (var(--adv-exit) * 0.06)));
   filter: blur(calc(((1 - var(--adv-progress)) * 3.8px) + (var(--adv-exit) * 5px)));
@@ -152,7 +157,10 @@ const exitValue = computed(() => {
 
 .adv-section-title {
   color: #dd5f05;
-  margin-bottom: 60px;
+  margin-bottom: clamp(34px, 4vw, 60px);
+  font-size: clamp(40px, 5vw, 72px);
+  line-height: 0.98;
+  letter-spacing: -0.02em;
   opacity: 0;
   transform: translateY(36px) scale(0.92);
   transition: opacity 0.42s ease, transform 0.52s cubic-bezier(.2,.7,.2,1);
@@ -167,9 +175,9 @@ const exitValue = computed(() => {
 .adv-grid {
   display: flex;
   flex-wrap: nowrap;
-  justify-content: center;
+  justify-content: space-between;
   align-items: flex-end;
-  gap: 20px;
+  gap: clamp(14px, 1.6vw, 26px);
   position: relative;
   z-index: 2;
   perspective: 1200px;
@@ -178,14 +186,15 @@ const exitValue = computed(() => {
 }
 
 .adv-card {
-  flex: 0 0 300px;
+  flex: 1 1 0;
+  min-width: 0;
   background: #e4f8ff;
   border-radius: 50px;
-  padding: 30px;
+  padding: clamp(20px, 2vw, 30px);
   box-shadow: 30px 16px 4px rgba(0,0,0,0.25);
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 18px;
   opacity: 0;
   transform: translateY(80px) rotateY(-12deg);
   transition: opacity 0.56s ease-out, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
@@ -257,7 +266,9 @@ const exitValue = computed(() => {
 }
 
 .adv-header h3 {
-  font-size: 24px;
+  font-size: clamp(22px, 1.65vw, 30px);
+  line-height: 1.08;
+  letter-spacing: -0.01em;
   max-width: 70%;
 }
 
@@ -277,7 +288,8 @@ const exitValue = computed(() => {
 }
 
 .adv-desc {
-  font-size: 16px;
-  line-height: 1.4;
+  font-size: clamp(16px, 1.12vw, 20px);
+  line-height: 1.32;
+  color: #1f1f1f;
 }
 </style>

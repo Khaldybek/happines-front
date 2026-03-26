@@ -1,7 +1,7 @@
 <template>
   <section class="home-form-section">
     <div class="home-form-bg" aria-hidden="true">
-      <img src="/home_form.png" alt="" class="home-form-bg-img">
+      <img :src="bgImage" alt="" class="home-form-bg-img">
     </div>
     <div class="container home-form-container">
       <div class="home-form-block">
@@ -54,11 +54,17 @@
 </template>
 
 <script setup lang="ts">
+const props = defineProps<{
+  backgroundImage?: string | null
+}>()
+
 const form = reactive({
   name: '',
   phone: '',
   agree: false,
 })
+
+const bgImage = computed(() => props.backgroundImage || '/home_form.png')
 
 function onSubmit() {
   // TODO: отправить на API

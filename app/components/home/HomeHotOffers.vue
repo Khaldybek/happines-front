@@ -1,5 +1,5 @@
 <template>
-  <section class="hot-offers-section">
+  <section ref="sectionRef" class="hot-offers-section" :class="{ 'is-visible': isVisible }">
     <div class="container">
       <h2 class="hot-offers-title">
         <span class="hot-offers-title-orange">ГОРЯЩИЕ</span>
@@ -11,11 +11,11 @@
         <button type="button" class="nav-arrow next" aria-label="Вперёд" @click="scrollNext"></button>
 
         <div ref="carouselRef" class="products-carousel">
-          <div v-for="product in products" :key="product.image" class="carousel-item">
+          <div v-for="product in displayedProducts" :key="product.id" class="carousel-item">
             <CabinetFavoriteCard
               :title="product.title"
               :description="product.description"
-              price="5 000Т"
+              :price="product.price"
               :image="product.image"
               variant="blue"
             />
@@ -27,25 +27,65 @@
 </template>
 
 <script setup lang="ts">
-const carouselRef = ref<HTMLElement | null>(null)
+import type { CatalogProduct } from '~/types/catalogPage'
 
-const products = [
+const carouselRef = ref<HTMLElement | null>(null)
+const sectionRef = ref<HTMLElement | null>(null)
+const isVisible = ref(false)
+
+onMounted(() => {
+  if (!sectionRef.value) return
+  const observer = new IntersectionObserver(
+    ([entry]) => { if (entry.isIntersecting) { isVisible.value = true; observer.disconnect() } },
+    { threshold: 0.15 }
+  )
+  observer.observe(sectionRef.value)
+})
+
+const fallbackProducts = [
   {
+    id: 'fallback-1',
     image: '/images/a9af888db3be8853f23ab252ff40884690219e08.png',
     title: 'ПОЧЕЧНЫЙ ЧАЙ',
-    description: 'Мягкая поддержка естественного очищения'
+    description: 'Мягкая поддержка естественного очищения',
+    price: '5 000 ₸',
   },
   {
+    id: 'fallback-2',
     image: '/images/acebc31125238ea02c6f2327a533eed417235ba7.png',
     title: 'ПОЧЕЧНЫЙ ЧАЙ',
-    description: 'Мягкая поддержка естественного очищения'
+    description: 'Мягкая поддержка естественного очищения',
+    price: '5 000 ₸',
   },
   {
+    id: 'fallback-3',
     image: '/images/dab270cdd863b399b68997a9649feb91f178c56b.png',
     title: 'ПОЧЕЧНЫЙ ЧАЙ',
-    description: 'Мягкая поддержка естественного очищения'
+    description: 'Мягкая поддержка естественного очищения',
+    price: '5 000 ₸',
   }
 ]
+
+const props = defineProps<{
+  products?: CatalogProduct[]
+}>()
+
+function formatPrice(value: number | null | undefined) {
+  const n = Number(value)
+  if (!Number.isFinite(n)) return '0 ₸'
+  return `${new Intl.NumberFormat('ru-RU').format(n)} ₸`
+}
+
+const displayedProducts = computed(() => {
+  const fromApi = props.products?.map((p) => ({
+    id: `product-${p.id}`,
+    image: p.image_orig || p.image || '/images/c46ab61af1aebaf89c9801b3ac51c5a7dce3816f.png',
+    title: p.short_title || p.title,
+    description: p.card_description || p.short_description || p.description || '',
+    price: formatPrice(p.discount_price > 0 ? p.discount_price : p.price),
+  }))
+  return fromApi?.length ? fromApi : fallbackProducts
+})
 
 function scrollPrev() {
   if (carouselRef.value) carouselRef.value.scrollBy({ left: -380, behavior: 'smooth' })
@@ -69,6 +109,14 @@ function scrollNext() {
   font-weight: 900;
   text-transform: uppercase;
   line-height: 1.02;
+  opacity: 0;
+  transform: translateY(44px);
+  transition: opacity 0.46s ease, transform 0.58s cubic-bezier(.2,.7,.2,1);
+}
+
+.hot-offers-section.is-visible .hot-offers-title {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .hot-offers-title-orange {
@@ -86,6 +134,14 @@ function scrollNext() {
   padding: 56px 112px 42px;
   background: #8ab1d8;
   border-radius: 44px;
+  opacity: 0;
+  transform: translateY(54px);
+  transition: opacity 0.48s ease 0.18s, transform 0.62s cubic-bezier(.2,.7,.2,1) 0.18s;
+}
+
+.hot-offers-section.is-visible .hot-offers-wrapper {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .nav-arrow {

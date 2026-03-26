@@ -1,67 +1,90 @@
 <template>
   <div>
     <TheHeader />
-    <main class="gallery-album-page">
-      <section class="breadcrumbs-section">
+    <main class="album-page">
+
+      <!-- Хлебные крошки -->
+      <nav class="breadcrumbs" aria-label="Хлебные крошки">
         <div class="container">
-          <nav class="breadcrumbs-list" aria-label="Хлебные крошки">
-            <NuxtLink to="/" class="crumb-item">Главная</NuxtLink>
-            <img src="/images/16_552.svg" alt="">
-            <NuxtLink to="/gallery" class="crumb-item">Галерея</NuxtLink>
-            <img src="/images/16_552.svg" alt="">
-            <NuxtLink :to="`/gallery/${category}`" class="crumb-item">{{ categoryTitle }}</NuxtLink>
-            <img src="/images/16_552.svg" alt="">
-            <span class="crumb-item active">{{ albumTitleShort }}</span>
-          </nav>
+          <ul class="breadcrumbs-list">
+            <li><NuxtLink to="/">Главная</NuxtLink></li>
+            <li aria-hidden="true"><img src="/images/16_552.svg" alt=""></li>
+            <li><NuxtLink to="/gallery">Галерея</NuxtLink></li>
+            <li aria-hidden="true"><img src="/images/16_552.svg" alt=""></li>
+            <li><NuxtLink :to="`/gallery/${encodeURIComponent(categoryParam)}`">{{ categoryTitle }}</NuxtLink></li>
+            <li aria-hidden="true"><img src="/images/16_552.svg" alt=""></li>
+            <li class="current">{{ albumTitleShort }}</li>
+          </ul>
         </div>
-      </section>
+      </nav>
 
-      <section class="gallery-album-intro">
-        <div class="container">
-          <h1 class="gallery-album-title">{{ albumTitle }}</h1>
-        </div>
-      </section>
+      <!-- Загрузка -->
+      <div v-if="pageStatus === 'loading'" class="album-status">
+        <p>Загрузка…</p>
+      </div>
 
-      <section class="gallery-album-grid-section">
-        <div class="container">
-          <div class="gallery-photos-grid">
-            <div
-              v-for="(photo, i) in displayedPhotos"
-              :key="i"
-              class="gallery-photo-wrap"
-              @click="openLightbox(i)"
-            >
-              <img :src="photo" :alt="`Фото ${i + 1}`" class="gallery-photo-img">
-              <span class="gallery-photo-zoom" aria-hidden="true">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="currentColor"/>
-                </svg>
-              </span>
-            </div>
-          </div>
+      <!-- Не найдено / ошибка -->
+      <div v-else-if="pageStatus !== 'ok'" class="album-status">
+        <h1 class="album-title">Альбом не найден</h1>
+        <NuxtLink :to="`/gallery/${encodeURIComponent(categoryParam)}`" class="album-back-link">
+          ← К списку событий
+        </NuxtLink>
+      </div>
 
-          <div class="gallery-album-pager">
-            <button type="button" class="pager-arrow" aria-label="Предыдущая страница" @click="prevPage">‹</button>
-            <button
-              v-for="p in totalPages"
-              :key="p"
-              type="button"
-              class="pager-item"
-              :class="{ 'is-active': p === currentPage }"
-              @click="currentPage = p"
-            >
-              {{ p }}
-            </button>
-            <button type="button" class="pager-arrow" aria-label="Следующая страница" @click="nextPage">›</button>
+      <!-- Контент -->
+      <template v-else>
+        <div class="album-header">
+          <div class="container">
+            <h1 class="album-title">{{ albumTitle }}</h1>
           </div>
         </div>
-      </section>
 
-      <!-- Лайтбокс: каждое фото открывается с навигацией -->
+        <section class="album-grid-section">
+          <div class="container">
+            <p v-if="!allPhotos.length" class="album-empty">
+              В альбоме пока нет фотографий.
+            </p>
+            <template v-else>
+              <div class="photos-grid">
+                <div
+                  v-for="(photo, i) in displayedPhotos"
+                  :key="`${photo}-${i}`"
+                  class="photo-wrap"
+                  @click="openLightbox(i)"
+                >
+                  <img :src="photo" :alt="`Фото ${i + 1}`" class="photo-img">
+                  <span class="photo-zoom" aria-hidden="true">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                      <path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="currentColor" />
+                    </svg>
+                  </span>
+                </div>
+              </div>
+
+              <div v-if="totalPages > 1" class="album-pager">
+                <button type="button" class="pager-arrow" :disabled="currentPage <= 1" @click="currentPage--">‹</button>
+                <button
+                  v-for="p in totalPages"
+                  :key="p"
+                  type="button"
+                  class="pager-item"
+                  :class="{ 'is-active': p === currentPage }"
+                  @click="currentPage = p"
+                >
+                  {{ p }}
+                </button>
+                <button type="button" class="pager-arrow" :disabled="currentPage >= totalPages" @click="currentPage++">›</button>
+              </div>
+            </template>
+          </div>
+        </section>
+      </template>
+
+      <!-- Лайтбокс -->
       <Teleport to="body">
         <div
           v-if="lightboxOpen"
-          class="lightbox-overlay"
+          class="lightbox"
           role="dialog"
           aria-modal="true"
           aria-label="Просмотр фото"
@@ -71,141 +94,116 @@
           <button
             type="button"
             class="lightbox-arrow lightbox-arrow--prev"
-            aria-label="Предыдущее фото"
-            :disabled="lightboxGlobalIndex <= 0"
+            aria-label="Предыдущее"
+            :disabled="lightboxIndex <= 0"
             @click.stop="lightboxPrev"
           >
-            <span aria-hidden="true">‹</span>
+            ‹
           </button>
           <img
-            :src="allPhotos[lightboxGlobalIndex]"
-            :alt="`Фото ${lightboxGlobalIndex + 1}`"
+            v-if="allPhotos[lightboxIndex]"
+            :src="allPhotos[lightboxIndex]"
+            :alt="`Фото ${lightboxIndex + 1}`"
             class="lightbox-img"
             @click.stop
           >
           <button
             type="button"
             class="lightbox-arrow lightbox-arrow--next"
-            aria-label="Следующее фото"
-            :disabled="lightboxGlobalIndex >= allPhotos.length - 1"
+            aria-label="Следующее"
+            :disabled="lightboxIndex >= allPhotos.length - 1"
             @click.stop="lightboxNext"
           >
-            <span aria-hidden="true">›</span>
+            ›
           </button>
         </div>
       </Teleport>
+
     </main>
     <TheFooter />
   </div>
 </template>
 
 <script setup lang="ts">
-definePageMeta({
-  layout: false,
-})
+import { resolvePhotoGalleryCategory } from '~/utils/resolvePhotoGalleryCategory'
+
+definePageMeta({ layout: false })
 
 const route = useRoute()
-const category = computed(() => (route.params.category as string) || 'travel')
-const slug = computed(() => (route.params.slug as string) || '')
 
-const categoryMeta: Record<string, string> = {
-  travel: 'ПУТЕШЕСТВИЯ',
-  training: 'ОБУЧЕНИЯ И МЕРОПРИЯТИЯ',
-  anniversary: 'ГОДОВЩИНЫ',
-}
+const categoryParam = computed(() => String(route.params.category || '').trim())
+const eventId = computed(() => {
+  const n = Number.parseInt(String(route.params.slug || ''), 10)
+  return Number.isNaN(n) ? null : n
+})
 
-const categoryTitle = computed(() => categoryMeta[category.value] ?? category.value.toUpperCase())
+const { data: photoGalleryData } = usePhotoGalleryPage()
+const { data: photosData, pending: photosPending } = usePhotoGalleryEventPhotos(eventId)
 
-const albumMeta: Record<string, { title: string; titleShort: string }> = {
-  'hainan-2023': {
-    title: 'ГОНКОНГСКАЯ КОРПОРАЦИЯ «ШЕН ЛУНГ» HAPPINESS ПРОМОУШЕН CASHBACK (848-889)',
-    titleShort: '10-е путешествие на о. Хайнань, г. Санья (12 ноября 2023 - 20 ноября 2023)',
-  },
-  'hainan-2023-2': {
-    title: 'ГОНКОНГСКАЯ КОРПОРАЦИЯ «ШЕН ЛУНГ» HAPPINESS ПРОМОУШЕН CASHBACK (848-889)',
-    titleShort: '10-е путешествие на о. Хайнань, г. Санья (12 ноября 2023 - 20 ноября 2023)',
-  },
-  'sanya-2024': {
-    title: '10-Й ТУР РОССИЙСКИХ ДИСТРИБЬЮТОРОВ КОМПАНИЯ ШЭНЛУН ИЗ ГОНКОНГА В САНЬЮ',
-    titleShort: '7-13 июня 2024 года',
-  },
-  'sanya-2024-2': {
-    title: '10-Й ТУР РОССИЙСКИХ ДИСТРИБЬЮТОРОВ КОМПАНИЯ ШЭНЛУН ИЗ ГОНКОНГА В САНЬЮ',
-    titleShort: '7-13 июня 2024 года',
-  },
-  'sanya-2024-3': {
-    title: '10-Й ТУР РОССИЙСКИХ ДИСТРИБЬЮТОРОВ КОМПАНИЯ ШЭНЛУН ИЗ ГОНКОНГА В САНЬЮ',
-    titleShort: '7-13 июня 2024 года',
-  },
-  'china-factory': {
-    title: 'ПУТЕШЕСТВИЕ НА ЗАВОД КОМПАНИИ HAPPINESS В КИТАЕ',
-    titleShort: 'Путешествие на завод компании Happiness в Китае',
-  },
-  'china-factory-2': {
-    title: 'ПУТЕШЕСТВИЕ НА ЗАВОД КОМПАНИИ HAPPINESS В КИТАЕ',
-    titleShort: 'Путешествие на завод компании Happiness в Китае',
-  },
-  'hainan': {
-    title: 'ПУТЕШЕСТВИЕ НА О. ХАЙНАНЬ, Г. САНЬЯ',
-    titleShort: 'Путешествие на о. Хайнань, г. Санья',
-  },
-  'hainan-2': {
-    title: 'ПУТЕШЕСТВИЕ НА О. ХАЙНАНЬ, Г. САНЬЯ',
-    titleShort: 'Путешествие на о. Хайнань, г. Санья',
-  },
-  default: {
-    title: 'АЛЬБОМ ГАЛЕРЕИ',
-    titleShort: 'Фотоальбом',
-  },
-}
+// ─── Статус страницы ──────────────────────────────────────────────────────────
 
-const albumTitle = computed(() => albumMeta[slug.value]?.title ?? albumMeta.default.title)
-const albumTitleShort = computed(() => albumMeta[slug.value]?.titleShort ?? albumMeta.default.titleShort)
+type PageStatus = 'loading' | 'invalid' | 'error' | 'ok'
+
+const pageStatus = computed<PageStatus>(() => {
+  if (eventId.value == null) return 'invalid'
+  if (photosPending.value && !photosData.value) return 'loading'
+  if (!photosData.value?.photo_gallery) return 'error'
+  return 'ok'
+})
+
+// ─── Данные ───────────────────────────────────────────────────────────────────
+
+const categoryTitle = computed(() => {
+  const c = resolvePhotoGalleryCategory(categoryParam.value, photoGalleryData.value?.photo_gallery?.categories)
+  if (!c) return categoryParam.value.toUpperCase()
+  return (c.hashtag || '').replace(/^#\s*/, '').trim().toUpperCase() || c.slug.toUpperCase()
+})
+
+const titleFromQuery = computed(() => {
+  const raw = [route.query.title].flat()[0] ?? ''
+  if (!raw) return ''
+  try { return decodeURIComponent(String(raw).replace(/\+/g, ' ')) } catch { return String(raw) }
+})
+
+const albumTitle = computed(() =>
+  titleFromQuery.value.trim() || (eventId.value != null ? `Событие ${eventId.value}` : 'Фотогалерея'),
+)
+
+const albumTitleShort = computed(() => {
+  const t = albumTitle.value
+  return t.length > 80 ? `${t.slice(0, 77)}…` : t
+})
 
 useHead({
-  title: () => `${albumTitleShort.value} — Галерея — Happiness`,
+  title: () =>
+    pageStatus.value === 'invalid' ? 'Галерея — Happiness' : `${albumTitleShort.value} — Галерея — Happiness`,
 })
 
-const currentPage = ref(3)
-const perPage = 20
-const totalPages = 5
+// ─── Фото и пагинация ────────────────────────────────────────────────────────
 
-const placeholderPhoto = '/images/c46ab61af1aebaf89c9801b3ac51c5a7dce3816f.png'
-const allPhotos = computed(() => {
-  const list: string[] = []
-  const imgs = [
-    placeholderPhoto,
-    '/images/e39744b8aca4253a251f6190e55ee1735b42dbd7.png',
-    '/images/0e4a1275c44cef2f320a07979f1e493f1718bc38.png',
-  ]
-  for (let i = 0; i < perPage * totalPages; i++) list.push(imgs[i % imgs.length])
-  return list
-})
+const PER_PAGE = 20
+const currentPage = ref(1)
 
-const displayedPhotos = computed(() => {
-  const start = (currentPage.value - 1) * perPage
-  return allPhotos.value.slice(start, start + perPage)
-})
+const allPhotos = computed(() => photosData.value?.photo_gallery?.photos ?? [])
+const totalPages = computed(() => Math.max(1, Math.ceil(allPhotos.value.length / PER_PAGE)))
+const displayedPhotos = computed(() => allPhotos.value.slice((currentPage.value - 1) * PER_PAGE, currentPage.value * PER_PAGE))
+
+watch(totalPages, (pages) => { if (currentPage.value > pages) currentPage.value = pages })
+watch([eventId, titleFromQuery], () => { currentPage.value = 1; closeLightbox() })
+
+// ─── Лайтбокс ────────────────────────────────────────────────────────────────
 
 const lightboxOpen = ref(false)
-const lightboxGlobalIndex = ref(0)
+const lightboxIndex = ref(0)
 
 function openLightbox(indexInPage: number) {
-  lightboxGlobalIndex.value = (currentPage.value - 1) * perPage + indexInPage
+  lightboxIndex.value = (currentPage.value - 1) * PER_PAGE + indexInPage
   lightboxOpen.value = true
 }
 
-function closeLightbox() {
-  lightboxOpen.value = false
-}
-
-function lightboxPrev() {
-  if (lightboxGlobalIndex.value > 0) lightboxGlobalIndex.value--
-}
-
-function lightboxNext() {
-  if (lightboxGlobalIndex.value < allPhotos.value.length - 1) lightboxGlobalIndex.value++
-}
+function closeLightbox() { lightboxOpen.value = false }
+function lightboxPrev() { if (lightboxIndex.value > 0) lightboxIndex.value-- }
+function lightboxNext() { if (lightboxIndex.value < allPhotos.value.length - 1) lightboxIndex.value++ }
 
 function onKeydown(e: KeyboardEvent) {
   if (!lightboxOpen.value) return
@@ -214,29 +212,19 @@ function onKeydown(e: KeyboardEvent) {
   if (e.key === 'ArrowRight') lightboxNext()
 }
 
-onMounted(() => {
-  window.addEventListener('keydown', onKeydown)
-})
-onUnmounted(() => {
-  window.removeEventListener('keydown', onKeydown)
-})
-
-function prevPage() {
-  if (currentPage.value > 1) currentPage.value--
-}
-
-function nextPage() {
-  if (currentPage.value < totalPages) currentPage.value++
-}
+onMounted(() => window.addEventListener('keydown', onKeydown))
+onUnmounted(() => window.removeEventListener('keydown', onKeydown))
 </script>
 
 <style scoped>
-.gallery-album-page {
+.album-page {
   background: #fff;
   padding-bottom: 60px;
 }
 
-.breadcrumbs-section {
+/* ─── Хлебные крошки ─────────────────────────────────────────────────────── */
+
+.breadcrumbs {
   padding: 20px 0;
 }
 
@@ -245,14 +233,22 @@ function nextPage() {
   align-items: center;
   gap: 8px;
   font-size: 14px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
   flex-wrap: wrap;
 }
 
-.crumb-item {
+.breadcrumbs-list a {
   color: #282828;
+  text-decoration: none;
 }
 
-.crumb-item.active {
+.breadcrumbs-list a:hover {
+  text-decoration: underline;
+}
+
+.breadcrumbs-list .current {
   color: #1a1a1a;
   font-weight: 600;
   max-width: 280px;
@@ -261,12 +257,33 @@ function nextPage() {
   white-space: nowrap;
 }
 
-.gallery-album-intro {
+/* ─── Статусы ────────────────────────────────────────────────────────────── */
+
+.album-status {
+  padding: 60px 16px;
+  text-align: center;
+}
+
+.album-back-link {
+  display: inline-block;
+  margin-top: 16px;
+  color: #dd5f05;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.album-back-link:hover {
+  text-decoration: underline;
+}
+
+/* ─── Заголовок ──────────────────────────────────────────────────────────── */
+
+.album-header {
   padding: 0 0 32px;
 }
 
-.gallery-album-title {
-  margin: 0;
+.album-title {
+  margin: 0 auto;
   text-align: center;
   font-size: clamp(20px, 2.2vw, 28px);
   font-weight: 800;
@@ -275,18 +292,29 @@ function nextPage() {
   line-height: 1.25;
   color: #dd5f05;
   max-width: 1000px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
-.gallery-photos-grid {
+/* ─── Сетка фото ─────────────────────────────────────────────────────────── */
+
+.album-grid-section {
+  padding: 0 0 50px;
+}
+
+.album-empty {
+  text-align: center;
+  padding: 32px 16px;
+  color: #555;
+  font-size: 16px;
+}
+
+.photos-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   margin-bottom: 40px;
 }
 
-.gallery-photo-wrap {
+.photo-wrap {
   position: relative;
   border-radius: 12px;
   overflow: hidden;
@@ -295,43 +323,64 @@ function nextPage() {
   cursor: pointer;
 }
 
-.gallery-photo-img {
+.photo-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.photo-wrap:hover::after {
+  opacity: 1;
+}
+
+.photo-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 0.2s;
+  transition: transform 0.25s;
 }
 
-.gallery-photo-wrap:hover .gallery-photo-img {
-  transform: scale(1.03);
+.photo-wrap:hover .photo-img {
+  transform: scale(1.04);
 }
 
-.gallery-photo-zoom {
+.photo-zoom {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 40px;
-  height: 40px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.92);
   color: #333;
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
   transition: opacity 0.2s;
+  z-index: 2;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
 }
 
-.gallery-photo-wrap:hover .gallery-photo-zoom {
+.photo-wrap:hover .photo-zoom {
   opacity: 1;
 }
 
-.gallery-album-pager {
+/* ─── Пагинация ───────────────────────────────────────────────────────────── */
+
+.album-pager {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .pager-arrow,
@@ -351,17 +400,23 @@ function nextPage() {
   transition: border-color 0.2s, background 0.2s, color 0.2s;
 }
 
+.pager-arrow:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
 .pager-item.is-active {
   border-color: #8bc34a;
   background: #8bc34a;
   color: #fff;
 }
 
-/* Lightbox — так открывается каждое фото */
-.lightbox-overlay {
+/* ─── Лайтбокс ────────────────────────────────────────────────────────────── */
+
+.lightbox {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(0, 0, 0, 0.88);
   backdrop-filter: blur(6px);
   z-index: 9999;
   display: flex;
@@ -412,21 +467,16 @@ function nextPage() {
 }
 
 .lightbox-arrow:hover:not(:disabled) {
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.75);
 }
 
 .lightbox-arrow:disabled {
-  opacity: 0.4;
+  opacity: 0.35;
   cursor: not-allowed;
 }
 
-.lightbox-arrow--prev {
-  left: 24px;
-}
-
-.lightbox-arrow--next {
-  right: 24px;
-}
+.lightbox-arrow--prev { left: 24px; }
+.lightbox-arrow--next { right: 24px; }
 
 .lightbox-img {
   max-width: calc(100vw - 200px);
@@ -435,19 +485,16 @@ function nextPage() {
   border-radius: 8px;
 }
 
+/* ─── Адаптив ─────────────────────────────────────────────────────────────── */
+
 @media (max-width: 1024px) {
-  .gallery-photos-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  .photos-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 600px) {
-  .gallery-photos-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .crumb-item.active {
-    max-width: 180px;
-  }
+  .photos-grid { grid-template-columns: 1fr; }
+  .breadcrumbs-list .current { max-width: 180px; }
+  .lightbox { padding: 48px 16px; }
+  .lightbox-img { max-width: calc(100vw - 40px); }
 }
 </style>

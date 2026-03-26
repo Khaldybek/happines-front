@@ -57,7 +57,6 @@ const distributors = Array.from({ length: 8 }, () => ({ ...baseDistributor }))
 <style scoped>
 .distributors-section {
   padding: 66px 0 78px;
-  background: #ededed;
 }
 
 .dist-header {
@@ -125,7 +124,6 @@ const distributors = Array.from({ length: 8 }, () => ({ ...baseDistributor }))
 }
 
 .dist-card {
-  background: #efefef;
   border: 2px solid #d7d7d7;
   border-radius: 42px;
   overflow: hidden;

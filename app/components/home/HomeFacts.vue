@@ -12,48 +12,28 @@
   >
     <div class="container">
       <div class="facts-header">
-        <h2>ФАКТЫ</h2>
-        <h2 class="orange-text">О HAPPINESS</h2>
+        <h2>{{ factsTitlePrimary }}</h2>
+        <h2 class="orange-text">{{ factsTitleAccent }}</h2>
       </div>
       <div class="facts-grid-wrap">
-        <div class="facts-sweep" :class="{ run: sweepRun }" />
         <div class="facts-grid">
-        <div class="fact-card">
-          <div class="fact-bg" />
-          <div class="fact-content">
-            <div class="fact-number">10+</div>
-            <div class="fact-label">стран</div>
+          <div
+            v-for="(block, idx) in displayedBlocks"
+            :key="`fact-${idx}`"
+            class="fact-card"
+            :class="{ 'iso-card': isIsoBlock(block) }"
+          >
+            <div class="fact-bg" :class="{ 'gradient-bg': isIsoBlock(block) }" />
+            <div v-if="isIsoBlock(block)" class="fact-content iso-content">
+              <div class="iso-title">{{ block.title }}</div>
+              <div class="iso-text">{{ block.description }}</div>
+            </div>
+            <div v-else class="fact-content">
+              <div class="fact-number">{{ block.title }}</div>
+              <div class="fact-label">{{ block.description }}</div>
+            </div>
           </div>
         </div>
-        <div class="fact-card">
-          <div class="fact-bg" />
-          <div class="fact-content">
-            <div class="fact-number">150+</div>
-            <div class="fact-label">регионов</div>
-          </div>
-        </div>
-        <div class="fact-card">
-          <div class="fact-bg" />
-          <div class="fact-content">
-            <div class="fact-number">40+</div>
-            <div class="fact-label">натуральных продуктов<br>китайской медицины</div>
-          </div>
-        </div>
-        <div class="fact-card">
-          <div class="fact-bg" />
-          <div class="fact-content">
-            <div class="fact-number">1 млн+</div>
-            <div class="fact-label">довольных клиентов<br>в мире</div>
-          </div>
-        </div>
-        <div class="fact-card iso-card">
-          <div class="fact-bg gradient-bg" />
-          <div class="fact-content iso-content">
-            <div class="iso-title">ISO</div>
-            <div class="iso-text">и другие<br>сертификаты<br>компании</div>
-          </div>
-        </div>
-      </div>
       </div>
       <div class="facts-decor">
         <img src="/images/1_469.svg" class="decor-left" alt="">
@@ -66,10 +46,21 @@
 </template>
 
 <script setup lang="ts">
-const props = withDefaults(defineProps<{ dimmed?: boolean, transitionProgress?: number, exitProgress?: number }>(), {
+interface FactBlock {
+  title: string
+  description: string
+}
+
+const props = withDefaults(defineProps<{
+  dimmed?: boolean
+  transitionProgress?: number
+  exitProgress?: number
+  title?: string | null
+  textBlocks?: Array<{ title: string | null, description: string | null }>
+}>(), {
   dimmed: false,
   transitionProgress: 0,
-  exitProgress: 0
+  exitProgress: 0,
 })
 
 const transitionValue = computed(() => {
@@ -90,28 +81,70 @@ const exitValue = computed(() => {
   return Math.max(0, Math.min(1, val))
 })
 
-const sweepRun = ref(false)
+const defaultBlocks: FactBlock[] = [
+  { title: '10+', description: 'стран' },
+  { title: '150+', description: 'регионов' },
+  { title: '40+', description: 'натуральных продуктов китайской медицины' },
+  { title: '1 млн+', description: 'довольных клиентов в мире' },
+  { title: 'ISO', description: 'и другие сертификаты компании' },
+]
 
-watch(revealStage, (stage) => {
-  if (stage !== 2) return
-  sweepRun.value = false
-  requestAnimationFrame(() => {
-    setTimeout(() => { sweepRun.value = true }, 120)
-  })
+const displayedBlocks = computed<FactBlock[]>(() => {
+  const fromApi = props.textBlocks
+    ?.map((item) => ({
+      title: String(item?.title || '').trim(),
+      description: String(item?.description || '').trim(),
+    }))
+    .filter((item) => item.title || item.description)
+
+  const base = fromApi?.length ? fromApi.slice(0, 5) : defaultBlocks
+  const iso = base.find(isIsoBlock)
+  const rest = base.filter((item) => !isIsoBlock(item))
+  return iso ? [iso, ...rest] : base
 })
+
+const factsTitlePrimary = computed(() => {
+  const title = String(props.title || '').trim()
+  if (!title) return 'ФАКТЫ'
+  return title.split(/\s+/)[0] || 'ФАКТЫ'
+})
+
+const factsTitleAccent = computed(() => {
+  const title = String(props.title || '').trim()
+  if (!title) return 'О HAPPINESS'
+  const parts = title.split(/\s+/).slice(1)
+  return parts.length ? parts.join(' ') : 'О HAPPINESS'
+})
+
+function isIsoBlock(block: FactBlock) {
+  return block.title.toUpperCase().includes('ISO')
+}
+
 </script>
 
 <style scoped>
 .facts-section {
-  padding: 100px 0;
+  min-height: calc(100svh - var(--home-header-height, 104px));
+  padding: 52px 0;
   position: relative;
+  display: flex;
+  align-items: center;
   overflow: hidden;
+  background:
+    radial-gradient(48% 42% at 0% 0%, rgba(75, 147, 215, 0.74) 0%, rgba(75, 147, 215, 0) 70%),
+    radial-gradient(44% 38% at 100% 0%, rgba(119, 179, 65, 0.72) 0%, rgba(119, 179, 65, 0) 68%),
+    radial-gradient(74% 84% at 100% 100%, rgba(255, 126, 28, 1) 0%, rgba(255, 126, 28, 0) 46%),
+    #fff;
   transition: background 0.4s ease;
   --facts-progress: 0;
   --facts-exit: 0;
 }
 
 .facts-section .container {
+  width: min(1480px, 100%);
+  max-width: 1480px;
+  padding-left: clamp(18px, 3vw, 36px);
+  padding-right: clamp(18px, 3vw, 36px);
   opacity: calc((0.06 + (var(--facts-progress) * 0.94)) * (1 - (var(--facts-exit) * 0.75)));
   transform: translateY(calc(((1 - var(--facts-progress)) * 48px) - (var(--facts-exit) * 30px))) scale(calc(1 - (var(--facts-exit) * 0.02)));
   filter: blur(calc(((1 - var(--facts-progress)) * 3.5px) + (var(--facts-exit) * 2.8px)));
@@ -119,7 +152,11 @@ watch(revealStage, (stage) => {
 }
 
 .facts-section.is-dimmed {
-  background: #fff;
+  background:
+    radial-gradient(48% 42% at 0% 0%, rgba(75, 147, 215, 0.56) 0%, rgba(75, 147, 215, 0) 70%),
+    radial-gradient(44% 38% at 100% 0%, rgba(119, 179, 65, 0.5) 0%, rgba(119, 179, 65, 0) 68%),
+    radial-gradient(74% 84% at 100% 100%, rgba(255, 126, 28, 0.46) 0%, rgba(255, 126, 28, 0) 46%),
+    #fff;
 }
 
 .facts-section.is-dimmed .container {
@@ -129,30 +166,37 @@ watch(revealStage, (stage) => {
 
 .facts-header {
   text-align: center;
-  margin-bottom: 60px;
+  margin-bottom: clamp(36px, 4vw, 64px);
   text-transform: uppercase;
-  font-size: 48px;
-  line-height: 1.2;
   opacity: 0;
-  transform: translateY(36px) scale(0.9) rotateX(22deg);
-  transform-origin: center 100%;
-  transition: opacity 0.42s ease, transform 0.52s cubic-bezier(.2,.7,.2,1);
+  transform: translateY(34px);
+  transition: opacity 0.42s ease, transform 0.54s cubic-bezier(.2,.7,.2,1);
+}
+
+.facts-header h2 {
+  margin: 0;
+  font-size: clamp(54px, 7vw, 98px);
+  line-height: 0.96;
+  font-weight: 800;
+  letter-spacing: -0.025em;
 }
 
 .facts-section.stage-1 .facts-header,
 .facts-section.stage-2 .facts-header {
   opacity: 1;
-  transform: translateY(0) scale(1) rotateX(0);
+  transform: translateY(0);
 }
 
 .facts-header .orange-text {
-  display: inline-block;
-  transform: translateY(12px) rotate(-4deg);
-  transition: transform 0.52s cubic-bezier(.2,.7,.2,1);
+  display: block;
+  transform: translateY(18px);
+  opacity: 0;
+  transition: transform 0.52s cubic-bezier(.2,.7,.2,1), opacity 0.38s ease;
 }
 
 .facts-section.stage-2 .facts-header .orange-text {
-  transform: translateY(0) rotate(0);
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .orange-text {
@@ -164,69 +208,46 @@ watch(revealStage, (stage) => {
   z-index: 2;
 }
 
-.facts-sweep {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 120px;
-  background: linear-gradient(90deg, rgba(255,255,255,0.6), rgba(255,255,255,0.15), transparent);
-  border-radius: 8px;
-  pointer-events: none;
-  z-index: 5;
-  transform: translateX(-100%);
-  transition: none;
-}
-.facts-sweep.run {
-  transform: translateX(0);
-  animation: sweep-right 1.8s ease-in-out forwards;
-}
-@keyframes sweep-right {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(calc(100% + 140px)); }
-}
-
 .facts-grid {
   display: grid;
-  grid-template-columns: minmax(170px, 240px) repeat(4, minmax(130px, 1fr));
+  grid-template-columns: minmax(180px, 240px) repeat(4, minmax(150px, 1fr));
   align-items: end;
-  gap: 20px;
+  gap: clamp(14px, 2vw, 30px);
   position: relative;
 }
 
 .fact-card {
   width: 100%;
-  min-height: 220px;
+  min-height: 190px;
   position: relative;
-  border-radius: 38px;
+  border-radius: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
   opacity: 0;
-  transform: translateY(42px) scale(0.86);
-  transition: opacity 0.42s ease, transform 0.54s cubic-bezier(.2,.7,.2,1);
+  transform: translateY(58px);
+  filter: blur(5px);
+  transition: opacity 0.44s ease, transform 0.58s cubic-bezier(.2,.7,.2,1), filter 0.44s ease;
 }
 
 .facts-section.stage-1 .fact-card {
-  opacity: 0.35;
-  transform: translateY(24px) scale(0.92);
+  opacity: 0;
+  transform: translateY(58px);
+  filter: blur(5px);
 }
 
 .facts-section.stage-2 .fact-card {
   opacity: 1;
-  transform: translateY(0) scale(1);
+  transform: translateY(0);
+  filter: blur(0);
 }
 
-.facts-section.stage-2 .fact-card:nth-child(1) { transition-delay: 0.03s; }
-.facts-section.stage-2 .fact-card:nth-child(2) { transition-delay: 0.1s; }
-.facts-section.stage-2 .fact-card:nth-child(3) { transition-delay: 0.17s; }
-.facts-section.stage-2 .fact-card:nth-child(4) { transition-delay: 0.24s; }
-.facts-section.stage-2 .fact-card:nth-child(5) { transition-delay: 0s; }
-
-.facts-section.stage-2 .iso-card {
-  transition-delay: 0.16s;
-}
+.facts-section.stage-2 .fact-card:nth-child(1) { transition-delay: 0.08s; }
+.facts-section.stage-2 .fact-card:nth-child(2) { transition-delay: 0.2s; }
+.facts-section.stage-2 .fact-card:nth-child(3) { transition-delay: 0.32s; }
+.facts-section.stage-2 .fact-card:nth-child(4) { transition-delay: 0.44s; }
+.facts-section.stage-2 .fact-card:nth-child(5) { transition-delay: 0.56s; }
 
 .fact-bg {
   position: absolute;
@@ -234,28 +255,48 @@ watch(revealStage, (stage) => {
   left: 0;
   width: 100%;
   height: 100%;
-  border-radius: 38px;
-  background: white;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 30px;
   z-index: -1;
+  display: none;
 }
 
 .fact-number {
-  font-size: 64px;
+  font-size: clamp(54px, 5.2vw, 92px);
   font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.025em;
   background: linear-gradient(180deg, #67A432 0%, #346F0E 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .fact-label {
-  font-size: 18px;
-  line-height: 1.2;
+  font-size: clamp(21px, 1.55vw, 28px);
+  line-height: 1.12;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #111;
+  text-transform: uppercase;
+}
+
+.fact-card:not(.iso-card) .fact-label {
+  font-size: clamp(21px, 1.55vw, 28px);
+  line-height: 1.12;
+}
+
+.fact-card:not(.iso-card) .fact-bg {
+  display: none;
+}
+
+.fact-card:not(.iso-card) .fact-content {
+  width: 100%;
+  text-align: left;
+  padding: 0 6px 8px 0;
 }
 
 .iso-card .gradient-bg {
+  display: block;
   background: linear-gradient(135deg, #CED564 0%, #538F20 50%, #346F04 100%);
   border: 1px solid rgba(255,255,255,0.25);
 }
@@ -270,18 +311,41 @@ watch(revealStage, (stage) => {
 }
 
 .iso-text {
-  font-size: 16px;
+  font-size: 15px;
   color: #becab0;
 }
 
 @media (max-width: 1200px) {
+  .facts-header h2 {
+    font-size: clamp(44px, 8vw, 72px);
+  }
+
   .facts-grid {
     grid-template-columns: repeat(3, minmax(150px, 1fr));
+    gap: 20px;
   }
 
   .iso-card {
     grid-column: span 3;
     min-height: 180px;
+  }
+
+  .fact-card:not(.iso-card) .fact-content {
+    text-align: center;
+    padding-right: 0;
+  }
+
+  .facts-section.stage-2 .fact-card:nth-child(1),
+  .facts-section.stage-2 .fact-card:nth-child(2),
+  .facts-section.stage-2 .fact-card:nth-child(3),
+  .facts-section.stage-2 .fact-card:nth-child(4),
+  .facts-section.stage-2 .fact-card:nth-child(5) {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  .fact-label,
+  .fact-card:not(.iso-card) .fact-label {
+    font-size: clamp(17px, 2.6vw, 24px);
   }
 }
 
@@ -303,14 +367,11 @@ watch(revealStage, (stage) => {
   height: 100%;
   pointer-events: none;
   z-index: 1;
-  opacity: 0;
-  transform: scale(1.08);
-  transition: opacity 0.55s ease, transform 0.7s cubic-bezier(.2,.7,.2,1);
+  display: none;
 }
 
 .facts-section.stage-2 .facts-decor {
-  opacity: 1;
-  transform: scale(1);
+  display: none;
 }
 
 .decor-left { position: absolute; left: -100px; top: 0; }

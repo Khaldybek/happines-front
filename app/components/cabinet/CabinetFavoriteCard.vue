@@ -1,19 +1,53 @@
 <template>
-  <article class="favorite-card" :class="variant ? `variant-${variant}` : ''">
+  <article class="favorite-card" :class="[variant ? `variant-${variant}` : '', { 'is-loading': loading }]">
     <div class="product-image-wrap">
-      <img :src="image" :alt="title" class="product-image">
+      <component :is="slug ? 'NuxtLink' : 'div'" :to="slug ? `/products/${slug}` : undefined">
+        <img :src="image" :alt="title" class="product-image">
+      </component>
     </div>
 
     <div class="favorite-content">
-      <h3 class="product-title">{{ title }}</h3>
-      <p class="product-description">{{ description }}</p>
-      <p class="product-price">{{ price }}</p>
+      <component :is="slug ? 'NuxtLink' : 'h3'" :to="slug ? `/products/${slug}` : undefined" class="product-title">
+        {{ title }}
+      </component>
+      <p v-if="description" class="product-description">{{ description }}</p>
+      <span v-if="code" class="product-code">{{ code }}</span>
+      <span v-if="inStock === false" class="out-of-stock">Нет в наличии</span>
+
+      <div class="price-wrap">
+        <p class="product-price">{{ displayPrice }}</p>
+        <p v-if="hasDiscount && displayOldPrice" class="product-old-price">{{ displayOldPrice }}</p>
+      </div>
 
       <footer class="favorite-actions">
-        <button type="button" class="icon-heart" aria-label="В избранное" @click="$emit('favoriteClick')">♡</button>
+        <button
+          type="button"
+          class="icon-heart"
+          :class="{ 'is-active': isFavorite }"
+          :aria-label="isFavorite ? 'Убрать из избранного' : 'В избранное'"
+          :disabled="loading"
+          @click="$emit('favoriteClick')"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 20.5c-.3 0-.6-.1-.8-.3C8.4 17.8 4 14.2 4 9.8 4 7.2 6 5 8.6 5c1.4 0 2.7.6 3.6 1.7C13.1 5.6 14.4 5 15.8 5 18.4 5 20.4 7.2 20.4 9.8c0 4.4-4.4 8-7.2 10.4-.3.2-.6.3-1.2.3z" />
+          </svg>
+        </button>
         <div class="cart-controls">
-          <button type="button" class="icon-arrow" aria-label="Подробнее" @click="$emit('detailClick')"></button>
-          <button type="button" class="cart-btn" @click="$emit('addToCart')">В КОРЗИНУ</button>
+          <button
+            v-if="slug"
+            type="button"
+            class="icon-arrow"
+            aria-label="Подробнее"
+            @click="$emit('detailClick')"
+          ></button>
+          <button
+            type="button"
+            class="cart-btn"
+            :class="{ 'in-cart': isInCart }"
+            @click="$emit('addToCart')"
+          >
+            {{ isInCart ? 'В КОРЗИНЕ' : 'В КОРЗИНУ' }}
+          </button>
         </div>
       </footer>
     </div>
@@ -21,18 +55,46 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
+const props = withDefaults(defineProps<{
+  productId?: number
   title: string
-  description: string
-  price: string
+  description?: string
+  /** Строка (старый формат) ИЛИ число (из API) */
+  price: string | number
   image: string
+  isFavorite?: boolean
   variant?: 'blue' | 'orange'
-}>()
+  /** Новые пропсы из API */
+  slug?: string
+  code?: string
+  hasDiscount?: boolean
+  oldPrice?: number | null
+  inStock?: boolean
+  isInCart?: boolean
+  loading?: boolean
+}>(), {
+  isFavorite: false,
+  hasDiscount: false,
+  inStock: true,
+  isInCart: false,
+  loading: false,
+})
+
 defineEmits<{
   addToCart: []
   favoriteClick: []
   detailClick: []
 }>()
+
+const displayPrice = computed(() =>
+  typeof props.price === 'number'
+    ? `${props.price.toLocaleString('ru-RU')} ₸`
+    : props.price,
+)
+
+const displayOldPrice = computed(() =>
+  props.oldPrice ? `${props.oldPrice.toLocaleString('ru-RU')} ₸` : null,
+)
 </script>
 
 <style scoped>
@@ -99,11 +161,52 @@ defineEmits<{
   opacity: 0.96;
 }
 
+.price-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .product-price {
   margin: 0;
-  font-size: clamp(40px, 2.1vw, 42px);
+  font-size: clamp(34px, 2vw, 42px);
   line-height: 1;
   font-weight: 700;
+}
+
+.product-old-price {
+  margin: 0;
+  font-size: clamp(16px, 1vw, 20px);
+  text-decoration: line-through;
+  opacity: 0.55;
+}
+
+.product-code {
+  font-size: 12px;
+  opacity: 0.6;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.out-of-stock {
+  font-size: 12px;
+  font-weight: 600;
+  color: #e05656;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.favorite-card:hover .out-of-stock {
+  color: #ffb3b3;
+}
+
+.cart-btn.in-cart {
+  opacity: 0.7;
+}
+
+.favorite-card.is-loading {
+  opacity: 0.55;
+  pointer-events: none;
 }
 
 .favorite-actions {
@@ -117,13 +220,32 @@ defineEmits<{
   border: 0;
   background: transparent;
   color: #e28133;
-  width: 24px;
-  height: 24px;
-  font-size: 34px;
-  line-height: 1;
+  width: 28px;
+  height: 28px;
   padding: 0;
   cursor: pointer;
   transition: color 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-heart svg {
+  width: 100%;
+  height: 100%;
+}
+
+.icon-heart path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: fill 0.2s ease;
+}
+
+.icon-heart.is-active path {
+  fill: currentColor;
 }
 
 .favorite-card:hover .icon-heart {

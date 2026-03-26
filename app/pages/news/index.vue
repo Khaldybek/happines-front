@@ -17,24 +17,33 @@
         <div class="news-grid">
           <NuxtLink
             v-for="(item, i) in items"
-            :key="i"
-            :to="`/news/${item.slug}`"
+            :key="item.id || i"
+            :to="`/news/${item.id}`"
             class="news-card"
           >
             <div class="news-card-img">
-              <img :src="item.image" :alt="item.title">
+              <img :src="item.main_image || '/images/342d0f8b9544d8dc8e8678f3302ca4864aa11e04.png'" :alt="item.title">
             </div>
             <div class="news-card-content">
               <h3>{{ item.title }}</h3>
-              <p>{{ item.excerpt }}</p>
-              <span class="news-card-date">{{ item.date }}</span>
+              <p>{{ excerpt(item) }}</p>
+              <span class="news-card-date">{{ formatDate(item.display_date) }}</span>
             </div>
           </NuxtLink>
         </div>
-        <div class="pagination">
-          <button type="button" class="page-btn" aria-label="Назад">‹</button>
-          <button v-for="p in 5" :key="p" type="button" class="page-num" :class="{ active: p === 3 }">{{ p }}</button>
-          <button type="button" class="page-btn" aria-label="Вперёд">›</button>
+        <div v-if="totalPages > 1" class="pagination">
+          <button type="button" class="page-btn" aria-label="Назад" @click="goToPage(currentPage - 1)">‹</button>
+          <button
+            v-for="p in pageNumbers"
+            :key="p"
+            type="button"
+            class="page-num"
+            :class="{ active: p === currentPage }"
+            @click="goToPage(p)"
+          >
+            {{ p }}
+          </button>
+          <button type="button" class="page-btn" aria-label="Вперёд" @click="goToPage(currentPage + 1)">›</button>
         </div>
       </div>
     </main>
@@ -43,22 +52,73 @@
 </template>
 
 <script setup lang="ts">
+import type { NewsItem } from '~/types/newsPage'
+
 definePageMeta({
   layout: false,
 })
 
-useHead({
-  title: 'Новости — Happiness',
-})
+const route = useRoute()
+const router = useRouter()
+const { data } = useNewsPage()
 
-const items = [
-  { slug: 'partnery-happiness-v-siane-2025', title: 'ПАРТНЕРЫ HAPPINESS В СИАНЕ 2025Г.', excerpt: '2025 год уже стал для партнеров HAPPINESS по-настоящему ярким и запоминающимся! 21 партнёр успешно завершили промоушен на путешествие в древний Сиань…', date: '24 декабря 2025', image: '/images/342d0f8b9544d8dc8e8678f3302ca4864aa11e04.png' },
-  { slug: 'partnery-happiness-v-siane-2025', title: 'ПАРТНЕРЫ HAPPINESS В СИАНЕ 2025Г.', excerpt: '2025 год уже стал для партнеров HAPPINESS по-настоящему ярким и запоминающимся! 21 партнёр успешно завершили промоушен…', date: '24 декабря 2025', image: '/images/342d0f8b9544d8dc8e8678f3302ca4864aa11e04.png' },
-  { slug: 'partnery-happiness-v-siane-2025', title: 'ПАРТНЕРЫ HAPPINESS В СИАНЕ 2025Г.', excerpt: '2025 год уже стал для партнеров HAPPINESS по-настоящему ярким и запоминающимся! 21 партнёр успешно завершили промоушен…', date: '24 декабря 2025', image: '/images/342d0f8b9544d8dc8e8678f3302ca4864aa11e04.png' },
-  { slug: 'partnery-happiness-v-siane-2025', title: 'ПАРТНЕРЫ HAPPINESS В СИАНЕ 2025Г.', excerpt: '2025 год уже стал для партнеров HAPPINESS по-настоящему ярким и запоминающимся! 21 партнёр успешно завершили промоушен…', date: '24 декабря 2025', image: '/images/342d0f8b9544d8dc8e8678f3302ca4864aa11e04.png' },
-  { slug: 'partnery-happiness-v-siane-2025', title: 'ПАРТНЕРЫ HAPPINESS В СИАНЕ 2025Г.', excerpt: '2025 год уже стал для партнеров HAPPINESS по-настоящему ярким и запоминающимся! 21 партнёр успешно завершили промоушен…', date: '24 декабря 2025', image: '/images/342d0f8b9544d8dc8e8678f3302ca4864aa11e04.png' },
-  { slug: 'partnery-happiness-v-siane-2025', title: 'ПАРТНЕРЫ HAPPINESS В СИАНЕ 2025Г.', excerpt: '2025 год уже стал для партнеров HAPPINESS по-настоящему ярким и запоминающимся! 21 партнёр успешно завершили промоушен…', date: '24 декабря 2025', image: '/images/342d0f8b9544d8dc8e8678f3302ca4864aa11e04.png' },
-]
+const pageData = computed(() => data.value?.news ?? null)
+const items = computed<NewsItem[]>(() => pageData.value?.items ?? [])
+const pagination = computed(() => pageData.value?.pagination ?? null)
+
+const totalPages = computed(() => pagination.value?.last_page || 1)
+const currentPage = computed(() => pagination.value?.current_page || 1)
+
+function decodeHtml(value: string) {
+  return value
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&ndash;/g, '–')
+    .replace(/&laquo;/g, '«')
+    .replace(/&raquo;/g, '»')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, '\'')
+    .replace(/&amp;/g, '&')
+}
+
+function stripHtml(value: string) {
+  return decodeHtml(value)
+    .replace(/<br\s*\/?>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function excerpt(item: NewsItem) {
+  const raw = item.first_description || item.second_description || ''
+  const txt = stripHtml(raw)
+  return txt.length > 170 ? `${txt.slice(0, 167)}…` : txt
+}
+
+function formatDate(iso: string) {
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return iso
+  return new Intl.DateTimeFormat('ru-RU', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  }).format(d)
+}
+
+function goToPage(page: number) {
+  if (page < 1 || page > totalPages.value || page === currentPage.value) return
+  router.push({
+    path: route.path,
+    query: { ...route.query, page: String(page) },
+  })
+}
+
+const pageNumbers = computed(() =>
+  Array.from({ length: totalPages.value }, (_, i) => i + 1),
+)
+
+useHead(() => ({
+  title: 'Новости — Happiness',
+}))
 </script>
 
 <style scoped>

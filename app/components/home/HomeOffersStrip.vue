@@ -2,22 +2,18 @@
   <section class="offers-strip-section">
     <div class="container">
       <div class="offers-row">
-        <div class="offer-item offer-item--blue-on-hover">
-          <div class="offer-icon"><img src="/fire.svg" alt=""></div>
-          <span>Выбирай выгодные наборы сейчас</span>
-        </div>
-        <div class="offer-item offer-item--blue-on-hover">
-          <div class="offer-icon"><img src="/fire.svg" alt=""></div>
-          <span>Лови лучшие цены недели</span>
-        </div>
-        <div class="offer-item offer-item--blue-on-hover">
-          <div class="offer-icon"><img src="/fire.svg" alt=""></div>
-          <span>Покупай качественные товары дешевле</span>
-        </div>
-        <div class="offer-item offer-item--blue-on-hover">
-          <div class="offer-icon"><img src="/fire.svg" alt=""></div>
-          <span>Успей забрать свою скидку</span>
-        </div>
+        <component
+          :is="item.link ? 'a' : 'div'"
+          v-for="(item, idx) in displayedLinks"
+          :key="`offer-${idx}`"
+          class="offer-item offer-item--blue-on-hover"
+          :href="item.link || undefined"
+          :target="item.link ? '_blank' : undefined"
+          :rel="item.link ? 'noopener noreferrer' : undefined"
+        >
+          <div class="offer-icon"><img :src="displayedIcon" alt=""></div>
+          <span>{{ item.title }}</span>
+        </component>
       </div>
     </div>
   </section>
@@ -60,4 +56,26 @@
 }
 </style>
 <script setup lang="ts">
+const props = defineProps<{
+  icon?: string | null
+  links?: Array<{ title: string | null, link: string | null }>
+}>()
+
+const displayedIcon = computed(() => props.icon || '/fire.svg')
+
+const displayedLinks = computed(() => {
+  const fromApi = props.links
+    ?.map((link) => ({
+      title: String(link?.title || '').trim(),
+      link: link?.link || null,
+    }))
+    .filter((link) => link.title)
+  if (fromApi?.length) return fromApi
+  return [
+    { title: 'Выбирай выгодные наборы сейчас', link: null },
+    { title: 'Лови лучшие цены недели', link: null },
+    { title: 'Покупай качественные товары дешевле', link: null },
+    { title: 'Успей забрать свою скидку', link: null },
+  ]
+})
 </script>

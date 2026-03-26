@@ -2,35 +2,41 @@
   <div>
     <TheHeader />
     <main class="learning-page">
-      <LearningBreadcrumbs />
-
-      <section class="learning-hero">
+      <section class="page-hero-catalog">
         <div class="container">
-          <div class="hero-image-wrap">
-            <img src="/images/e39744b8aca4253a251f6190e55ee1735b42dbd7.png" alt="Онлайн обучение" class="hero-image">
-          </div>
-          <h1 class="learning-title">ОНЛАЙН ОБУЧЕНИЕ</h1>
-          <p class="learning-desc">
-            Онлайн-обучение открывает доступ к знаниям в удобное для вас время и в любом месте. Осваивайте новые навыки, повышайте квалификацию и развивайтесь в комфортном темпе.
-          </p>
+          <LearningBreadcrumbs />
 
-          <div class="learning-tabs">
-            <button
-              type="button"
-              class="learning-tab"
-              :class="{ 'is-active': activeTab === 'documents' }"
-              @click="activeTab = 'documents'"
-            >
-              ДОКУМЕНТЫ ДЛЯ СКАЧИВАНИЯ
-            </button>
-            <button
-              type="button"
-              class="learning-tab"
-              :class="{ 'is-active': activeTab === 'video' }"
-              @click="activeTab = 'video'"
-            >
-              ВИДЕОАРХИВ
-            </button>
+          <div class="hero-content">
+            <div class="hero-image-container">
+              <img
+                src="/images/e39744b8aca4253a251f6190e55ee1735b42dbd7.png"
+                alt="Онлайн обучение"
+                class="hero-bg-img"
+              >
+            </div>
+            <h1 class="learning-title">ОНЛАЙН ОБУЧЕНИЕ</h1>
+            <p class="learning-desc">
+              Онлайн-обучение открывает доступ к знаниям в удобное для вас время и в любом месте. Осваивайте новые навыки, повышайте квалификацию и развивайтесь в комфортном темпе.
+            </p>
+
+            <div class="learning-tabs">
+              <button
+                type="button"
+                class="learning-tab"
+                :class="{ 'is-active': activeTab === 'documents' }"
+                @click="activeTab = 'documents'"
+              >
+                ДОКУМЕНТЫ ДЛЯ СКАЧИВАНИЯ
+              </button>
+              <button
+                type="button"
+                class="learning-tab"
+                :class="{ 'is-active': activeTab === 'video' }"
+                @click="activeTab = 'video'"
+              >
+                ВИДЕОАРХИВ
+              </button>
+            </div>
           </div>
 
           <div class="learning-content-box">
@@ -114,32 +120,12 @@ const videos = Array.from({ length: 5 }, () => ({
   padding-bottom: 40px;
 }
 
-.breadcrumbs-section {
-  padding: 20px 0;
-}
-
-.learning-hero {
-  padding: 0 0 30px;
-}
-
-.hero-image-wrap {
-  border-radius: 0 0 24px 24px;
-  overflow: hidden;
-  margin-bottom: 28px;
-}
-
-.hero-image {
-  width: 100%;
-  height: clamp(220px, 28vw, 390px);
-  object-fit: cover;
-}
-
 .learning-title {
   font-size: clamp(32px, 4vw, 56px);
   font-weight: 800;
   text-transform: uppercase;
   color: #dd5f05;
-  margin: 0 0 16px;
+  margin: 30px 0 18px;
   line-height: 1.1;
   letter-spacing: 0.01em;
 }
@@ -336,6 +322,10 @@ const videos = Array.from({ length: 5 }, () => ({
 }
 
 @media (max-width: 768px) {
+  .learning-title {
+    margin: 22px 0 14px;
+  }
+
   .learning-doc-row {
     flex-wrap: wrap;
   }

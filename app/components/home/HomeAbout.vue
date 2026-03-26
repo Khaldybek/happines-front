@@ -7,27 +7,68 @@
     <div class="container">
       <div class="about-top">
         <div class="about-text">
-          <h2 class="section-title about-section-title">О НАС</h2>
+          <h2 v-if="props.title" class="section-title about-section-title">{{ props.title }}</h2>
           <div class="about-desc">
-            <p>Lorem Ipsum является стандартной "рыбой" для текстов на латинице с начала XVI века. В то время некий безымянный печатник</p>
-            <p>Lorem Ipsum является стандартной "рыбой" для текстов на латинице с начала XVI века. В то время некий безымянный</p>
+            <p v-if="props.description1">{{ props.description1 }}</p>
+            <p v-if="props.description2">{{ props.description2 }}</p>
           </div>
         </div>
-        <div class="about-image-main">
-          <img src="/images/c46ab61af1aebaf89c9801b3ac51c5a7dce3816f.png" alt="About Us">
-
+        <div v-if="mainSlider.images.length" class="about-image-main">
+          <img
+            :src="mainSlider.currentImage"
+            :class="{ 'is-fading': mainSlider.isFading }"
+            alt=""
+          >
+          <div v-if="mainSlider.images.length > 1" class="slider-dots slider-dots--main" aria-hidden="true">
+            <button
+              v-for="(_, idx) in mainSlider.images"
+              :key="idx"
+              type="button"
+              class="slider-dot"
+              :class="{ 'is-active': mainSlider.currentIndex === idx }"
+              @click="mainSlider.goTo(idx)"
+            />
+          </div>
         </div>
       </div>
       <div class="about-bottom">
-        <div class="about-img-group">
-          <img src="/images/home/121.png" alt="Team 1">
+        <div v-if="leftSlider.images.length" class="about-img-group">
+          <img
+            :src="leftSlider.currentImage"
+            :class="{ 'is-fading': leftSlider.isFading }"
+            alt=""
+          >
+          <div v-if="leftSlider.images.length > 1" class="slider-dots" aria-hidden="true">
+            <button
+              v-for="(_, idx) in leftSlider.images"
+              :key="idx"
+              type="button"
+              class="slider-dot"
+              :class="{ 'is-active': leftSlider.currentIndex === idx }"
+              @click="leftSlider.goTo(idx)"
+            />
+          </div>
         </div>
-        <div class="about-img-group small">
-          <img src="/images/home/121.png" alt="Team 2">
+        <div v-if="rightSlider.images.length" class="about-img-group small">
+          <img
+            :src="rightSlider.currentImage"
+            :class="{ 'is-fading': rightSlider.isFading }"
+            alt=""
+          >
+          <div v-if="rightSlider.images.length > 1" class="slider-dots" aria-hidden="true">
+            <button
+              v-for="(_, idx) in rightSlider.images"
+              :key="idx"
+              type="button"
+              class="slider-dot"
+              :class="{ 'is-active': rightSlider.currentIndex === idx }"
+              @click="rightSlider.goTo(idx)"
+            />
+          </div>
         </div>
         <div class="about-text-bottom">
-          <p>Lorem Ipsum является стандартной "рыбой" для текстов на латинице с начала XVI века. В то время некий безымянный</p>
-          <p>Lorem Ipsum является стандартной "рыбой" для текстов на латинице с начала XVI века. В то время некий безымянный</p>
+          <p v-if="props.description3">{{ props.description3 }}</p>
+          <p v-if="props.description4">{{ props.description4 }}</p>
         </div>
       </div>
     </div>
@@ -35,9 +76,20 @@
 </template>
 
 <script setup lang="ts">
-const props = withDefaults(defineProps<{ dimmed?: boolean, transitionProgress?: number }>(), {
+const props = withDefaults(defineProps<{
+  dimmed?: boolean
+  transitionProgress?: number
+  title?: string | null
+  description1?: string | null
+  description2?: string | null
+  description3?: string | null
+  description4?: string | null
+  slider1?: string[]
+  slider2?: string[]
+  slider3?: string[]
+}>(), {
   dimmed: false,
-  transitionProgress: 0
+  transitionProgress: 0,
 })
 
 const transitionValue = computed(() => {
@@ -45,11 +97,69 @@ const transitionValue = computed(() => {
   if (Number.isNaN(val)) return 0
   return Math.max(0, Math.min(1, val))
 })
+
+const FADE_DURATION_MS = 700
+
+function useAutoSlider(source: () => string[] | undefined) {
+  const images = ref<string[]>([])
+  const currentIndex = ref(0)
+  const isFading = ref(false)
+  const currentImage = computed(() => images.value[currentIndex.value] ?? '')
+
+  let fadeTimer: ReturnType<typeof setTimeout> | null = null
+
+  const stop = () => {
+    if (fadeTimer) { clearTimeout(fadeTimer); fadeTimer = null }
+    isFading.value = false
+  }
+
+  const goTo = (idx: number) => {
+    const len = images.value.length
+    if (len <= 0) return
+    const next = ((idx % len) + len) % len
+    if (next === currentIndex.value) return
+    if (!import.meta.client) {
+      currentIndex.value = next
+      return
+    }
+    if (fadeTimer) clearTimeout(fadeTimer)
+    isFading.value = true
+    fadeTimer = setTimeout(() => {
+      currentIndex.value = next
+      isFading.value = false
+      fadeTimer = null
+    }, FADE_DURATION_MS)
+  }
+
+  watch(
+    () => source(),
+    (raw) => {
+      const resolved = (raw ?? []).filter(Boolean)
+      images.value = resolved
+      currentIndex.value = 0
+      stop()
+    },
+    { immediate: true },
+  )
+
+  onUnmounted(stop)
+
+  // reactive() нужен чтобы Vue автоматически разворачивал ref-ы в шаблоне
+  return reactive({ images, currentImage, currentIndex, isFading, goTo })
+}
+
+const mainSlider = useAutoSlider(() => props.slider1)
+const leftSlider = useAutoSlider(() => props.slider2)
+const rightSlider = useAutoSlider(() => props.slider3)
 </script>
 
 <style scoped>
 .about-section {
   padding: 100px 0;
+  background:
+    radial-gradient(62% 54% at 0% 100%, rgba(75, 147, 215, 0.88) 0%, rgba(75, 147, 215, 0) 72%),
+    radial-gradient(58% 50% at 100% 100%, rgba(119, 179, 65, 0.84) 0%, rgba(119, 179, 65, 0) 70%),
+    #fff;
   transition: background 0.4s ease;
   --about-progress: 0;
 }
@@ -103,13 +213,21 @@ const transitionValue = computed(() => {
 .about-image-main {
   flex: 1;
   position: relative;
+  height: 440px;
+  overflow: hidden;
+  border-radius: 50px;
 }
 
 .about-image-main img {
   width: 100%;
+  height: 100%;
+  object-fit: cover;
   border-radius: 50px;
+  display: block;
+  transform: scale(1);
+  filter: saturate(1);
+  transition: opacity 700ms ease-in-out, transform 900ms ease, filter 900ms ease;
 }
-
 
 .about-bottom {
   position: relative;
@@ -117,7 +235,7 @@ const transitionValue = computed(() => {
   gap: 30px;
   align-items: center;
   padding: 40px 40px 40px 50px;
-  background: linear-gradient(to right, #d4e8f7 0%, #e5f0f9 20%, #f0f7fc 40%, #f8fbfd 60%, white 75%);
+  background: transparent;
   border-radius: 0 50px 50px 0;
   transform: translateY(calc(var(--about-progress) * 26px));
   transition: transform 0.42s cubic-bezier(.2,.7,.2,1);
@@ -136,11 +254,52 @@ const transitionValue = computed(() => {
   height: 100%;
   object-fit: cover;
   border-radius: 50px;
+  transform: scale(1);
+  filter: saturate(1);
+  transition: opacity 700ms ease-in-out, transform 900ms ease, filter 900ms ease;
 }
 
 .about-img-group.small {
   flex: 0 0 18%;
   height: 280px;
+}
+
+.about-image-main img.is-fading,
+.about-img-group img.is-fading {
+  opacity: 0;
+  transform: scale(1.04);
+  filter: saturate(1.08);
+}
+
+.slider-dots {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 2;
+}
+
+.slider-dots--main {
+  bottom: 18px;
+}
+
+.slider-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.95);
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.slider-dot.is-active {
+  background: #e28133;
+  transform: scale(1.35);
 }
 
 .about-text-bottom {
@@ -156,11 +315,6 @@ const transitionValue = computed(() => {
   padding: 20px 24px;
   border-radius: 0 24px 24px 0;
   background: white;
-}
-
-.about-text-bottom p:last-child {
-  background: linear-gradient(to right, #e2f0dc 0%, #eef5eb 30%, #f6faf4 55%, white 80%);
-  border-radius: 0 24px 24px 0;
 }
 
 </style>

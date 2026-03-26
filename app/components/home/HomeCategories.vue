@@ -1,33 +1,32 @@
 <template>
   <section
+    ref="sectionRef"
     class="categories-section"
-    :class="`stage-${revealStage}`"
-    :style="{ '--cat-progress': String(transitionValue) }"
+    :class="{ 'is-visible': isVisible }"
   >
     <div class="container">
       <h2 class="categories-title">
-        <span class="categories-title-accent">ПОПУЛЯРНЫЕ</span>
-        <span>КАТЕГОРИИ</span>
+        <span class="categories-title-accent">{{ categoriesTitlePrimary }}</span>
+        <span>{{ categoriesTitleSecondary }}</span>
       </h2>
 
       <div class="categories-rows">
         <article
-          v-for="(category, index) in categories"
+          v-for="(category, index) in displayedCategories"
           :key="category.tag"
           class="category-row"
           :class="{ 'is-reverse': index % 2 === 1 }"
         >
           <div class="category-media">
-            <img class="media-main" :src="category.image" :alt="category.title">
-            <img class="media-side" :src="category.image" :alt="category.title">
-            <img class="media-side" :src="category.image" :alt="category.title">
+            <img class="media-main" :src="category.imageMain" :alt="category.title">
+            <img class="media-side" :src="category.imageTwo" :alt="category.title">
+            <img class="media-side" :src="category.imageThree" :alt="category.title">
           </div>
 
           <div class="category-content" :style="{ '--category-color': category.color }">
             <p class="category-tag">{{ category.tag }}</p>
             <p class="category-text">
-              Lorem Ipsum является стандартной "рыбой" для текстов на латинице с начала
-              XVI века. В то время некий Lorem Ipsum является
+              {{ category.text }}
             </p>
             <NuxtLink :to="category.to" class="category-more">
               <span class="more-arrow"></span>
@@ -41,72 +40,126 @@
 </template>
 
 <script setup lang="ts">
-const props = withDefaults(defineProps<{ transitionProgress?: number }>(), {
+import { resolveNavHref } from '~/utils/navHref'
+
+interface CategoryDisplayItem {
+  tag: string
+  title: string
+  imageMain: string
+  imageTwo: string
+  imageThree: string
+  color: string
+  to: string
+  text: string
+}
+
+const props = withDefaults(defineProps<{
+  transitionProgress?: number
+  title?: string | null
+  categories?: Array<{
+    id: number
+    slug: string
+    category_title: string | null
+    category_plural_title: string | null
+    href: string | null
+    image_one: string | null
+    image_two: string | null
+    image_three: string | null
+  }>
+}>(), {
   transitionProgress: 0
 })
 
-const transitionValue = computed(() => {
-  const val = props.transitionProgress
-  if (Number.isNaN(val)) return 0
-  return Math.max(0, Math.min(1, val))
+const sectionRef = ref<HTMLElement | null>(null)
+const isVisible = ref(false)
+
+onMounted(() => {
+  if (!sectionRef.value) return
+  const observer = new IntersectionObserver(
+    ([entry]) => { if (entry.isIntersecting) { isVisible.value = true; observer.disconnect() } },
+    { threshold: 0.08 }
+  )
+  observer.observe(sectionRef.value)
 })
 
-const revealStage = computed(() => {
-  if (transitionValue.value < 0.2) return 0
-  if (transitionValue.value < 0.52) return 1
-  return 2
-})
+const FALLBACK_IMAGE = '/images/9e8377ac40899f1b0381dc2db14e9b7cd56c6b20.jpeg'
 
-const categories = [
+const defaultCategories: CategoryDisplayItem[] = [
   {
     tag: '#ОЧИЩЕНИЕ',
     title: 'Очищение',
-    image: '/images/9e8377ac40899f1b0381dc2db14e9b7cd56c6b20.jpeg',
+    imageMain: '/images/9e8377ac40899f1b0381dc2db14e9b7cd56c6b20.jpeg',
+    imageTwo: '/images/9e8377ac40899f1b0381dc2db14e9b7cd56c6b20.jpeg',
+    imageThree: '/images/9e8377ac40899f1b0381dc2db14e9b7cd56c6b20.jpeg',
     color: '#4B93D7',
-    to: '/products/cleansing'
+    to: '/catalog/ocishhenie',
+    text: 'Очищение организма от шлаков и токсинов - первый шаг на пути к здоровью и долголетию.',
   },
   {
     tag: '#ВОССТАНОВЛЕНИЕ И ОМОЛОЖЕНИЕ',
     title: 'Восстановление и омоложение',
-    image: '/images/c73c8a5ce7b873a9895e9561a5106da110e962d2.png',
+    imageMain: '/images/c73c8a5ce7b873a9895e9561a5106da110e962d2.png',
+    imageTwo: '/images/c73c8a5ce7b873a9895e9561a5106da110e962d2.png',
+    imageThree: '/images/c73c8a5ce7b873a9895e9561a5106da110e962d2.png',
     color: '#FF7F1E',
-    to: '/products/recovery'
+    to: '/catalog/vosstanovlenie-i-omolozenie',
+    text: 'Естественный путь к восстановлению и обновлению организма',
   },
   {
     tag: '#ЕЖЕДНЕВНЫЙ УХОД',
     title: 'Ежедневный уход',
-    image: '/images/9e8377ac40899f1b0381dc2db14e9b7cd56c6b20.jpeg',
+    imageMain: '/images/9e8377ac40899f1b0381dc2db14e9b7cd56c6b20.jpeg',
+    imageTwo: '/images/9e8377ac40899f1b0381dc2db14e9b7cd56c6b20.jpeg',
+    imageThree: '/images/9e8377ac40899f1b0381dc2db14e9b7cd56c6b20.jpeg',
     color: '#79A62F',
-    to: '/products/daily-care'
+    to: '/catalog/ezednevnyi-uxod',
+    text: 'Природная косметика для красоты и обновления кожи',
   },
   {
     tag: '#ТОВАРЫ ДЛЯ СЕМЬИ',
     title: 'Товары для семьи',
-    image: '/images/dcf565b5ae1c07ff18202d1bb30694776d5b7536.png',
+    imageMain: '/images/dcf565b5ae1c07ff18202d1bb30694776d5b7536.png',
+    imageTwo: '/images/dcf565b5ae1c07ff18202d1bb30694776d5b7536.png',
+    imageThree: '/images/dcf565b5ae1c07ff18202d1bb30694776d5b7536.png',
     color: '#F2B72B',
-    to: '/products/family'
+    to: '/catalog/tovary-dlia-semi',
+    text: 'Товары для семьи',
   }
 ]
+
+const categoryColors = ['#4B93D7', '#FF7F1E', '#79A62F', '#F2B72B']
+
+const displayedCategories = computed<CategoryDisplayItem[]>(() => {
+  const fromApi = props.categories?.map((c, idx) => ({
+    tag: `#${String(c.category_title || '').trim().toUpperCase() || `КАТЕГОРИЯ ${idx + 1}`}`,
+    title: String(c.category_title || '').trim() || `Категория ${idx + 1}`,
+    imageMain: c.image_one || FALLBACK_IMAGE,
+    imageTwo: c.image_two || c.image_one || FALLBACK_IMAGE,
+    imageThree: c.image_three || c.image_one || FALLBACK_IMAGE,
+    color: categoryColors[idx % categoryColors.length] ?? '#4B93D7',
+    to: resolveNavHref(c.href) ?? `/catalog/${encodeURIComponent(c.slug)}`,
+    text: String(c.category_plural_title || '').trim() || 'Описание категории',
+  }))
+  return fromApi?.length ? fromApi : defaultCategories
+})
+
+const categoriesTitlePrimary = computed(() => {
+  const title = String(props.title || '').trim()
+  if (!title) return 'ПОПУЛЯРНЫЕ'
+  return title.split(/\s+/)[0]?.toUpperCase() || 'ПОПУЛЯРНЫЕ'
+})
+
+const categoriesTitleSecondary = computed(() => {
+  const title = String(props.title || '').trim()
+  if (!title) return 'КАТЕГОРИИ'
+  return title.split(/\s+/).slice(1).join(' ').toUpperCase() || 'КАТЕГОРИИ'
+})
 </script>
 
 <style scoped>
 .categories-section {
   padding: 84px 0 74px;
   background: #fff;
-  --cat-progress: 0;
-}
-
-.categories-section .container {
-  opacity: calc(0.08 + (var(--cat-progress) * 0.92));
-  transform: translateY(calc((1 - var(--cat-progress)) * 42px));
-  filter: blur(calc((1 - var(--cat-progress)) * 3.4px));
-  transition: opacity 0.42s ease, transform 0.5s cubic-bezier(.2,.7,.2,1), filter 0.45s ease;
-}
-
-.categories-section.stage-2 .container {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-  filter: blur(0);
 }
 
 .categories-title {
@@ -119,8 +172,13 @@ const categories = [
   letter-spacing: 0.01em;
   color: #0f1117;
   opacity: 0;
-  transform: translateY(24px) scale(0.93);
-  transition: opacity 0.42s ease, transform 0.52s cubic-bezier(.2,.7,.2,1);
+  transform: translateY(36px);
+  transition: opacity 0.46s ease, transform 0.58s cubic-bezier(.2,.7,.2,1);
+}
+
+.categories-section.is-visible .categories-title {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .categories-title span {
@@ -130,12 +188,6 @@ const categories = [
 .categories-title-accent {
   color: #dd5f05;
   margin-bottom: 6px;
-}
-
-.categories-section.stage-1 .categories-title,
-.categories-section.stage-2 .categories-title {
-  opacity: 1;
-  transform: translateY(0) scale(1);
 }
 
 .categories-rows {
@@ -149,8 +201,7 @@ const categories = [
   gap: 20px;
   align-items: stretch;
   opacity: 0;
-  transform: translateY(38px) scale(0.96);
-  transition: opacity 0.45s ease, transform 0.58s cubic-bezier(.2,.7,.2,1);
+  transition: opacity 0.42s ease;
 }
 
 .category-row.is-reverse .category-media {
@@ -161,20 +212,46 @@ const categories = [
   order: 1;
 }
 
-.categories-section.stage-1 .category-row {
-  opacity: 0.24;
-  transform: translateY(20px) scale(0.98);
+.category-media,
+.category-content {
+  opacity: 0;
+  transition: opacity 0.44s ease, transform 0.62s cubic-bezier(.2,.7,.2,1);
 }
 
-.categories-section.stage-2 .category-row {
+.category-row .category-media {
+  transform: translate3d(-56px, 0, 0);
+}
+
+.category-row .category-content {
+  transform: translate3d(56px, 0, 0);
+}
+
+.category-row.is-reverse .category-media {
+  transform: translate3d(56px, 0, 0);
+}
+
+.category-row.is-reverse .category-content {
+  transform: translate3d(-56px, 0, 0);
+}
+
+.categories-section.is-visible .category-row {
   opacity: 1;
-  transform: translateY(0) scale(1);
 }
 
-.categories-section.stage-2 .category-row:nth-child(1) { transition-delay: 0.06s; }
-.categories-section.stage-2 .category-row:nth-child(2) { transition-delay: 0.14s; }
-.categories-section.stage-2 .category-row:nth-child(3) { transition-delay: 0.22s; }
-.categories-section.stage-2 .category-row:nth-child(4) { transition-delay: 0.3s; }
+.categories-section.is-visible .category-row .category-media,
+.categories-section.is-visible .category-row .category-content {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.categories-section.is-visible .category-row:nth-child(1) .category-media,
+.categories-section.is-visible .category-row:nth-child(1) .category-content { transition-delay: 0.12s; }
+.categories-section.is-visible .category-row:nth-child(2) .category-media,
+.categories-section.is-visible .category-row:nth-child(2) .category-content { transition-delay: 0.24s; }
+.categories-section.is-visible .category-row:nth-child(3) .category-media,
+.categories-section.is-visible .category-row:nth-child(3) .category-content { transition-delay: 0.36s; }
+.categories-section.is-visible .category-row:nth-child(4) .category-media,
+.categories-section.is-visible .category-row:nth-child(4) .category-content { transition-delay: 0.48s; }
 
 .category-media {
   min-height: 224px;

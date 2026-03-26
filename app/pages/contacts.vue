@@ -9,88 +9,73 @@
 
         <div class="contacts-info">
           <div class="contacts-grid">
-            <div class="contact-office">
-              <h3>ОФИС В КАЗАХСТАНЕ</h3>
+            <div v-if="mainOffice" class="contact-office">
+              <h3>{{ mainOffice.name }}</h3>
               <div class="contact-detail">
                 <img src="/images/16_502.svg" alt="" class="contact-icon">
-                <span>Казахстан, г Алматы ул. Эльбека, 61/3</span>
+                <span>{{ mainOffice.address }}</span>
               </div>
-              <div class="contact-detail">
+              <div
+                v-for="(phone, idx) in mainOffice.phones"
+                :key="`main-phone-${idx}`"
+                class="contact-detail"
+              >
                 <img src="/images/16_508.svg" alt="" class="contact-icon">
-                <span>+7 777 643 11 14</span>
+                <span>{{ phone }}</span>
               </div>
-              <div class="contact-detail">
+              <div
+                v-for="(email, idx) in mainOffice.emails"
+                :key="`main-email-${idx}`"
+                class="contact-detail"
+              >
                 <img src="/images/16_424.svg" alt="" class="contact-icon">
-                <span>support@happiness.com</span>
+                <span>{{ email }}</span>
               </div>
-              <div class="contact-detail">
+              <div v-if="mainOffice.work_time" class="contact-detail">
                 <img src="/images/16_514.svg" alt="" class="contact-icon">
-                <span>ПН-ВС 09:00 - 20:00</span>
+                <span>{{ mainOffice.work_time }}</span>
               </div>
             </div>
 
-            <div class="contact-office">
-              <h3>ГОЛОВНОЙ ОФИС В КИТАЕ</h3>
+            <div v-if="chinaOffice" class="contact-office">
+              <h3>{{ chinaOffice.name }}</h3>
               <div class="contact-detail">
                 <img src="/images/16_502.svg" alt="" class="contact-icon">
-                <span>Room 2007-1, Unit 1, Building 1, Lianhe Caifu Guangchang, No.2177 Tianchen Road, Gaoxin District, Jinan City</span>
+                <span>{{ chinaOffice.address }}</span>
               </div>
-              <div class="contact-detail">
+              <div
+                v-for="(phone, idx) in chinaOffice.phones"
+                :key="`china-phone-${idx}`"
+                class="contact-detail"
+              >
                 <img src="/images/16_508.svg" alt="" class="contact-icon">
-                <span>+86 0531-68659493</span>
+                <span>{{ phone }}</span>
               </div>
-              <div class="contact-detail">
-                <img src="/images/16_508.svg" alt="" class="contact-icon">
-                <span>Горячая линия: +86 400-172-1168</span>
-              </div>
-              <div class="contact-detail">
+              <div
+                v-for="(email, idx) in chinaOffice.emails"
+                :key="`china-email-${idx}`"
+                class="contact-detail"
+              >
                 <img src="/images/16_424.svg" alt="" class="contact-icon">
-                <span>support@happiness.com</span>
+                <span>{{ email }}</span>
+              </div>
+              <div v-if="chinaOffice.work_time" class="contact-detail">
+                <img src="/images/16_514.svg" alt="" class="contact-icon">
+                <span>{{ chinaOffice.work_time }}</span>
               </div>
             </div>
           </div>
 
           <div class="branches-grid">
-            <div class="branch">
-              <h4>КАЗАХСТАНСКИЙ ФИЛИАЛ</h4>
+            <div
+              v-for="branch in branches"
+              :key="branch.id"
+              class="branch"
+            >
+              <h4>{{ branch.name }}</h4>
               <div class="contact-detail">
                 <img src="/images/16_508.svg" alt="" class="contact-icon">
-                <span>+7 702 107 42 26</span>
-              </div>
-            </div>
-            <div class="branch">
-              <h4>УКРАИНСКИЙ ФИЛИАЛ</h4>
-              <div class="contact-detail">
-                <img src="/images/16_508.svg" alt="" class="contact-icon">
-                <span>+380 44 500 55 57</span>
-              </div>
-            </div>
-            <div class="branch">
-              <h4>МОСКОВСКИЙ ФИЛИАЛ</h4>
-              <div class="contact-detail">
-                <img src="/images/16_508.svg" alt="" class="contact-icon">
-                <span>+7 499 754 90 35</span>
-              </div>
-            </div>
-            <div class="branch">
-              <h4>ГРУЗИНСКИЙ ФИЛИАЛ</h4>
-              <div class="contact-detail">
-                <img src="/images/16_508.svg" alt="" class="contact-icon">
-                <span>+995 593 331 958</span>
-              </div>
-            </div>
-            <div class="branch">
-              <h4>ЕКАТЕРИНБУРГСКИЙ ФИЛИАЛ</h4>
-              <div class="contact-detail">
-                <img src="/images/16_508.svg" alt="" class="contact-icon">
-                <span>+7 912 656 63 67</span>
-              </div>
-            </div>
-            <div class="branch">
-              <h4>НЕМЕЦКИЙ ФИЛИАЛ</h4>
-              <div class="contact-detail">
-                <img src="/images/16_508.svg" alt="" class="contact-icon">
-                <span>+49 30 34042697</span>
+                <span>{{ branch.phone }}</span>
               </div>
             </div>
           </div>
@@ -111,19 +96,21 @@
                 <input id="contacts-name" v-model="form.name" type="text" placeholder="Введите ваше имя" required>
               </div>
               <div class="form-group">
-                <label for="contacts-city">Город</label>
-                <input id="contacts-city" v-model="form.city" type="text" placeholder="Введите город">
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
                 <label for="contacts-phone">Номер телефона</label>
                 <input id="contacts-phone" v-model="form.phone" type="tel" placeholder="Введите телефон" required>
               </div>
-              <div class="form-group">
-                <label for="contacts-email">Email</label>
-                <input id="contacts-email" v-model="form.email" type="email" placeholder="Введите email">
-              </div>
+            </div>
+            <div class="form-row">
+              <CountryCitySelect
+                v-model:country-id="form.countryId"
+                v-model:city-id="form.cityId"
+                :countries="countries"
+                :loading="countriesPending"
+              />
+            </div>
+            <div class="form-group form-group-full">
+              <label for="contacts-email">Email</label>
+              <input id="contacts-email" v-model="form.email" type="email" placeholder="Введите email">
             </div>
             <div class="form-group form-group-full">
               <label for="contacts-message">Ваш вопрос или сообщение</label>
@@ -151,17 +138,68 @@
 </template>
 
 <script setup lang="ts">
+import type { ContactsBranch, ContactsOffice } from '~/types/contactsPage'
+import { useCountries } from '~/composables/useCountries'
+
 definePageMeta({
   layout: false,
 })
 
-useHead({
-  title: 'Контакты — Happiness',
-})
+const { data } = useContactsPage()
+const { data: countriesData, pending: countriesPending } = useCountries()
+const countries = computed(() => countriesData.value?.data ?? [])
+
+const pageData = computed(() => data.value ?? null)
+
+const fallbackMainOffice: ContactsOffice = {
+  name: 'ОФИС В КАЗАХСТАНЕ',
+  address: 'Казахстан, г Алматы ул. Эльбека, 61/3',
+  work_time: 'ПН-ВС 09:00 - 20:00',
+  phones: ['+7 777 643 11 14'],
+  emails: ['support@happiness.com'],
+}
+
+const fallbackChinaOffice: ContactsOffice = {
+  name: 'ГОЛОВНОЙ ОФИС В КИТАЕ',
+  address: 'Room 2007-1, Unit 1, Building 1, Lianhe Caifu Guangchang, No.2177 Tianchen Road, Gaoxin District, Jinan City',
+  work_time: '',
+  phones: ['+86 0531-68659493', 'Горячая линия: +86 400-172-1168'],
+  emails: ['support@happiness.com'],
+}
+
+const fallbackBranches: ContactsBranch[] = [
+  { id: 1, name: 'КАЗАХСТАНСКИЙ ФИЛИАЛ', phone: '+7 702 107 42 26' },
+  { id: 2, name: 'УКРАИНСКИЙ ФИЛИАЛ', phone: '+380 44 500 55 57' },
+  { id: 3, name: 'МОСКОВСКИЙ ФИЛИАЛ', phone: '+7 499 754 90 35' },
+  { id: 4, name: 'ГРУЗИНСКИЙ ФИЛИАЛ', phone: '+995 593 331 958' },
+  { id: 5, name: 'ЕКАТЕРИНБУРГСКИЙ ФИЛИАЛ', phone: '+7 912 656 63 67' },
+  { id: 6, name: 'НЕМЕЦКИЙ ФИЛИАЛ', phone: '+49 30 34042697' },
+]
+
+const mainOffice = computed(() => pageData.value?.contact ?? fallbackMainOffice)
+const chinaOffice = computed(
+  () => pageData.value?.offices?.china_head ?? fallbackChinaOffice,
+)
+const branches = computed(() => pageData.value?.branches ?? fallbackBranches)
+
+useHead(() => ({
+  title: `${pageData.value?.seoPage?.meta_title || 'Контакты'} — Happiness`,
+  meta: [
+    {
+      name: 'description',
+      content: pageData.value?.seoPage?.meta_description || 'Контакты',
+    },
+    {
+      name: 'keywords',
+      content: pageData.value?.seoPage?.meta_keyword || 'Контакты',
+    },
+  ],
+}))
 
 const form = reactive({
   name: '',
-  city: '',
+  countryId: null as number | null,
+  cityId: null as number | null,
   phone: '',
   email: '',
   message: '',

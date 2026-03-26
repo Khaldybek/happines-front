@@ -8,7 +8,6 @@
 
       <div class="cards-grid">
         <article class="card card-1">
-          <div class="card-fire"><img src="/fire.svg" alt=""></div>
           <div class="card-content">
             <h3>Продукция HAPPINESS</h3>
             <p>Натуральные формулы на стыке традиционной китайской медицины и современных биотехнологий — для ежедневной поддержки организма.</p>
@@ -90,7 +89,6 @@
 <style scoped>
 .happiness-today-section {
   padding: 74px 0;
-  background: #ededed;
 }
 
 .happiness-title {

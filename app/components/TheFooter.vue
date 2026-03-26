@@ -51,7 +51,7 @@
                 <h4>СОБЫТИЯ</h4>
                 <ul>
                   <li><NuxtLink to="/events/promotion" class="footer-link" active-class="is-active">Промоушен</NuxtLink></li>
-                  <li><NuxtLink to="/gallery" class="footer-link" active-class="is-active">Галерея</NuxtLink></li>
+                  <li><NuxtLink to="/gallery/gallery" class="footer-link" active-class="is-active">Галерея</NuxtLink></li>
                   <li><NuxtLink to="/distributors" class="footer-link" active-class="is-active">Выдающиеся дистрибьюторы</NuxtLink></li>
                   <li><NuxtLink to="/news" class="footer-link" active-class="is-active">Новости</NuxtLink></li>
                 </ul>
@@ -118,7 +118,7 @@
 
             <div class="policy-links">
               <NuxtLink to="/privacy">Политика конфиденциальности</NuxtLink>
-              <NuxtLink to="/terms">Пользовательское соглашение</NuxtLink>
+              <NuxtLink to="/privacy">Пользовательское соглашение</NuxtLink>
             </div>
           </div>
         </div>

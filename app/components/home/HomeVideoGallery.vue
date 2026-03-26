@@ -2,46 +2,65 @@
   <section class="video-section">
     <div class="container">
       <div class="video-header">
-        <h2 class="video-title">ВИДЕОГАЛЕРЕЯ</h2>
+        <h2 class="video-title">{{ displayTitle }}</h2>
         <img src="/vit.png" alt="" class="video-decor" aria-hidden="true">
       </div>
 
       <div class="video-desc">
-        <p class="video-hashtag">#HAPPINESSINSIDE</p>
-        <p class="video-text">
-          Здесь собраны лучшие видео о продуктах, людях и развитии компании. Узнайте,
-          как работает команда, меняются рынки и строится будущее бренда.
-        </p>
+        <p class="video-hashtag">{{ displaySubtitle }}</p>
+        <p class="video-text">{{ displayDescription }}</p>
       </div>
 
       <div class="video-grid">
-        <div class="video-item">
+        <div v-for="video in orderedVideos" :key="video.id" class="video-item">
           <div class="video-thumb">
-            <img src="/images/342d0f8b9544d8dc8e8678f3302ca4864aa11e04.png" alt="Видео о продукции NEW">
-            <button class="play-btn" aria-label="Воспроизвести видео"></button>
+            <video
+              v-if="video.video_url"
+              :src="video.video_url"
+              class="video-player"
+              controls
+              preload="metadata"
+            />
+            <div v-else class="video-empty">Видео недоступно</div>
           </div>
-          <p class="video-caption">ВИДЕО О ПРОДУКЦИИ NEW</p>
+          <p class="video-caption">{{ video.description || 'Видео о продукции Happiness' }}</p>
         </div>
-
-        <div class="video-item">
-          <div class="video-thumb">
-            <img src="/images/342d0f8b9544d8dc8e8678f3302ca4864aa11e04.png" alt="Видео о продукции NEW Зубная паста Happiness">
-            <button class="play-btn" aria-label="Воспроизвести видео"></button>
-          </div>
-          <p class="video-caption">
-            ВИДЕО О ПРОДУКЦИИ NEW ЗУБНАЯ ПАСТА HAPPINESS ДВОЙНОЙ ЭФФЕКТ «СИЯЮЩИЕ ЗУБЫ И
-            ЗДОРОВЫЕ ДЕСНЫ»...
-          </p>
-        </div>
-      </div>
-
-      <div class="video-nav">
-        <button class="video-nav-btn is-prev" aria-label="Предыдущее видео"></button>
-        <button class="video-nav-btn is-next" aria-label="Следующее видео"></button>
       </div>
     </div>
   </section>
 </template>
+
+<script setup lang="ts">
+import type { HomeVideoGalleryItem } from '~/types/homePage'
+
+const props = withDefaults(defineProps<{
+  title?: string | null
+  subtitle?: string | null
+  description?: string | null
+  videos?: HomeVideoGalleryItem[] | null
+}>(), {
+  title: null,
+  subtitle: null,
+  description: null,
+  videos: () => [],
+})
+
+const displayTitle = computed(() => props.title?.trim() || 'ВИДЕОГАЛЕРЕЯ')
+const displaySubtitle = computed(() => props.subtitle?.trim() || '#HAPPINESSINSIDE')
+const displayDescription = computed(
+  () => props.description?.trim()
+    || 'Здесь собраны лучшие видео о продуктах, людях и развитии компании.',
+)
+
+const orderedVideos = computed(() => {
+  const list = Array.isArray(props.videos) ? [...props.videos] : []
+  return list.sort((a, b) => {
+    const positionA = typeof a.position === 'number' ? a.position : Number.MAX_SAFE_INTEGER
+    const positionB = typeof b.position === 'number' ? b.position : Number.MAX_SAFE_INTEGER
+    return positionA - positionB
+  })
+})
+</script>
 
 <style scoped>
 .video-section {
@@ -109,36 +128,28 @@
   position: relative;
   overflow: hidden;
   border-radius: 52px;
+  background: #f3f5f8;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 260px;
 }
 
-.video-thumb img {
+.video-player {
   width: 100%;
   height: 100%;
-  min-height: 280px;
   object-fit: cover;
+  display: block;
 }
 
-.play-btn {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 66px;
-  height: 66px;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  background: #2f73cd;
-  box-shadow: 0 8px 14px rgba(47, 115, 205, 0.28);
-}
-
-.play-btn::before {
-  content: "";
-  position: absolute;
-  left: 56%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  border-left: 16px solid #fff;
-  border-top: 10px solid transparent;
-  border-bottom: 10px solid transparent;
+.video-empty {
+  width: 100%;
+  height: 100%;
+  min-height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #666;
 }
 
 .video-caption {
@@ -148,51 +159,6 @@
   font-weight: 900;
   color: #111;
   text-transform: uppercase;
-}
-
-.video-nav {
-  display: flex;
-  justify-content: center;
-  gap: 18px;
-  margin-top: 38px;
-}
-
-.video-nav-btn {
-  position: relative;
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-}
-
-.video-nav-btn::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 10px;
-  height: 10px;
-  border-top: 2px solid currentColor;
-  border-right: 2px solid currentColor;
-  transform-origin: center;
-}
-
-.video-nav-btn.is-prev {
-  border: 1px solid #e28133;
-  color: #e28133;
-  background: #fff;
-}
-
-.video-nav-btn.is-prev::before {
-  transform: translate(-38%, -50%) rotate(-135deg);
-}
-
-.video-nav-btn.is-next {
-  background: #e28133;
-  color: #fff;
-}
-
-.video-nav-btn.is-next::before {
-  transform: translate(-62%, -50%) rotate(45deg);
 }
 
 @media (max-width: 1280px) {
@@ -225,6 +191,7 @@
 
   .video-thumb {
     border-radius: 32px;
+    min-height: 220px;
   }
 
   .video-caption {
@@ -237,19 +204,8 @@
     line-height: 1.3;
   }
 
-  .video-thumb img {
-    min-height: 220px;
-  }
-
-  .play-btn {
-    width: 54px;
-    height: 54px;
-  }
-
-  .play-btn::before {
-    border-left-width: 12px;
-    border-top-width: 8px;
-    border-bottom-width: 8px;
+  .video-empty {
+    min-height: 200px;
   }
 }
 </style>

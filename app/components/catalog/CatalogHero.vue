@@ -3,10 +3,10 @@
     <div class="container">
       <CatalogBreadcrumbs :current-label="categoryTitle" />
       <div class="hero-content">
-        <h1 class="hero-title">{{ categoryTitle }}</h1>
         <div class="hero-image-container">
           <img :src="heroImage" :alt="categoryTitle" class="hero-bg-img">
         </div>
+        <h1 class="hero-title">{{ categoryTitle }}</h1>
         <div class="hero-text">
           <p class="hero-lead">{{ lead }}</p>
           <p class="hero-desc">{{ description }}</p>
@@ -38,10 +38,10 @@ defineProps<{
 
 .hero-title {
   color: #dd5f05;
-  font-size: 64px;
+  font-size: clamp(44px, 6vw, 84px);
   font-weight: 800;
   text-transform: uppercase;
-  margin: 40px 0;
+  margin: 30px 0 18px;
 }
 
 .hero-image-container {
@@ -62,15 +62,31 @@ defineProps<{
 .hero-text {
   max-width: 1258px;
   margin: 0 auto;
-  text-align: left;
+  text-align: center;
 }
 
 .hero-lead {
   font-weight: 700;
-  margin-bottom: 10px;
+  font-size: clamp(20px, 2.2vw, 32px);
+  line-height: 1.25;
+  margin: 0 auto 18px;
+  max-width: 1100px;
 }
 
 .hero-desc {
-  line-height: 1.6;
+  font-size: clamp(14px, 1.15vw, 16px);
+  line-height: 1.65;
+  margin: 0 auto;
+  max-width: 1120px;
+}
+
+@media (max-width: 768px) {
+  .hero-content {
+    padding: 0 16px;
+  }
+
+  .hero-title {
+    margin: 22px 0 14px;
+  }
 }
 </style>

@@ -13,12 +13,16 @@
               <span class="icon-heart">♡</span>
             </div>
 
-            <p>
+            <p v-if="placedOrder">
+              Заказ <strong>#{{ placedOrder.id }}</strong> успешно оформлен.<br>
+              Вы можете следить за статусом в личном кабинете.
+            </p>
+            <p v-else>
               Вы можете следить за статусом
               своего заказа в личном кабинете
             </p>
 
-            <NuxtLink to="/cabinet/orders" class="success-btn">
+            <NuxtLink to="/lk/orders" class="success-btn">
               <span class="success-arrow"></span>
               <span>ПЕРЕЙТИ В ЛИЧНЫЙ КАБИНЕТ</span>
             </NuxtLink>
@@ -31,21 +35,20 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({
-  layout: false,
-})
+import type { PlacedOrder } from '~/types/checkoutPage'
 
-useHead({
-  title: 'Личный кабинет — Оплата',
-})
+definePageMeta({ layout: false })
+useHead({ title: 'Личный кабинет — Заказ оформлен' })
 
 const breadcrumbs = [
   { label: 'Главная', to: '/' },
-  { label: 'Личный кабинет', to: '/cabinet/orders' },
-  { label: 'Моя корзина', to: '/cabinet/cart' },
-  { label: 'Оформление заказа', to: '/cabinet/checkout' },
-  { label: 'Оплата' },
+  { label: 'Личный кабинет', to: '/lk/orders' },
+  { label: 'Моя корзина', to: '/lk/cart' },
+  { label: 'Оформление заказа', to: '/lk/checkout' },
+  { label: 'Заказ оформлен' },
 ]
+
+const placedOrder = useState<PlacedOrder | null>('placed-order', () => null)
 </script>
 
 <style scoped>

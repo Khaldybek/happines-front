@@ -1,10 +1,7 @@
 <template>
   <section class="mission-section">
     <div class="container">
-      <div class="mission-bg">
-        <img src="/images/16_416.svg" class="blob-left" alt="">
-        <img src="/images/16_417.svg" class="blob-right" alt="">
-      </div>
+
       <div class="mission-content">
         <h2 class="mission-title">
           <span class="title-black">НАША</span>

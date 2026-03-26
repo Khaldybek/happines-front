@@ -2,85 +2,162 @@
   <div class="long-term-doc-wrapper">
     <TheHeader />
     <main class="long-term-doc-page">
-      <section class="breadcrumbs-section">
-        <div class="container">
-          <nav class="breadcrumbs-list" aria-label="Хлебные крошки">
-            <NuxtLink to="/" class="crumb-item">Главная</NuxtLink>
-            <img src="/images/16_552.svg" alt="">
-            <NuxtLink to="/events/promotion" class="crumb-item">Промоушен HAPPINESS</NuxtLink>
-            <img src="/images/16_552.svg" alt="">
-            <NuxtLink to="/events/promotion?tab=long" class="crumb-item">Долгосрочные промоушены</NuxtLink>
-            <img src="/images/16_552.svg" alt="">
-            <span class="crumb-item active">{{ doc?.titleShort || doc?.title }}</span>
-          </nav>
-        </div>
-      </section>
+      <!-- Статические документы (старые slug) -->
+      <template v-if="doc">
+        <section class="breadcrumbs-section">
+          <div class="container">
+            <nav class="breadcrumbs-list" aria-label="Хлебные крошки">
+              <NuxtLink to="/" class="crumb-item">Главная</NuxtLink>
+              <img src="/images/16_552.svg" alt="">
+              <NuxtLink to="/events/promotion" class="crumb-item">Промоушен HAPPINESS</NuxtLink>
+              <img src="/images/16_552.svg" alt="">
+              <NuxtLink to="/events/promotion?tab=long" class="crumb-item">Долгосрочные промоушены</NuxtLink>
+              <img src="/images/16_552.svg" alt="">
+              <span class="crumb-item active">{{ doc?.titleShort || doc?.title }}</span>
+            </nav>
+          </div>
+        </section>
 
-      <div v-if="doc" class="container long-term-doc-container">
-        <h1 class="long-term-doc-title">{{ doc.title }}</h1>
-        <p v-if="doc.intro" class="long-term-doc-intro">{{ doc.intro }}</p>
-        <p class="long-term-doc-date">
-          <span class="date-icon" aria-hidden="true">📅</span>
-          {{ doc.date }}
-        </p>
+        <div class="container long-term-doc-container">
+          <h1 class="long-term-doc-title">{{ doc.title }}</h1>
+          <p v-if="doc.intro" class="long-term-doc-intro">{{ doc.intro }}</p>
+          <p class="long-term-doc-date">
+            <span class="date-icon" aria-hidden="true">📅</span>
+            {{ doc.date }}
+          </p>
 
-        <div class="long-term-doc-brand">
-          <img src="/logo.svg" alt="HAPPINESS" class="doc-logo">
-          <p class="doc-company">Гонконгская корпорация «Шен Лунг» Happiness</p>
-          <p class="doc-contact">+86 400-172-1168</p>
-          <p class="doc-contact">support@slhappiness.com</p>
-          <p class="doc-contact">https://slhappiness.com</p>
-          <h2 class="doc-subtitle">{{ doc.subtitle || doc.title }}</h2>
-        </div>
+          <div class="long-term-doc-brand">
+            <img src="/logo.svg" alt="HAPPINESS" class="doc-logo">
+            <p class="doc-company">Гонконгская корпорация «Шен Лунг» Happiness</p>
+            <p class="doc-contact">+86 400-172-1168</p>
+            <p class="doc-contact">support@slhappiness.com</p>
+            <p class="doc-contact">https://slhappiness.com</p>
+            <h2 class="doc-subtitle">{{ doc.subtitle || doc.title }}</h2>
+          </div>
 
-        <div v-if="doc.sections?.length" class="long-term-doc-sections">
-          <section v-for="(sec, i) in doc.sections" :key="i" class="doc-section">
-            <h3 class="doc-section-title">{{ sec.heading }}</h3>
-            <p v-if="sec.text" class="doc-section-text">{{ sec.text }}</p>
-            <ul v-if="sec.list?.length" class="doc-section-list">
-              <li v-for="(item, j) in sec.list" :key="j">{{ item }}</li>
-            </ul>
-            <ol v-if="sec.numbered?.length" class="doc-section-ol">
-              <li v-for="(item, k) in sec.numbered" :key="k">{{ item }}</li>
-            </ol>
-          </section>
-        </div>
+          <div v-if="doc.sections?.length" class="long-term-doc-sections">
+            <section v-for="(sec, i) in doc.sections" :key="i" class="doc-section">
+              <h3 class="doc-section-title">{{ sec.heading }}</h3>
+              <p v-if="sec.text" class="doc-section-text">{{ sec.text }}</p>
+              <ul v-if="sec.list?.length" class="doc-section-list">
+                <li v-for="(item, j) in sec.list" :key="j">{{ item }}</li>
+              </ul>
+              <ol v-if="sec.numbered?.length" class="doc-section-ol">
+                <li v-for="(item, k) in sec.numbered" :key="k">{{ item }}</li>
+              </ol>
+            </section>
+          </div>
 
-        <div v-if="doc.tables?.length" class="long-term-doc-tables">
-          <div v-for="(tbl, ti) in doc.tables" :key="ti" class="doc-table-wrap">
-            <h3 class="doc-table-caption">{{ tbl.caption }}</h3>
-            <div class="doc-table-scroll">
-              <table class="doc-table">
-                <thead>
-                  <tr>
-                    <th v-for="(col, ci) in tbl.headers" :key="ci">{{ col }}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(row, ri) in tbl.rows" :key="ri">
-                    <td v-for="(cell, ci) in row" :key="ci">{{ cell }}</td>
-                  </tr>
-                </tbody>
-              </table>
+          <div v-if="doc.tables?.length" class="long-term-doc-tables">
+            <div v-for="(tbl, ti) in doc.tables" :key="ti" class="doc-table-wrap">
+              <h3 class="doc-table-caption">{{ tbl.caption }}</h3>
+              <div class="doc-table-scroll">
+                <table class="doc-table">
+                  <thead>
+                    <tr>
+                      <th v-for="(col, ci) in tbl.headers" :key="ci">{{ col }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(row, ri) in tbl.rows" :key="ri">
+                      <td v-for="(cell, ci) in row" :key="ci">{{ cell }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="long-term-doc-back">
+          <div class="long-term-doc-back">
+            <NuxtLink to="/events/promotion?tab=long" class="doc-back-link">← Назад к промоушенам</NuxtLink>
+          </div>
+        </div>
+      </template>
+
+      <!-- Блок из API (slug или block-0, block-1…) -->
+      <template v-else-if="isPromoLoading">
+        <div class="container long-term-doc-loading">
+          <p>Загрузка…</p>
+        </div>
+      </template>
+
+      <template v-else-if="apiBlock">
+        <section class="breadcrumbs-section">
+          <div class="container">
+            <nav class="breadcrumbs-list" aria-label="Хлебные крошки">
+              <NuxtLink to="/" class="crumb-item">Главная</NuxtLink>
+              <img src="/images/16_552.svg" alt="">
+              <NuxtLink to="/events/promotion" class="crumb-item">Промоушен HAPPINESS</NuxtLink>
+              <img src="/images/16_552.svg" alt="">
+              <NuxtLink to="/events/promotion?tab=long" class="crumb-item">Долгосрочные промоушены</NuxtLink>
+              <img src="/images/16_552.svg" alt="">
+              <span class="crumb-item active">{{ apiCrumbTitle }}</span>
+            </nav>
+          </div>
+        </section>
+
+        <div class="container long-term-doc-container">
+          <h1 class="long-term-doc-title">{{ apiBlock.title }}</h1>
+          <p
+            v-for="(para, i) in splitApiDescription(apiBlock.description)"
+            :key="i"
+            class="long-term-doc-intro"
+          >
+            {{ para }}
+          </p>
+          <p v-if="apiBlockDate" class="long-term-doc-date">
+            <span class="date-icon" aria-hidden="true">📅</span>
+            {{ apiBlockDate }}
+          </p>
+
+          <div class="long-term-api-banner">
+            <img
+              :src="apiBlockMainImage"
+              :alt="apiBlock.title"
+              class="long-term-api-banner-img"
+            >
+          </div>
+
+          <ul v-if="apiBlockFilesNonImage.length" class="long-term-api-file-list">
+            <li v-for="(f, fi) in apiBlockFilesNonImage" :key="fi">
+              <a
+                :href="f.url"
+                class="long-term-api-file-link"
+                target="_blank"
+                rel="noopener noreferrer"
+              >{{ f.name || f.url }}</a>
+            </li>
+          </ul>
+
+          <div class="long-term-doc-brand">
+            <img src="/logo.svg" alt="HAPPINESS" class="doc-logo">
+            <p class="doc-company">Гонконгская корпорация «Шен Лунг» Happiness</p>
+            <p class="doc-contact">+86 400-172-1168</p>
+            <p class="doc-contact">support@slhappiness.com</p>
+            <p class="doc-contact">https://slhappiness.com</p>
+            <h2 class="doc-subtitle">{{ apiBlock.title }}</h2>
+          </div>
+
+          <div class="long-term-doc-back">
+            <NuxtLink to="/events/promotion?tab=long" class="doc-back-link">← Назад к промоушенам</NuxtLink>
+          </div>
+        </div>
+      </template>
+
+      <template v-else>
+        <div class="container">
+          <p class="long-term-doc-notfound">Документ не найден.</p>
           <NuxtLink to="/events/promotion?tab=long" class="doc-back-link">← Назад к промоушенам</NuxtLink>
         </div>
-      </div>
-
-      <div v-else class="container">
-        <p class="long-term-doc-notfound">Документ не найден.</p>
-        <NuxtLink to="/events/promotion?tab=long" class="doc-back-link">← Назад к промоушенам</NuxtLink>
-      </div>
+      </template>
     </main>
     <TheFooter />
   </div>
 </template>
 
 <script setup lang="ts">
+import type { PromotionsLongTermBlock } from '~/types/promotionsPage'
+
 definePageMeta({
   layout: false,
 })
@@ -109,7 +186,17 @@ interface LongTermDoc {
 }
 
 const route = useRoute()
-const slug = computed(() => (route.params.slug as string) || '')
+const slug = computed(() => String(route.params.slug || ''))
+
+function decodeSlug(s: string) {
+  try {
+    return decodeURIComponent(s)
+  } catch {
+    return s
+  }
+}
+
+const slugDecoded = computed(() => decodeSlug(slug.value))
 
 const docsBySlug: Record<string, LongTermDoc> = {
   'cashback-848-889': {
@@ -231,10 +318,91 @@ const docsBySlug: Record<string, LongTermDoc> = {
   },
 }
 
-const doc = computed(() => (slug.value ? docsBySlug[slug.value] ?? null : null))
+const doc = computed(() => {
+  const s = slug.value
+  if (!s) return null
+  return docsBySlug[s] ?? docsBySlug[slugDecoded.value] ?? null
+})
+
+const { data: promoData, pending } = usePromotionsPage()
+
+const blocks = computed(() => promoData.value?.long_term?.blocks ?? [])
+
+/** Пока нет данных промо-страницы — ждём (избегаем ложного «не найден») */
+const isPromoLoading = computed(
+  () => !doc.value && pending.value && blocks.value.length === 0,
+)
+
+const apiBlock = computed((): PromotionsLongTermBlock | null => {
+  if (doc.value) return null
+  const list = blocks.value
+
+  const qi = route.query.i
+  if (qi !== undefined && qi !== '') {
+    const raw = Array.isArray(qi) ? qi[0] : qi
+    const n = Number.parseInt(String(raw), 10)
+    if (!Number.isNaN(n) && n >= 0 && n < list.length) {
+      return list[n]!
+    }
+  }
+
+  const raw = slugDecoded.value
+  const m = /^block-(\d+)$/i.exec(raw)
+  if (m) {
+    const i = Number.parseInt(m[1], 10)
+    if (!Number.isNaN(i) && i >= 0 && i < list.length) {
+      return list[i]!
+    }
+    return null
+  }
+  return list.find((b) => (b.slug || '').trim() === raw) ?? null
+})
+
+const apiCrumbTitle = computed(() => {
+  const t = apiBlock.value?.title || ''
+  return t.length > 72 ? `${t.slice(0, 70)}…` : t
+})
+
+function splitApiDescription(text: string) {
+  return text
+    .split(/\r\n|\r|\n/)
+    .map((p) => p.trim())
+    .filter(Boolean)
+}
+
+const apiBlockDate = computed(() => {
+  const b = apiBlock.value
+  if (!b) return ''
+  if (b.date && String(b.date).trim()) return String(b.date).trim()
+  const m = b.title?.match(/\b(\d{1,2}\.\d{1,2}\.\d{2,4})\b/)
+  return m?.[1] ?? ''
+})
+
+const PLACEHOLDER = '/images/c46ab61af1aebaf89c9801b3ac51c5a7dce3816f.png'
+
+const apiBlockMainImage = computed(() => {
+  const b = apiBlock.value
+  if (!b?.files?.length) return PLACEHOLDER
+  const img = b.files.find((f) => f.is_image)
+  return img?.url || PLACEHOLDER
+})
+
+const apiBlockFilesNonImage = computed(() => {
+  const b = apiBlock.value
+  if (!b?.files?.length) return []
+  return b.files.filter((f) => !f.is_image)
+})
 
 useHead({
-  title: () => (doc.value ? `${doc.value.titleShort || doc.value.title} — Промоушен — Happiness` : 'Документ — Промоушен — Happiness'),
+  title: () => {
+    if (doc.value) {
+      return `${doc.value.titleShort || doc.value.title} — Промоушен — Happiness`
+    }
+    if (apiBlock.value) {
+      return `${apiBlock.value.title} — Промоушен — Happiness`
+    }
+    return 'Документ — Промоушен — Happiness'
+  },
 })
 </script>
 
@@ -242,6 +410,12 @@ useHead({
 .long-term-doc-page {
   background: #fff;
   padding-bottom: 60px;
+}
+
+.long-term-doc-loading {
+  padding: 48px 16px;
+  text-align: center;
+  color: #666;
 }
 
 .breadcrumbs-section {
@@ -287,7 +461,7 @@ useHead({
 }
 
 .long-term-doc-date {
-  margin: 0 0 32px;
+  margin: 0 0 24px;
   font-size: 0.9rem;
   color: #666;
   display: flex;
@@ -297,6 +471,33 @@ useHead({
 
 .date-icon {
   font-size: 1.1rem;
+}
+
+.long-term-api-banner {
+  margin-bottom: 24px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #f5f5f5;
+  line-height: 0;
+}
+
+.long-term-api-banner-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  vertical-align: top;
+}
+
+.long-term-api-file-list {
+  margin: 0 0 24px;
+  padding-left: 1.25rem;
+  font-size: 0.95rem;
+}
+
+.long-term-api-file-link {
+  color: #78a435;
+  font-weight: 600;
+  word-break: break-all;
 }
 
 .long-term-doc-brand {

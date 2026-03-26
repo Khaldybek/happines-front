@@ -2,10 +2,15 @@
   <label class="auth-field">
     <span class="auth-label">{{ label }}</span>
 
-    <span class="input-wrap" :class="{ 'with-icon': icon === 'eye' }">
-      <select v-if="type === 'select'" class="auth-input auth-select">
-        <option disabled selected>{{ placeholder }}</option>
-        <option v-for="option in options" :key="option">{{ option }}</option>
+    <span class="input-wrap" :class="{ 'with-icon': icon === 'eye', 'has-error': !!error }">
+      <select
+        v-if="type === 'select'"
+        class="auth-input auth-select"
+        :value="modelValue"
+        @change="$emit('update:modelValue', ($event.target as HTMLSelectElement).value)"
+      >
+        <option disabled :selected="!modelValue" value="">{{ placeholder }}</option>
+        <option v-for="option in options" :key="option" :value="option">{{ option }}</option>
       </select>
 
       <input
@@ -14,6 +19,8 @@
         class="auth-input"
         :type="effectiveType"
         :placeholder="placeholder"
+        :value="modelValue"
+        @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
       >
 
       <button
@@ -32,6 +39,8 @@
         </svg>
       </button>
     </span>
+
+    <span v-if="error" class="auth-field-error">{{ error }}</span>
   </label>
 </template>
 
@@ -40,13 +49,21 @@ const props = withDefaults(defineProps<{
   label: string
   placeholder: string
   type?: 'text' | 'email' | 'password' | 'tel' | 'select'
+  modelValue?: string
   options?: string[]
   icon?: 'none' | 'eye'
+  error?: string
 }>(), {
   type: 'text',
+  modelValue: '',
   options: () => [],
   icon: 'none',
+  error: '',
 })
+
+defineEmits<{
+  'update:modelValue': [value: string]
+}>()
 
 const passwordVisible = ref(false)
 const inputRef = ref<HTMLInputElement | null>(null)
@@ -140,6 +157,19 @@ function togglePasswordVisibility() {
   .auth-label {
     font-size: 17px;
   }
+}
+
+.has-error .auth-input {
+  border-color: #e05656;
+}
+
+.auth-field-error {
+  display: block;
+  margin-top: 6px;
+  padding-left: 14px;
+  font-size: 13px;
+  color: #e05656;
+  line-height: 1.3;
 }
 
 @media (max-width: 480px) {
