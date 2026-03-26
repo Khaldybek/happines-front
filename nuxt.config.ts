@@ -7,7 +7,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       /** NUXT_PUBLIC_API_BASE — без завершающего слэша */
-      apiBase: 'http://127.0.0.1:8000',
+      apiBase: 'https://admin-happines.test-nomad.kz',
     },
   },
   app: {

@@ -1,13 +1,5 @@
 const LOCAL_ORIGIN_RE = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/
 
-/**
- * Заменяет localhost / 127.0.0.1 origin в URL медиафайлов
- * на сконфигурированный apiBase.
- *
- * Это нужно, когда бэкенд хранит в БД абсолютные URL
- * вида http://127.0.0.1:8000/uploads/... — браузер
- * не может обратиться к localhost продакшн-сервера.
- */
 export function resolveMediaUrl(
   url: string | null | undefined,
   apiBase: string,
