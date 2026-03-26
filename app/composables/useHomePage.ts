@@ -1,5 +1,6 @@
 import type { HomePageResponse } from '~/types/homePage'
 import { getApiLangForRequest } from '~/composables/useApiLangQuery'
+import { deepFixMediaUrls } from '~/utils/resolveMediaUrl'
 
 function apiBaseUrl(): string {
   const config = useRuntimeConfig()
@@ -14,17 +15,20 @@ export function homePageUrl(): string {
 
 export function useHomePage() {
   const route = useRoute()
+  const baseUrl = apiBaseUrl()
   const url = homePageUrl()
 
   return useAsyncData(
     'home-page',
     async () => {
       try {
-        return await $fetch<HomePageResponse>(url, {
+        const data = await $fetch<HomePageResponse>(url, {
           headers: { Accept: 'application/json' },
           query: getApiLangForRequest(route),
         })
-      } catch {
+        return deepFixMediaUrls(data, baseUrl)
+      }
+      catch {
         return null
       }
     },

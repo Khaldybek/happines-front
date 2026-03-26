@@ -1,6 +1,7 @@
 import type { Ref } from 'vue'
 import type { NewsDetailResponse, NewsItem, NewsListResponse } from '~/types/newsPage'
 import { getApiLangForRequest } from '~/composables/useApiLangQuery'
+import { deepFixMediaUrls } from '~/utils/resolveMediaUrl'
 
 function apiBaseUrl(): string {
   const config = useRuntimeConfig()
@@ -19,6 +20,7 @@ export function newsItemUrl(id: number | string): string {
 
 export function useNewsPage() {
   const route = useRoute()
+  const baseUrl = apiBaseUrl()
   const url = newsPageUrl()
 
   return useAsyncData(
@@ -27,14 +29,16 @@ export function useNewsPage() {
       const pageRaw = Array.isArray(route.query.page) ? route.query.page[0] : route.query.page
       const page = Number.parseInt(String(pageRaw || '1'), 10)
       try {
-        return await $fetch<NewsListResponse>(url, {
+        const data = await $fetch<NewsListResponse>(url, {
           headers: { Accept: 'application/json' },
           query: {
             ...getApiLangForRequest(route),
             page: Number.isNaN(page) || page < 1 ? 1 : page,
           },
         })
-      } catch {
+        return deepFixMediaUrls(data, baseUrl)
+      }
+      catch {
         return null
       }
     },
@@ -47,6 +51,7 @@ export function useNewsPage() {
 
 export function useNewsItem(id: number | string | Ref<number | string>) {
   const route = useRoute()
+  const baseUrl = apiBaseUrl()
   const idValue = computed(() => String(unref(id)))
 
   return useAsyncData(
@@ -57,8 +62,9 @@ export function useNewsItem(id: number | string | Ref<number | string>) {
           headers: { Accept: 'application/json' },
           query: getApiLangForRequest(route),
         })
-        return res?.news ?? null
-      } catch {
+        return deepFixMediaUrls(res?.news ?? null, baseUrl) as NewsItem | null
+      }
+      catch {
         return null
       }
     },

@@ -4,10 +4,23 @@ import type {
   FavoritesApiResponse,
   FavoriteToggleResponse,
 } from '~/types/favoritesApi'
+import { resolveMediaUrl } from '~/utils/resolveMediaUrl'
 
 function favApiBase(): string {
   const config = useRuntimeConfig()
   return `${String(config.public.apiBase ?? '').replace(/\/+$/, '')}/api/V1/favorites`
+}
+
+function getMediaBase(): string {
+  const config = useRuntimeConfig()
+  return String(config.public.apiBase ?? '').replace(/\/+$/, '')
+}
+
+function fixItemImages(items: FavoriteApiItem[], base: string): FavoriteApiItem[] {
+  return items.map(item => ({
+    ...item,
+    image: resolveMediaUrl(item.image, base),
+  }))
 }
 
 function authHeaders(): Record<string, string> {
@@ -23,6 +36,7 @@ function authHeaders(): Record<string, string> {
 
 export function useFavoritesApi() {
   const base = favApiBase()
+  const mediaBase = getMediaBase()
 
   // ── State ──────────────────────────────────────────────────────────────────
   const items = ref<FavoriteApiItem[]>([])
@@ -41,7 +55,7 @@ export function useFavoritesApi() {
   }
 
   function applyResponse(res: FavoritesApiResponse) {
-    items.value = res.favorites.data
+    items.value = fixItemImages(res.favorites.data, mediaBase)
     pagination.value = res.pagination
   }
 

@@ -1,8 +1,21 @@
 import type { CartApiResponse, CartApiItem } from '~/types/cartApi'
+import { resolveMediaUrl } from '~/utils/resolveMediaUrl'
 
 function cartApiBase(): string {
   const config = useRuntimeConfig()
   return `${String(config.public.apiBase ?? '').replace(/\/+$/, '')}/api/V1/cart`
+}
+
+function apiBase(): string {
+  const config = useRuntimeConfig()
+  return String(config.public.apiBase ?? '').replace(/\/+$/, '')
+}
+
+function fixItemImages(items: CartApiItem[], base: string): CartApiItem[] {
+  return items.map(item => ({
+    ...item,
+    image: resolveMediaUrl(item.image, base),
+  }))
 }
 
 function authHeaders(): Record<string, string> {
@@ -18,6 +31,7 @@ function authHeaders(): Record<string, string> {
 
 export function useCartApi() {
   const base = cartApiBase()
+  const mediaBase = apiBase()
 
   // ── Reactive state ─────────────────────────────────────────────────────────
   const items = ref<CartApiItem[]>([])
@@ -37,7 +51,7 @@ export function useCartApi() {
   }
 
   function applyResponse(data: CartApiResponse) {
-    items.value = data.items
+    items.value = fixItemImages(data.items, mediaBase)
     summary.items_count = data.summary.items_count
     summary.total_quantity = data.summary.total_quantity
     summary.subtotal = data.summary.subtotal

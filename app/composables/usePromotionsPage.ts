@@ -1,5 +1,6 @@
 import type { PromotionsPageResponse } from '~/types/promotionsPage'
 import { getApiLangForRequest } from '~/composables/useApiLangQuery'
+import { deepFixMediaUrls } from '~/utils/resolveMediaUrl'
 
 function apiBaseUrl(): string {
   const config = useRuntimeConfig()
@@ -14,17 +15,20 @@ export function promotionsPageUrl(): string {
 
 export function usePromotionsPage() {
   const route = useRoute()
+  const baseUrl = apiBaseUrl()
   const url = promotionsPageUrl()
 
   return useAsyncData(
     'promotions-page',
     async () => {
       try {
-        return await $fetch<PromotionsPageResponse>(url, {
+        const data = await $fetch<PromotionsPageResponse>(url, {
           headers: { Accept: 'application/json' },
           query: getApiLangForRequest(route),
         })
-      } catch {
+        return deepFixMediaUrls(data, baseUrl)
+      }
+      catch {
         return null
       }
     },

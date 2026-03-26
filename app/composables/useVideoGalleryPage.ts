@@ -1,5 +1,6 @@
 import type { VideoGalleryResponse } from '~/types/videoGalleryPage'
 import { getApiLangForRequest } from '~/composables/useApiLangQuery'
+import { deepFixMediaUrls } from '~/utils/resolveMediaUrl'
 
 function apiBaseUrl(): string {
   const config = useRuntimeConfig()
@@ -14,17 +15,20 @@ export function videoGalleryPageUrl(): string {
 
 export function useVideoGalleryPage() {
   const route = useRoute()
+  const baseUrl = apiBaseUrl()
   const url = videoGalleryPageUrl()
 
   return useAsyncData(
     'video-gallery-page',
     async () => {
       try {
-        return await $fetch<VideoGalleryResponse>(url, {
+        const data = await $fetch<VideoGalleryResponse>(url, {
           headers: { Accept: 'application/json' },
           query: getApiLangForRequest(route),
         })
-      } catch {
+        return deepFixMediaUrls(data, baseUrl)
+      }
+      catch {
         return null
       }
     },

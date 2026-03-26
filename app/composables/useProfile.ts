@@ -1,8 +1,14 @@
 import type { AuthUser, AuthApiError, ProfileUpdatePayload } from '~/types/auth'
+import { resolveMediaUrl } from '~/utils/resolveMediaUrl'
 
 function profileApiUrl(): string {
   const config = useRuntimeConfig()
   return `${String(config.public.apiBase ?? '').replace(/\/+$/, '')}/api/V1/user/profile`
+}
+
+function getApiBase(): string {
+  const config = useRuntimeConfig()
+  return String(config.public.apiBase ?? '').replace(/\/+$/, '')
 }
 
 function buildAuthHeaders(): Record<string, string> {
@@ -17,15 +23,20 @@ function buildAuthHeaders(): Record<string, string> {
 
 export function useProfile() {
   const url = profileApiUrl()
+  const mediaBase = getApiBase()
 
   // ── Fetch ──────────────────────────────────────────────────────────────────
   const { data: profile, pending: fetchPending, refresh } = useAsyncData<AuthUser | null>(
     'user-profile',
     async () => {
       try {
-        return await $fetch<AuthUser>(url, {
+        const user = await $fetch<AuthUser>(url, {
           headers: buildAuthHeaders(),
         })
+        if (user?.photo) {
+          user.photo = resolveMediaUrl(user.photo, mediaBase)
+        }
+        return user
       }
       catch {
         return null
@@ -55,6 +66,9 @@ export function useProfile() {
         body,
       })
 
+      if (updated?.photo) {
+        updated.photo = resolveMediaUrl(updated.photo, mediaBase)
+      }
       profile.value = updated
       updateSuccess.value = true
       return true

@@ -1,5 +1,6 @@
 import type { DistributorsPageResponse } from '~/types/distributorsPage'
 import { getApiLangForRequest } from '~/composables/useApiLangQuery'
+import { deepFixMediaUrls } from '~/utils/resolveMediaUrl'
 
 function apiBaseUrl(): string {
   const config = useRuntimeConfig()
@@ -14,17 +15,20 @@ export function distributorsPageUrl(): string {
 
 export function useDistributorsPage() {
   const route = useRoute()
+  const baseUrl = apiBaseUrl()
   const url = distributorsPageUrl()
 
   return useAsyncData(
     'distributors-page',
     async () => {
       try {
-        return await $fetch<DistributorsPageResponse>(url, {
+        const data = await $fetch<DistributorsPageResponse>(url, {
           headers: { Accept: 'application/json' },
           query: getApiLangForRequest(route),
         })
-      } catch {
+        return deepFixMediaUrls(data, baseUrl)
+      }
+      catch {
         return null
       }
     },

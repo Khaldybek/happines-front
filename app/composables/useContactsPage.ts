@@ -1,5 +1,6 @@
 import type { ContactsPageResponse } from '~/types/contactsPage'
 import { getApiLangForRequest } from '~/composables/useApiLangQuery'
+import { deepFixMediaUrls } from '~/utils/resolveMediaUrl'
 
 function apiBaseUrl(): string {
   const config = useRuntimeConfig()
@@ -14,17 +15,20 @@ export function contactsPageUrl(): string {
 
 export function useContactsPage() {
   const route = useRoute()
+  const baseUrl = apiBaseUrl()
   const url = contactsPageUrl()
 
   return useAsyncData(
     'contacts-page',
     async () => {
       try {
-        return await $fetch<ContactsPageResponse>(url, {
+        const data = await $fetch<ContactsPageResponse>(url, {
           headers: { Accept: 'application/json' },
           query: getApiLangForRequest(route),
         })
-      } catch {
+        return deepFixMediaUrls(data, baseUrl)
+      }
+      catch {
         return null
       }
     },

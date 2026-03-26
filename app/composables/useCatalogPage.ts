@@ -1,5 +1,6 @@
 import type { CatalogPageResponse } from '~/types/catalogPage'
 import { getApiLangForRequest } from '~/composables/useApiLangQuery'
+import { deepFixMediaUrls } from '~/utils/resolveMediaUrl'
 
 function apiBaseUrl(): string {
   const config = useRuntimeConfig()
@@ -15,17 +16,20 @@ export function catalogPageUrl(slug: string): string {
 
 export function useCatalogPage(slug: string) {
   const route = useRoute()
+  const baseUrl = apiBaseUrl()
   const url = catalogPageUrl(slug)
 
   return useAsyncData(
     `catalog-page:${slug}`,
     async () => {
       try {
-        return await $fetch<CatalogPageResponse>(url, {
+        const data = await $fetch<CatalogPageResponse>(url, {
           headers: { Accept: 'application/json' },
           query: getApiLangForRequest(route),
         })
-      } catch {
+        return deepFixMediaUrls(data, baseUrl)
+      }
+      catch {
         return null
       }
     },

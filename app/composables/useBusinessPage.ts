@@ -1,5 +1,6 @@
 import type { BusinessPageResponse } from '~/types/businessPage'
 import { getApiLangForRequest } from '~/composables/useApiLangQuery'
+import { deepFixMediaUrls } from '~/utils/resolveMediaUrl'
 
 function apiBaseUrl(): string {
   const config = useRuntimeConfig()
@@ -14,17 +15,20 @@ export function businessPageUrl(): string {
 
 export function useBusinessPage() {
   const route = useRoute()
+  const baseUrl = apiBaseUrl()
   const url = businessPageUrl()
 
   return useAsyncData(
     'business-page',
     async () => {
       try {
-        return await $fetch<BusinessPageResponse>(url, {
+        const data = await $fetch<BusinessPageResponse>(url, {
           headers: { Accept: 'application/json' },
           query: getApiLangForRequest(route),
         })
-      } catch {
+        return deepFixMediaUrls(data, baseUrl)
+      }
+      catch {
         return null
       }
     },
