@@ -29,16 +29,22 @@ export function useMyOrders(page: Ref<number> = ref(1)) {
           },
         })
 
-        // Fix localhost image URLs so the browser can load them
-        if (data?.data) {
-          data.data = data.data.map(order => ({
-            ...order,
-            products: order.products.map(product => ({
-              ...product,
-              image: resolveMediaUrl(product.image, baseUrl),
-            })),
-          }))
-        }
+        const orders = Array.isArray(data?.orders) ? data.orders : []
+        data.orders = orders.map(order => ({
+          ...order,
+          products: (order.products ?? []).map(product => ({
+            ...product,
+            image: resolveMediaUrl(product.image, baseUrl),
+          })),
+          payment_method: order.payment_method
+            ? {
+                ...order.payment_method,
+                image_url: order.payment_method.image_url
+                  ? resolveMediaUrl(order.payment_method.image_url, baseUrl)
+                  : order.payment_method.image_url,
+              }
+            : order.payment_method,
+        }))
 
         return data
       }

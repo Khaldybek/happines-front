@@ -1,8 +1,13 @@
 <template>
   <AuthPageShell>
     <AuthCard title="Регистрация" size="lg">
-      <form class="auth-form" @submit.prevent>
-        <AuthInputField label="ФИО" placeholder="Введите ваше ФИО" />
+      <form class="auth-form" novalidate @submit.prevent="handleSubmit">
+        <AuthInputField
+          v-model="form.full_name"
+          label="ФИО"
+          placeholder="Введите ваше ФИО"
+          :error="fieldError('full_name')"
+        />
 
         <div class="grid-2">
           <CountryCitySelect
@@ -14,14 +19,54 @@
         </div>
 
         <div class="grid-2">
-          <AuthInputField label="Номер телефона" placeholder="Введите ваш телефон" type="tel" />
-          <AuthInputField label="Email" placeholder="Введите ваш email" type="email" />
+          <AuthInputField
+            v-model="form.phone"
+            label="Номер телефона"
+            placeholder="Введите ваш телефон"
+            type="tel"
+            :error="fieldError('phone')"
+          />
+          <AuthInputField
+            v-model="form.email"
+            label="Email"
+            placeholder="Введите ваш email"
+            type="email"
+            :error="fieldError('email')"
+          />
         </div>
 
-        <AuthConsent />
+        <div class="grid-2">
+          <AuthInputField
+            v-model="form.password"
+            label="Пароль"
+            placeholder="Придумайте пароль"
+            type="password"
+            icon="eye"
+            :error="fieldError('password')"
+          />
+          <AuthInputField
+            v-model="form.password_confirmation"
+            label="Повторите пароль"
+            placeholder="Повторите пароль"
+            type="password"
+            icon="eye"
+            :error="fieldError('password_confirmation')"
+          />
+        </div>
+
+        <AuthConsent v-model="form.agree" />
+
+        <p v-if="clientError || authStore.error" class="form-error" role="alert">
+          {{ clientError || authStore.error }}
+        </p>
 
         <div class="cta-wrap">
-          <AuthCtaButton label="Зарегистрироваться" />
+          <AuthCtaButton
+            label="Зарегистрироваться"
+            loading-label="Регистрируем..."
+            type="submit"
+            :loading="authStore.pending"
+          />
         </div>
 
         <p class="bottom-text">Уже есть аккаунт? <NuxtLink to="/login">Войти</NuxtLink></p>
@@ -31,15 +76,64 @@
 </template>
 
 <script setup lang="ts">
+import { useAuthStore } from '~/stores/useAuthStore'
+
 definePageMeta({ layout: false })
 
 useHead({ title: 'Регистрация — Happiness' })
+
+const authStore = useAuthStore()
+const router = useRouter()
 
 const { data: countriesData, pending: countriesPending } = useCountries()
 const countries = computed(() => countriesData.value?.data ?? [])
 
 const countryId = ref<number | null>(null)
 const cityId = ref<number | null>(null)
+
+const form = reactive({
+  full_name: '',
+  email: '',
+  phone: '',
+  password: '',
+  password_confirmation: '',
+  agree: false,
+})
+
+const clientError = ref('')
+
+function fieldError(field: string): string {
+  return authStore.fieldErrors[field]?.[0] ?? ''
+}
+
+async function handleSubmit() {
+  clientError.value = ''
+  authStore.clearErrors()
+
+  if (!form.agree) {
+    clientError.value = 'Нужно согласие на обработку персональных данных'
+    return
+  }
+
+  if (form.password !== form.password_confirmation) {
+    clientError.value = 'Пароли не совпадают'
+    return
+  }
+
+  const ok = await authStore.register({
+    full_name: form.full_name,
+    email: form.email,
+    phone: form.phone,
+    password: form.password,
+    password_confirmation: form.password_confirmation,
+    country_id: countryId.value,
+    city_id: cityId.value,
+  })
+
+  if (ok) {
+    await router.push('/lk/profile')
+  }
+}
 </script>
 
 <style scoped>
@@ -63,6 +157,17 @@ const cityId = ref<number | null>(null)
 .cta-wrap {
   text-align: center;
   margin-top: 6px;
+}
+
+.form-error {
+  margin: 0;
+  padding: 12px 18px;
+  border-radius: 12px;
+  background: #fff0f0;
+  border: 1px solid #f5c6c6;
+  color: #c0392b;
+  font-size: clamp(14px, 0.85vw, 16px);
+  text-align: center;
 }
 
 .bottom-text {

@@ -89,8 +89,8 @@ useHead({ title: 'Личный кабинет — Мои заказы' })
 const currentPage = ref(1)
 const { data, pending } = useMyOrders(currentPage)
 
-const orders = computed(() => data.value?.data ?? [])
-const lastPage = computed(() => data.value?.last_page ?? 1)
+const orders = computed(() => data.value?.orders ?? [])
+const lastPage = computed(() => data.value?.pagination?.total_pages ?? 1)
 
 const pageRange = computed(() => {
   const total = lastPage.value

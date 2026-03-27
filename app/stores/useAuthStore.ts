@@ -1,5 +1,5 @@
 import { defineStore, acceptHMRUpdate } from 'pinia'
-import type { AuthUser, AuthLoginResponse, AuthApiError } from '~/types/auth'
+import type { AuthUser, AuthLoginResponse, AuthApiError, RegisterPayload } from '~/types/auth'
 
 export const useAuthStore = defineStore('auth', () => {
   const config = useRuntimeConfig()
@@ -62,6 +62,50 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  /** POST /api/V1/auth/register — ответ как после логина (token + user) */
+  async function register(payload: RegisterPayload): Promise<boolean> {
+    pending.value = true
+    error.value = null
+    fieldErrors.value = {}
+
+    const baseUrl = String(config.public.apiBase ?? '').replace(/\/+$/, '')
+
+    try {
+      const response = await $fetch<AuthLoginResponse>(
+        `${baseUrl}/api/V1/auth/registration`,
+        {
+          method: 'POST',
+          headers: { Accept: 'application/json' },
+          body: {
+            full_name: payload.full_name.trim(),
+            email: payload.email.trim(),
+            phone: payload.phone.trim(),
+            password: payload.password,
+            password_confirmation: payload.password_confirmation,
+            country_id: payload.country_id,
+            city_id: payload.city_id,
+          },
+        },
+      )
+
+      token.value = response.token
+      tokenType.value = response.token_type
+      user.value = response.user
+
+      return true
+    }
+    catch (err: unknown) {
+      const fetchError = err as { data?: AuthApiError }
+      const data = fetchError?.data
+      error.value = data?.message ?? 'Не удалось зарегистрироваться'
+      fieldErrors.value = data?.errors ?? {}
+      return false
+    }
+    finally {
+      pending.value = false
+    }
+  }
+
   function logout() {
     token.value = null
     tokenType.value = 'Bearer'
@@ -85,6 +129,7 @@ export const useAuthStore = defineStore('auth', () => {
     isLoggedIn,
     authHeader,
     loginByEmail,
+    register,
     logout,
     clearErrors,
   }

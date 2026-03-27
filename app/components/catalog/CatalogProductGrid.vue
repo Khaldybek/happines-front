@@ -5,12 +5,18 @@
         <CabinetFavoriteCard
           v-for="(product, index) in products"
           :key="product.id ?? index"
+          :product-id="product.productId"
+          :slug="product.slug"
           :title="product.title"
           :description="product.description"
           :price="product.price"
           :image="product.image"
           :variant="product.tealBtn ? 'orange' : 'blue'"
+          :is-in-cart="product.isInCart"
+          :is-favorite="product.isFavorite"
+          :loading="product.actionLoading"
           @add-to-cart="onAddToCart(product)"
+          @favorite-click="onFavoriteClick(product)"
         />
       </div>
       <div class="pagination">
@@ -40,6 +46,8 @@
 <script setup lang="ts">
 interface Product {
   id?: string
+  productId?: number
+  slug?: string
   title: string
   description: string
   price: string
@@ -47,6 +55,10 @@ interface Product {
   arrowIcon?: string
   tealBtn?: boolean
   showTap?: boolean
+  isInCart?: boolean
+  isFavorite?: boolean
+  /** загрузка корзины / избранного для этой карточки */
+  actionLoading?: boolean
 }
 
 const props = withDefaults(
@@ -61,7 +73,8 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   'update:currentPage': [number]
-  addToCart: [Product]
+  addToCart: [{ productId?: number }]
+  favoriteClick: [{ productId?: number }]
 }>()
 
 function goTo(page: number) {
@@ -78,6 +91,10 @@ function goNext() {
 
 function onAddToCart(product: Product) {
   emit('addToCart', product)
+}
+
+function onFavoriteClick(product: Product) {
+  emit('favoriteClick', product)
 }
 </script>
 

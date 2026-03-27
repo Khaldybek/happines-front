@@ -21,10 +21,9 @@ export interface FavoriteApiPagination {
   total_pages: number
 }
 
+/** GET: favorites — массив или Laravel pagination { data: [...] } */
 export interface FavoritesApiResponse {
-  favorites: {
-    data: FavoriteApiItem[]
-  }
+  favorites: FavoriteApiItem[] | { data: FavoriteApiItem[] }
   pagination: FavoriteApiPagination
 }
 

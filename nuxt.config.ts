@@ -4,6 +4,14 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   devServer: { port: 3010 },
   srcDir: 'app',
+  /**
+   * По умолчанию сканируем ~/components; отдельно common без префикса Common*,
+   * чтобы в шаблонах работало имя CountryCitySelect (а не только CommonCountryCitySelect).
+   */
+  components: [
+    '~/components',
+    { path: '~/components/common', pathPrefix: false },
+  ],
   runtimeConfig: {
     public: {
       /** NUXT_PUBLIC_API_BASE — без завершающего слэша */

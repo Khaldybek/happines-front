@@ -1,12 +1,16 @@
 <template>
   <label class="consent">
-    <input type="checkbox" class="consent-check">
+    <input v-model="agreed" type="checkbox" class="consent-check">
     <span class="consent-text">
       Я согласен(-а) на обработку <NuxtLink to="/privacy">персональных данных</NuxtLink>
       и ознакомился(-ась) с <NuxtLink to="/privacy">политикой конфиденциальности</NuxtLink>
     </span>
   </label>
 </template>
+
+<script setup lang="ts">
+const agreed = defineModel<boolean>({ default: false })
+</script>
 
 <style scoped>
 .consent {

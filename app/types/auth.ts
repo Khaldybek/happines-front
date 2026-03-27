@@ -33,6 +33,17 @@ export interface AuthApiError {
   errors?: Record<string, string[]>
 }
 
+/** Тело POST /api/V1/auth/register (поля по договорённости с бэкендом) */
+export interface RegisterPayload {
+  full_name: string
+  email: string
+  phone: string
+  password: string
+  password_confirmation: string
+  country_id: number | null
+  city_id: number | null
+}
+
 /** Данные для обновления профиля (все поля необязательны) */
 export interface ProfileUpdatePayload {
   full_name?: string

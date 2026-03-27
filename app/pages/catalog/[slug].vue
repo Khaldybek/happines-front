@@ -16,6 +16,7 @@
         :use-green="false"
         @update:current-page="currentPage = $event"
         @add-to-cart="onAddToCart"
+        @favorite-click="onFavoriteClick"
       />
     </main>
     <TheFooter />
@@ -29,6 +30,23 @@ import type { CatalogProduct } from '~/types/catalogPage'
 definePageMeta({ layout: false })
 
 const route = useRoute()
+const cart = useCartApi()
+const fav = useFavoritesApi()
+
+onMounted(async () => {
+  const token = useCookie<string | null>('auth_token')
+  if (!token.value) return
+  await Promise.all([cart.fetchCart(), fav.fetchFavorites(1)]).catch(() => {})
+})
+
+function requireAuth(): boolean {
+  const token = useCookie<string | null>('auth_token')
+  if (!token.value) {
+    navigateTo(`/login?redirect=${encodeURIComponent(route.fullPath)}`)
+    return false
+  }
+  return true
+}
 const slug = computed(() => String(route.params.slug || '').trim())
 
 const { data: navData } = useNavigation()
@@ -92,15 +110,28 @@ function productImage(p: CatalogProduct) {
 const gridProducts = computed(() =>
   products.value.map((p) => ({
     id: String(p.id),
+    productId: p.id,
+    slug: p.slug,
     title: p.short_title || p.title,
     description: p.card_description || p.short_description || p.description || '',
     price: formatPrice(p.price),
     image: productImage(p),
     tealBtn: false,
+    isInCart: cart.items.some(i => i.product_id === p.id),
+    isFavorite: fav.isFavorite(p.id) || p.is_favorite,
+    actionLoading: fav.isItemLoading(p.id) || cart.isItemLoading(p.id),
   })),
 )
 
-function onAddToCart(_product: unknown) {
-  // TODO: интеграция с корзиной
+async function onAddToCart(product: { productId?: number }) {
+  if (!product.productId) return
+  if (!requireAuth()) return
+  await cart.addItem(product.productId, 1)
+}
+
+async function onFavoriteClick(product: { productId?: number }) {
+  if (!product.productId) return
+  if (!requireAuth()) return
+  await fav.toggleFavorite(product.productId)
 }
 </script>

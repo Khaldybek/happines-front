@@ -31,14 +31,14 @@
                 </div>
 
                 <!-- Empty -->
-                <div v-else-if="cart.isEmpty.value" class="table-body">
+                <div v-else-if="cart.isEmpty" class="table-body">
                   <p class="cart-empty">Ваша корзина пуста.</p>
                 </div>
 
                 <!-- Items -->
                 <div v-else class="table-body">
                   <div
-                    v-for="item in cart.items.value"
+                    v-for="item in cart.items"
                     :key="item.cart_item_id"
                     class="cart-row"
                     :class="{ 'is-loading': cart.isItemLoading(item.product_id) }"
@@ -111,10 +111,10 @@
                     </NuxtLink>
 
                     <button
-                      v-if="!cart.isEmpty.value"
+                      v-if="!cart.isEmpty"
                       type="button"
                       class="solid-btn"
-                      :disabled="cart.mutating.value"
+                      :disabled="cart.mutating"
                       @click="goToCheckout"
                     >
                       <span class="solid-arrow"></span>
@@ -122,17 +122,17 @@
                     </button>
 
                     <button
-                      v-if="!cart.isEmpty.value"
+                      v-if="!cart.isEmpty"
                       type="button"
                       class="clear-btn"
-                      :disabled="cart.mutating.value"
+                      :disabled="cart.mutating"
                       @click="cart.clearCart()"
                     >
                       Очистить корзину
                     </button>
                   </div>
 
-                  <p v-if="!cart.isEmpty.value" class="grand-total">
+                  <p v-if="!cart.isEmpty" class="grand-total">
                     Итого без доставки:
                     <strong>{{ formatPrice(cart.summary.subtotal) }}</strong>
                   </p>
@@ -173,7 +173,7 @@ interface CheckoutCartItem {
 const checkoutCart = useState<CheckoutCartItem[]>('checkoutCart', () => [])
 
 function goToCheckout() {
-  checkoutCart.value = cart.items.value.map((i: CartApiItem) => ({
+  checkoutCart.value = cart.items.map((i: CartApiItem) => ({
     id: i.product_id,
     image: i.image,
     title: i.product_name,

@@ -42,7 +42,11 @@ export function useProfile() {
         return null
       }
     },
-    { server: false },
+    /**
+     * server: true — иначе на SSR pending=false и сразу форма, на клиенте
+     * сначала pending=true (скелетон) → hydration mismatch.
+     */
+    { server: true },
   )
 
   // ── Update ─────────────────────────────────────────────────────────────────

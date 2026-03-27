@@ -6,7 +6,7 @@
         <span class="order-date">{{ order.created_at }}</span>
         <span
           class="order-status-badge"
-          :style="{ background: statusBg, color: order.status.color }"
+          :style="{ background: statusBg, color: statusColor }"
         >
           {{ order.status.name }}
         </span>
@@ -58,14 +58,14 @@
       <!-- Details -->
       <aside class="order-details">
         <p class="detail-section-title">Доставка</p>
-        <p>{{ order.delivery.title }}</p>
-        <p v-if="order.delivery.estimated_time" class="detail-muted">{{ order.delivery.estimated_time }}</p>
+        <p>{{ order.delivery?.title ?? '—' }}</p>
+        <p v-if="order.delivery?.estimated_time" class="detail-muted">{{ order.delivery.estimated_time }}</p>
         <p>
-          {{ order.delivery.is_free ? 'Бесплатно' : formatPrice(order.delivery_price) }}
+          {{ order.delivery?.is_free ? 'Бесплатно' : formatPrice(order.delivery_price) }}
         </p>
 
         <p class="detail-section-title">Оплата</p>
-        <p>{{ order.payment_method.title }}</p>
+        <p>{{ order.payment_method?.title ?? '—' }}</p>
 
         <p class="detail-section-title">Адрес</p>
         <p>{{ order.address }}</p>
@@ -99,8 +99,10 @@ const visibleItems = computed(() =>
   isExpanded.value ? props.order.products : props.order.products.slice(0, props.collapsedCount),
 )
 
+const statusColor = computed(() => props.order.status.color || '#6c757d')
+
 /** Полупрозрачная заливка из цвета статуса */
-const statusBg = computed(() => `${props.order.status.color}1a`)
+const statusBg = computed(() => `${statusColor.value}1a`)
 
 function formatPrice(value: number): string {
   return `${value.toLocaleString('ru-RU')} ₸`

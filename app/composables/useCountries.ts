@@ -19,15 +19,10 @@ export function useCountries() {
   return useAsyncData(
     'countries',
     async () => {
-      try {
-        return await $fetch<CountriesResponse>(url, {
-          headers: { Accept: 'application/json' },
-          query: getApiLangForRequest(route),
-        })
-      }
-      catch {
-        return null
-      }
+      return await $fetch<CountriesResponse>(url, {
+        headers: { Accept: 'application/json' },
+        query: getApiLangForRequest(route),
+      })
     },
     {
       server: true,

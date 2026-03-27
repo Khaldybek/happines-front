@@ -17,7 +17,7 @@
               <div class="favorites-head">
                 <h2 class="favorites-title">МОИ ИЗБРАННЫЕ</h2>
                 <button
-                  v-if="!fav.isEmpty.value && !fav.fetchPending.value"
+                  v-if="!fav.isEmpty && !fav.fetchPending"
                   type="button"
                   class="clear-btn"
                   @click="fav.clearFavorites()"
@@ -27,12 +27,12 @@
               </div>
 
               <!-- Skeleton -->
-              <div v-if="fav.fetchPending.value" class="favorites-grid">
+              <div v-if="fav.fetchPending" class="favorites-grid">
                 <div v-for="n in 6" :key="n" class="skeleton-card"></div>
               </div>
 
               <!-- Empty -->
-              <div v-else-if="fav.isEmpty.value" class="favorites-empty">
+              <div v-else-if="fav.isEmpty" class="favorites-empty">
                 <p>Вы ещё не добавили ни одного товара в избранное.</p>
                 <NuxtLink to="/catalog" class="catalog-btn">
                   <span class="catalog-arrow"></span>
@@ -44,7 +44,7 @@
               <template v-else>
                 <div class="favorites-grid">
                   <CabinetFavoriteCard
-                    v-for="item in fav.items.value"
+                    v-for="item in fav.items"
                     :key="item.favorite_id"
                     :product-id="item.product_id"
                     :title="item.product_name"
@@ -65,7 +65,7 @@
                 </div>
 
                 <!-- Pagination -->
-                <div v-if="fav.pagination.value.total_pages > 1" class="pagination">
+                <div v-if="fav.pagination.total_pages > 1" class="pagination">
                   <button
                     type="button"
                     class="page-btn"
@@ -85,7 +85,7 @@
                   <button
                     type="button"
                     class="page-btn"
-                    :disabled="currentPage === fav.pagination.value.total_pages"
+                    :disabled="currentPage === fav.pagination.total_pages"
                     @click="changePage(currentPage + 1)"
                   >→</button>
                 </div>
@@ -113,7 +113,7 @@ onMounted(() => {
 })
 
 const pageRange = computed(() => {
-  const total = fav.pagination.value.total_pages
+  const total = fav.pagination.total_pages
   const current = currentPage.value
   const range: number[] = []
   for (let i = Math.max(1, current - 2); i <= Math.min(total, current + 2); i++) {
@@ -253,11 +253,14 @@ async function handleAddToCart(productId: number) {
   text-transform: uppercase;
 }
 
-/* ── Grid ── */
+/* ── Grid ──
+   В CabinetFavoriteCard фото absolute с top: ~-86px — нужен row-gap иначе ряд ниже наезжает на карточки сверху */
 .favorites-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
+  column-gap: 18px;
+  row-gap: clamp(88px, 12vw, 108px);
+  align-items: start;
 }
 
 /* ── Pagination ── */
@@ -324,6 +327,7 @@ async function handleAddToCart(productId: number) {
 @media (max-width: 760px) {
   .favorites-grid {
     grid-template-columns: 1fr;
+    row-gap: clamp(80px, 22vw, 100px);
   }
 }
 </style>

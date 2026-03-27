@@ -1,7 +1,11 @@
 <template>
   <article class="favorite-card" :class="[variant ? `variant-${variant}` : '', { 'is-loading': loading }]">
     <div class="product-image-wrap">
-      <component :is="slug ? 'NuxtLink' : 'div'" :to="slug ? `/products/${slug}` : undefined">
+      <component
+        :is="slug ? 'NuxtLink' : 'div'"
+        :to="slug ? `/products/${slug}` : undefined"
+        class="product-image-link"
+      >
         <img :src="image" :alt="title" class="product-image">
       </component>
     </div>
@@ -26,7 +30,7 @@
           :class="{ 'is-active': isFavorite }"
           :aria-label="isFavorite ? 'Убрать из избранного' : 'В избранное'"
           :disabled="loading"
-          @click="$emit('favoriteClick')"
+          @click.stop="$emit('favoriteClick')"
         >
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M12 20.5c-.3 0-.6-.1-.8-.3C8.4 17.8 4 14.2 4 9.8 4 7.2 6 5 8.6 5c1.4 0 2.7.6 3.6 1.7C13.1 5.6 14.4 5 15.8 5 18.4 5 20.4 7.2 20.4 9.8c0 4.4-4.4 8-7.2 10.4-.3.2-.6.3-1.2.3z" />
@@ -38,13 +42,13 @@
             type="button"
             class="icon-arrow"
             aria-label="Подробнее"
-            @click="$emit('detailClick')"
+            @click.stop="$emit('detailClick')"
           ></button>
           <button
             type="button"
             class="cart-btn"
             :class="{ 'in-cart': isInCart }"
-            @click="$emit('addToCart')"
+            @click.stop="$emit('addToCart')"
           >
             {{ isInCart ? 'В КОРЗИНЕ' : 'В КОРЗИНУ' }}
           </button>
@@ -101,7 +105,8 @@ const displayOldPrice = computed(() =>
 .favorite-card {
   position: relative;
   border-radius: 40px;
-  padding: 112px 18px 16px;
+  /* Запас под absolute-фото (top:-86, h:168 → низ ~82px): в проде шрифты/субпиксели иначе, чем в dev */
+  padding: 120px 18px 16px;
   min-height: 390px;
   background: #ffffff;
   color: #111;
@@ -125,6 +130,15 @@ const displayOldPrice = computed(() =>
   width: min(96%, 294px);
   height: 168px;
   border-radius: 2px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.product-image-link {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
 }
 
 .product-image {
@@ -134,6 +148,8 @@ const displayOldPrice = computed(() =>
 }
 
 .favorite-content {
+  position: relative;
+  z-index: 2;
   display: grid;
   grid-template-rows: auto auto 1fr auto;
   gap: 14px;
@@ -210,6 +226,8 @@ const displayOldPrice = computed(() =>
 }
 
 .favorite-actions {
+  position: relative;
+  z-index: 3;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -313,7 +331,8 @@ const displayOldPrice = computed(() =>
 
 /* Вариант: синяя карточка (как на горячих предложениях / каталоге), фото выходит за верх карточки как в избранном */
 .favorite-card.variant-blue {
-  padding: 112px 18px 16px;
+  /* Фото h:200, top:-86 → низ ~114px; 112px давало почти ноль зазора и наезды в проде */
+  padding: 132px 18px 16px;
   min-height: 390px;
   position: relative;
   background: #4b93d7;
@@ -392,7 +411,7 @@ const displayOldPrice = computed(() =>
 
 /* Вариант: оранжевый акцент (каталог), фото выходит за верх карточки как в избранном */
 .favorite-card.variant-orange {
-  padding: 112px 18px 16px;
+  padding: 132px 18px 16px;
   min-height: 390px;
   position: relative;
   background: #4b93d7;
@@ -474,7 +493,8 @@ const displayOldPrice = computed(() =>
 @media (max-width: 900px) {
   .favorite-card {
     min-height: 340px;
-    padding-top: 102px;
+    /* низ фото ~80px при top:-72, h:152 */
+    padding-top: 108px;
   }
 
   .product-image-wrap {
@@ -484,7 +504,8 @@ const displayOldPrice = computed(() =>
 
   .favorite-card.variant-blue,
   .favorite-card.variant-orange {
-    padding-top: 102px;
+    /* низ фото ~108px при h:180 — раньше padding 102 давал перекрытие заголовка */
+    padding-top: 124px;
   }
 
   .favorite-card.variant-blue .product-image-wrap,
