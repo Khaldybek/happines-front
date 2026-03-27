@@ -417,7 +417,16 @@ function scrollNext() {
 
 @media (max-width: 768px) {
   .news-breadcrumbs {
-    padding: 20px 16px;
+    padding: 10px 0;
+    font-size: 12px;
+    overflow-x: auto;
+    white-space: nowrap;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+  }
+
+  .news-breadcrumbs::-webkit-scrollbar {
+    display: none;
   }
 
   .article-title {
@@ -435,6 +444,89 @@ function scrollNext() {
   .article-prose,
   .article-image--between {
     max-width: 100%;
+  }
+
+  .other-news-section {
+    padding: 36px 0;
+  }
+
+  .other-news-header {
+    margin-bottom: 14px;
+  }
+
+  .other-news-title {
+    font-size: 22px;
+  }
+
+  .news-nav-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .other-news-carousel {
+    gap: 12px;
+    padding-bottom: 10px;
+  }
+
+  .news-card {
+    flex-basis: min(86vw, 320px);
+    border-radius: 16px;
+  }
+
+  .news-card-img {
+    height: 168px;
+  }
+
+  .news-card-content {
+    padding: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .news-article-page {
+    padding-bottom: 42px;
+  }
+
+  .article-title {
+    margin: 14px 0 8px;
+    font-size: clamp(22px, 8vw, 28px);
+  }
+
+  .article-date {
+    font-size: 13px;
+    margin-bottom: 14px;
+  }
+
+  .article-intro,
+  .article-body {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .article-intro {
+    margin-bottom: 14px;
+  }
+
+  .article-image--between {
+    margin-bottom: 16px;
+  }
+
+  .other-news-title {
+    font-size: 18px;
+  }
+
+  .other-news-nav {
+    gap: 8px;
+  }
+
+  .news-nav-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  .news-nav-btn img {
+    width: 16px;
+    height: 16px;
   }
 }
 </style>

@@ -160,6 +160,7 @@ function scheduleSectionSync() {
 }
 
 function handleWheel(event: WheelEvent) {
+  if (window.innerWidth <= 1024) return
   if (Math.abs(event.deltaY) < 12) return
   if (event.ctrlKey || event.metaKey) return
 
@@ -250,12 +251,6 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-:deep(.site-header-wrap) {
-  position: sticky;
-  top: 0;
-  z-index: 1200;
-}
-
 .home-page main > * {
   min-height: calc(100dvh - var(--home-header-height));
   scroll-margin-top: var(--home-header-height);
@@ -278,5 +273,21 @@ onUnmounted(() => {
 
 .section-view-wrap--auto {
   min-height: auto;
+}
+
+@media (max-width: 1024px) {
+  .home-page main {
+    scroll-snap-type: none;
+  }
+
+  .home-page main > * {
+    min-height: auto;
+    scroll-snap-align: none;
+    scroll-snap-stop: normal;
+  }
+
+  .section-view-wrap {
+    min-height: auto;
+  }
 }
 </style>

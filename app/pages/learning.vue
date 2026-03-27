@@ -351,4 +351,97 @@ const videos = Array.from({ length: 5 }, () => ({
     height: 180px;
   }
 }
+
+@media (max-width: 600px) {
+  .learning-page {
+    padding-bottom: 24px;
+  }
+
+  .learning-title {
+    margin: 14px 0 10px;
+    font-size: clamp(24px, 8.5vw, 30px);
+  }
+
+  .learning-desc {
+    margin-bottom: 14px;
+    font-size: 14px;
+    line-height: 1.35;
+  }
+
+  .learning-tabs {
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .learning-tab {
+    padding: 9px 14px;
+    font-size: 12px;
+  }
+
+  .learning-content-box {
+    border-radius: 16px;
+    padding: 14px 12px 16px;
+  }
+
+  .learning-documents,
+  .learning-videos {
+    gap: 10px;
+  }
+
+  .learning-doc-row {
+    gap: 10px;
+    padding: 8px 0;
+  }
+
+  .doc-icon svg {
+    width: 26px;
+    height: 34px;
+  }
+
+  .doc-title {
+    padding-left: 36px;
+    font-size: 14px;
+  }
+
+  .btn-download {
+    width: 100%;
+    justify-content: center;
+    padding: 9px 14px;
+    font-size: 12px;
+  }
+
+  .learning-video-row {
+    gap: 10px;
+  }
+
+  .video-thumb-wrap {
+    max-width: 100%;
+    height: 150px;
+    border-radius: 10px;
+  }
+
+  .video-play-icon img {
+    width: 38px;
+    height: 38px;
+  }
+
+  .video-text {
+    font-size: 14px;
+    line-height: 1.35;
+  }
+
+  .learning-pager {
+    margin-top: 12px;
+    padding-top: 12px;
+    gap: 6px;
+  }
+
+  .pager-arrow,
+  .pager-item {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    font-size: 13px;
+  }
+}
 </style>

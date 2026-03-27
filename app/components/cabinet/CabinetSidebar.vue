@@ -111,7 +111,7 @@ const menuItems = [
   padding: 0 16px;
   border-bottom: 1px solid #dfdfdf;
   color: #202020;
-  font-size: clamp(20px, 1.25vw, 36px);
+  font-size: clamp(16px, 1.08vw, 21px);
   font-weight: 600;
   text-decoration: none;
 }
@@ -189,7 +189,60 @@ const menuItems = [
 
   .menu-item {
     min-height: 54px;
-    font-size: clamp(16px, 5vw, 22px);
+    font-size: clamp(15px, 3.2vw, 18px);
+  }
+}
+
+@media (max-width: 760px) {
+  .cabinet-menu {
+    display: flex;
+    gap: 8px;
+    border-radius: 18px;
+    border: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 2px 0 6px;
+    background: transparent;
+    scrollbar-width: thin;
+  }
+
+  .menu-item {
+    min-height: 44px;
+    border: 1px solid #dfdfdf;
+    border-radius: 999px;
+    padding: 0 12px;
+    font-size: 14px;
+    white-space: nowrap;
+    flex: 0 0 auto;
+  }
+
+  .menu-item:last-child {
+    border-bottom: 1px solid #dfdfdf;
+  }
+
+  .menu-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .menu-icon :deep(svg) {
+    width: 17px;
+    height: 17px;
+  }
+
+  .logout-btn {
+    margin-top: 10px;
+  }
+
+  .logout-arrow {
+    width: 42px;
+    height: 42px;
+  }
+
+  .logout-btn span:last-child {
+    height: 42px;
+    padding: 0 14px;
+    font-size: 13px;
   }
 }
 </style>

@@ -17,6 +17,7 @@
         @update:current-page="currentPage = $event"
         @add-to-cart="onAddToCart"
         @favorite-click="onFavoriteClick"
+        @detail-click="onDetailClick"
       />
     </main>
     <TheFooter />
@@ -133,5 +134,11 @@ async function onFavoriteClick(product: { productId?: number }) {
   if (!product.productId) return
   if (!requireAuth()) return
   await fav.toggleFavorite(product.productId)
+}
+
+function onDetailClick(product: { slug?: string }) {
+  const s = String(product.slug || '').trim()
+  if (!s) return
+  navigateTo(`/products/${s}`)
 }
 </script>

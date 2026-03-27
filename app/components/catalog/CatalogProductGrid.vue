@@ -17,6 +17,7 @@
           :loading="product.actionLoading"
           @add-to-cart="onAddToCart(product)"
           @favorite-click="onFavoriteClick(product)"
+          @detail-click="onDetailClick(product)"
         />
       </div>
       <div class="pagination">
@@ -75,6 +76,7 @@ const emit = defineEmits<{
   'update:currentPage': [number]
   addToCart: [{ productId?: number }]
   favoriteClick: [{ productId?: number }]
+  detailClick: [{ slug?: string }]
 }>()
 
 function goTo(page: number) {
@@ -95,6 +97,10 @@ function onAddToCart(product: Product) {
 
 function onFavoriteClick(product: Product) {
   emit('favoriteClick', product)
+}
+
+function onDetailClick(product: Product) {
+  emit('detailClick', product)
 }
 </script>
 

@@ -162,9 +162,6 @@ watch(() => route.path, () => {
 .site-header-wrap {
   padding: 20px 0;
   background: transparent;
-  position: sticky;
-  top: 0;
-  z-index: 1200;
   border-bottom: none;
 }
 
@@ -361,5 +358,85 @@ watch(() => route.path, () => {
 .lang-option.active {
   background-color: rgba(226, 129, 51, 0.15);
   color: #E28133;
+}
+
+@media (max-width: 1200px) {
+  .site-header {
+    gap: 14px;
+  }
+
+  .logo {
+    width: 172px;
+  }
+
+  .main-nav .nav-link {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .header-actions {
+    gap: 10px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .site-header {
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .main-nav {
+    order: 3;
+    width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+  }
+
+  .main-nav .nav-link {
+    white-space: nowrap;
+  }
+
+  .header-actions {
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 700px) {
+  .site-header-wrap {
+    padding: 12px 0;
+  }
+
+  .site-header {
+    gap: 10px;
+  }
+
+  .logo {
+    width: 146px;
+  }
+
+  .icon-btn {
+    padding: 4px;
+  }
+
+  .icon-btn img {
+    width: 20px;
+    height: 20px;
+  }
+
+  .lang-trigger {
+    padding: 7px 11px;
+    font-size: 12px;
+  }
+
+  .main-nav {
+    gap: 4px;
+  }
+
+  .main-nav .nav-link {
+    padding: 7px 10px;
+    font-size: 12px;
+  }
 }
 </style>

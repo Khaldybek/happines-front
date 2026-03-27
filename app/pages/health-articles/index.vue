@@ -328,8 +328,68 @@ const displayedArticles = computed(() => {
 }
 
 @media (max-width: 768px) {
+  .health-articles-page {
+    padding-bottom: 34px;
+  }
+
+  .breadcrumbs-section {
+    padding: 10px 0;
+  }
+
+  .breadcrumbs-list {
+    font-size: 12px;
+    overflow-x: auto;
+    white-space: nowrap;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+  }
+
+  .breadcrumbs-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .health-articles-title {
+    margin-bottom: 18px;
+    font-size: clamp(26px, 8vw, 34px);
+  }
+
   .health-articles-grid {
     grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .health-article-card-content {
+    padding: 14px 12px;
+  }
+
+  .health-article-card-img {
+    height: 180px;
+  }
+
+  .health-article-card-title {
+    font-size: 15px;
+    margin-bottom: 8px;
+  }
+
+  .health-article-card-excerpt {
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+
+  .health-article-card-date {
+    font-size: 12px;
+  }
+
+  .health-articles-pager {
+    gap: 6px;
+  }
+
+  .pager-arrow,
+  .pager-num {
+    width: 34px;
+    height: 34px;
+    font-size: 14px;
   }
 }
 </style>

@@ -497,4 +497,81 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
   .lightbox { padding: 48px 16px; }
   .lightbox-img { max-width: calc(100vw - 40px); }
 }
+
+@media (max-width: 480px) {
+  .album-page {
+    padding-bottom: 28px;
+  }
+
+  .breadcrumbs {
+    padding: 10px 0;
+  }
+
+  .breadcrumbs-list {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    white-space: nowrap;
+    font-size: 12px;
+    scrollbar-width: none;
+  }
+
+  .breadcrumbs-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .album-header {
+    padding-bottom: 16px;
+  }
+
+  .album-title {
+    font-size: clamp(18px, 7vw, 22px);
+  }
+
+  .photos-grid {
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .album-pager {
+    gap: 6px;
+  }
+
+  .pager-arrow,
+  .pager-item {
+    width: 34px;
+    height: 34px;
+    font-size: 14px;
+  }
+
+  .lightbox {
+    padding: 42px 10px;
+  }
+
+  .lightbox-close {
+    top: 10px;
+    right: 10px;
+    width: 36px;
+    height: 36px;
+    font-size: 22px;
+  }
+
+  .lightbox-arrow {
+    width: 42px;
+    height: 42px;
+    font-size: 24px;
+  }
+
+  .lightbox-arrow--prev {
+    left: 8px;
+  }
+
+  .lightbox-arrow--next {
+    right: 8px;
+  }
+
+  .lightbox-img {
+    max-width: calc(100vw - 24px);
+    max-height: 80vh;
+  }
+}
 </style>

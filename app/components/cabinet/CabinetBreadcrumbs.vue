@@ -67,4 +67,30 @@ const resolvedItems = computed<BreadcrumbItem[]>(() => {
 .crumb-item.active {
   color: #8d8d8d;
 }
+
+@media (max-width: 760px) {
+  .breadcrumbs-section {
+    padding: 8px 0 6px;
+  }
+
+  .breadcrumbs-list {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    font-size: 12px;
+    gap: 6px;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .breadcrumbs-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .breadcrumbs-list img {
+    width: 10px;
+    height: 10px;
+    flex: 0 0 auto;
+  }
+}
 </style>

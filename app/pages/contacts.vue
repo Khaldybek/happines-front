@@ -453,6 +453,7 @@ function onSubmit() {
 @media (max-width: 600px) {
   .contacts-title {
     font-size: 38px;
+    margin-bottom: 28px;
   }
 
   .contact-office h3,
@@ -471,6 +472,101 @@ function onSubmit() {
 
   .form-section-title {
     font-size: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .contacts-title {
+    font-size: 30px;
+    margin-bottom: 20px;
+  }
+
+  .contacts-info {
+    padding-bottom: 36px;
+  }
+
+  .contacts-grid,
+  .branches-grid {
+    gap: 20px;
+  }
+
+  .contacts-grid {
+    margin-bottom: 24px;
+  }
+
+  .contact-office h3,
+  .branch h4 {
+    font-size: 17px;
+    margin-bottom: 10px;
+  }
+
+  .contact-detail {
+    gap: 10px;
+    margin-bottom: 10px;
+    font-size: 15px;
+    line-height: 1.35;
+  }
+
+  .contact-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .contacts-form-section {
+    padding: 34px 0 42px;
+  }
+
+  .form-section-title {
+    font-size: 19px;
+    margin-bottom: 18px;
+  }
+
+  .contacts-form {
+    border-radius: 18px;
+    padding: 18px 14px;
+  }
+
+  .form-row {
+    gap: 12px;
+  }
+
+  .form-group {
+    margin-bottom: 12px;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 14px;
+  }
+
+  .form-group textarea {
+    min-height: 88px;
+  }
+
+  .form-footer {
+    margin-top: 10px;
+    padding-top: 12px;
+    gap: 12px;
+  }
+
+  .checkbox-wrapper {
+    min-width: 0;
+    font-size: 12px;
+    gap: 8px;
+  }
+
+  .form-submit {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 18px;
+    font-size: 14px;
+  }
+
+  .form-submit .btn-arrow {
+    width: 16px;
+    height: 16px;
   }
 }
 </style>

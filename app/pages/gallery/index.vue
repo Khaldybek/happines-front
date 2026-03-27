@@ -699,8 +699,120 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
 }
 
 @media (max-width: 700px) {
+  .gallery-page {
+    padding-bottom: 32px;
+  }
+
+  .gallery-intro {
+    padding-bottom: 20px;
+  }
+
+  .gallery-title {
+    margin-bottom: 14px;
+    font-size: clamp(32px, 10vw, 44px);
+  }
+
+  .gallery-tabs {
+    gap: 10px;
+  }
+
+  .gallery-tab {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .gallery-blocks {
+    padding-bottom: 18px;
+  }
+
+  .gallery-row {
+    margin-bottom: 18px;
+    gap: 10px;
+  }
+
+  .gallery-img {
+    border-radius: 16px;
+  }
+
+  .gallery-img--big img,
+  .gallery-img--small img {
+    height: 180px;
+  }
+
+  .gallery-block {
+    padding: 16px 14px;
+    border-radius: 16px !important;
+  }
+
+  .gallery-block-hashtag {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  .gallery-block-desc {
+    font-size: 18px;
+    margin-bottom: 12px;
+    line-height: 1.25;
+  }
+
+  .gallery-block-btn-circle {
+    width: 40px;
+    background-size: 14px 14px;
+  }
+
+  .gallery-block-btn-label {
+    padding: 12px 12px;
+    font-size: 12px;
+  }
+
   .video-gallery-grid {
     grid-template-columns: 1fr;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .video-gallery-thumb {
+    margin-bottom: 8px;
+    border-radius: 12px;
+  }
+
+  .video-gallery-play::after {
+    width: 50px;
+    height: 50px;
+  }
+
+  .video-gallery-desc {
+    font-size: 13px;
+  }
+
+  .gallery-pager {
+    gap: 6px;
+  }
+
+  .pager-arrow,
+  .pager-item {
+    width: 34px;
+    height: 34px;
+    font-size: 14px;
+  }
+
+  .video-modal-overlay {
+    padding: 10px;
+  }
+
+  .video-modal-box {
+    border-radius: 10px;
+  }
+
+  .video-modal-close {
+    width: 34px;
+    height: 34px;
+    font-size: 22px;
+  }
+
+  .video-modal-desc {
+    padding: 10px 12px 0;
+    font-size: 13px;
   }
 }
 </style>

@@ -635,4 +635,88 @@ select.field-input option:disabled {
     font-size: 16px;
   }
 }
+
+@media (max-width: 760px) {
+  .section-title {
+    margin: 4px 0 18px;
+    font-size: clamp(28px, 8.5vw, 36px);
+  }
+
+  .avatar-wrap {
+    margin-bottom: 18px;
+  }
+
+  .avatar-image {
+    width: 116px;
+    height: 116px;
+  }
+
+  .avatar-edit {
+    width: 38px;
+    height: 38px;
+    right: -2px;
+    bottom: -2px;
+  }
+
+  .profile-form,
+  .form-skeleton {
+    gap: 10px 0;
+  }
+
+  .field-label {
+    font-size: 15px;
+  }
+
+  .field-input {
+    height: 50px;
+    border-width: 1.5px;
+    padding: 0 16px;
+    font-size: 15px;
+  }
+
+  .select-wrap::after {
+    right: 16px;
+  }
+
+  .address-title {
+    margin-top: 12px;
+    font-size: clamp(24px, 7.8vw, 32px);
+  }
+
+  .save-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 520px) {
+  .profile-section {
+    padding-bottom: 4px;
+  }
+
+  .section-title {
+    margin-bottom: 14px;
+    font-size: clamp(24px, 8vw, 30px);
+  }
+
+  .avatar-image {
+    width: 104px;
+    height: 104px;
+  }
+
+  .field-group {
+    gap: 6px;
+  }
+
+  .field-input {
+    height: 46px;
+    border-radius: 14px;
+  }
+
+  .save-btn {
+    height: 48px;
+    padding: 0 20px;
+    font-size: 14px;
+  }
+}
 </style>

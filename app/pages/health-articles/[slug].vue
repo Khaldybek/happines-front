@@ -383,4 +383,107 @@ useHead({
 .recommended-cart-arrow {
   font-size: 1rem;
 }
+
+@media (max-width: 768px) {
+  .breadcrumbs-section {
+    padding: 10px 0;
+  }
+
+  .breadcrumbs-list {
+    font-size: 12px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+  }
+
+  .breadcrumbs-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .health-article-page {
+    padding-bottom: 30px;
+  }
+
+  .health-article-hero {
+    margin-bottom: 14px;
+  }
+
+  .health-article-title {
+    font-size: clamp(22px, 8vw, 30px);
+    margin-bottom: 8px;
+  }
+
+  .health-article-date {
+    font-size: 13px;
+    margin-bottom: 14px;
+  }
+
+  .health-article-body {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .health-article-subtitle {
+    margin-top: 16px;
+    margin-bottom: 8px;
+    font-size: 15px;
+  }
+
+  .recommended-products-section {
+    padding: 24px 0 30px;
+  }
+
+  .recommended-header {
+    margin-bottom: 12px;
+  }
+
+  .recommended-title {
+    font-size: 18px;
+  }
+
+  .recommended-nav-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+
+  .recommended-carousel {
+    gap: 12px;
+  }
+
+  .recommended-card {
+    flex-basis: min(78vw, 260px);
+  }
+
+  .recommended-card-img-wrap {
+    height: 150px;
+    padding: 14px;
+  }
+
+  .recommended-card-title {
+    margin: 10px 12px 6px;
+    font-size: 14px;
+  }
+
+  .recommended-card-desc {
+    margin: 0 12px 8px;
+    font-size: 12px;
+  }
+
+  .recommended-card-price {
+    margin: 0 12px 8px;
+    font-size: 14px;
+  }
+
+  .recommended-fav-btn {
+    margin: 0 12px 8px;
+  }
+
+  .recommended-cart-btn {
+    margin: 0 12px;
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+}
 </style>

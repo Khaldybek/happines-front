@@ -1073,4 +1073,160 @@ function toggleFaq(index: number) {
     padding: 18px 20px;
   }
 }
+
+@media (max-width: 480px) {
+  .business-hero {
+    margin-bottom: 24px;
+  }
+
+  .hero-wrapper {
+    height: 220px;
+    border-radius: 14px;
+  }
+
+  .play-btn {
+    width: 52px;
+    height: 52px;
+  }
+
+  .play-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .business-intro {
+    margin-bottom: 26px;
+  }
+
+  .business-title {
+    margin-bottom: 12px;
+    font-size: clamp(22px, 8vw, 30px);
+  }
+
+  .business-desc {
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .benefits-section,
+  .partners-section {
+    margin-bottom: 30px;
+  }
+
+  .benefit-card {
+    min-height: 184px;
+    border-radius: 24px;
+    padding: 84px 14px 16px;
+    font-size: 12px;
+  }
+
+  .benefit-icon {
+    width: 72px;
+    height: 72px;
+    border-width: 4px;
+  }
+
+  .benefit-icon img {
+    width: 34px;
+    height: 34px;
+  }
+
+  .partners-title {
+    font-size: 22px;
+    margin-bottom: 14px;
+  }
+
+  .partners-cta-row {
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+
+  .partners-desc {
+    min-width: 0;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .partners-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 10px 14px;
+    font-size: 12px;
+  }
+
+  .video-thumb {
+    min-height: 156px;
+    border-radius: 16px;
+  }
+
+  .video-play {
+    width: 44px;
+    height: 44px;
+  }
+
+  .video-play::before {
+    border-left-width: 11px;
+    border-top-width: 7px;
+    border-bottom-width: 7px;
+  }
+
+  .reviews-section {
+    padding: 36px 0;
+    margin-bottom: 30px;
+  }
+
+  .reviews-title {
+    margin-bottom: 18px;
+  }
+
+  .reviews-green-block {
+    padding: 10px;
+    border-radius: 20px;
+  }
+
+  .review-card {
+    padding: 14px 12px;
+    border-radius: 14px;
+  }
+
+  .review-text {
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .faq-section {
+    padding: 28px 0 36px;
+  }
+
+  .faq-list {
+    border-radius: 20px;
+    padding: 10px;
+  }
+
+  .faq-question {
+    padding: 12px 14px;
+    font-size: 15px;
+    border-radius: 16px;
+  }
+
+  .faq-toggle {
+    width: 28px;
+    height: 28px;
+    font-size: 18px;
+  }
+
+  .faq-answer {
+    padding: 12px 14px;
+  }
+
+  .faq-item:last-child .faq-answer,
+  .faq-item--open .faq-question {
+    border-radius: 12px;
+  }
+
+  .faq-answer p {
+    font-size: 14px;
+    line-height: 1.45;
+  }
+}
 </style>

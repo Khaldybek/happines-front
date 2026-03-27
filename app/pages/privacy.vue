@@ -208,10 +208,48 @@ useHead({
 @media (max-width: 900px) {
   .privacy-content {
     grid-template-columns: 1fr;
+    gap: 26px;
   }
 
   .privacy-title {
     font-size: 36px;
+    margin-bottom: 24px;
+  }
+}
+
+@media (max-width: 600px) {
+  .privacy-page {
+    padding-bottom: 30px;
+  }
+
+  .privacy-title {
+    font-size: 26px;
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+
+  .privacy-col {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .privacy-col h2 {
+    font-size: 16px;
+    margin: 18px 0 8px;
+  }
+
+  .privacy-col h3 {
+    font-size: 15px;
+    margin: 14px 0 8px;
+  }
+
+  .privacy-col p,
+  .privacy-col ul {
+    margin-bottom: 10px;
+  }
+
+  .privacy-col ul {
+    padding-left: 18px;
   }
 }
 </style>

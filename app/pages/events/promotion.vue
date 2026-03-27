@@ -613,4 +613,116 @@ function longTermBlockDate(block: PromotionsLongTermBlock): string {
   object-fit: cover;
 }
 
+@media (max-width: 600px) {
+  .promotion-page {
+    padding-bottom: 34px;
+  }
+
+  .promo-hero {
+    padding-bottom: 20px;
+  }
+
+  .promo-hero-image-wrap {
+    border-radius: 18px;
+    margin-bottom: 14px;
+  }
+
+  .promo-hero-image {
+    height: clamp(180px, 52vw, 260px);
+  }
+
+  .promo-title {
+    font-size: clamp(24px, 9vw, 34px);
+    line-height: 1.06;
+  }
+
+  .promo-regions {
+    padding-bottom: 20px;
+  }
+
+  .promo-tabs-wrap {
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .promo-tab-arrow {
+    width: 36px;
+    height: 36px;
+  }
+
+  .promo-tab-arrow-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .promo-tabs {
+    gap: 8px;
+  }
+
+  .promo-tab {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  .promo-subtitle {
+    font-size: clamp(16px, 5.4vw, 22px);
+  }
+
+  .promo-simple,
+  .promo-long-term {
+    padding-bottom: 28px;
+  }
+
+  .promo-simple-photo {
+    height: clamp(180px, 58vw, 260px);
+  }
+
+  .promo-long-term-inner {
+    gap: 16px;
+  }
+
+  .long-term-card {
+    border-radius: 14px;
+    min-height: 0;
+  }
+
+  .long-term-card__media {
+    min-height: 150px;
+    padding: 12px;
+  }
+
+  .long-term-card__img {
+    max-height: 190px;
+  }
+
+  .long-term-card__panel {
+    padding: 14px 12px 16px;
+    gap: 10px;
+  }
+
+  .long-term-card__title {
+    font-size: 18px;
+    line-height: 1.2;
+  }
+
+  .long-term-card__para {
+    font-size: 14px;
+    line-height: 1.45;
+    margin-bottom: 8px;
+  }
+
+  .long-term-card__date {
+    font-size: 13px;
+    margin-top: 2px;
+  }
+
+  .long-term-card__btn {
+    width: 100%;
+    justify-content: center;
+    padding: 10px 12px;
+    font-size: 11px;
+    gap: 8px;
+  }
+}
+
 </style>

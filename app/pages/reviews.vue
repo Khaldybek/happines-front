@@ -310,6 +310,11 @@ onUnmounted(() => {
   .reviews-layout {
     grid-template-columns: 1fr;
   }
+
+  .reviews-summary-box {
+    position: static;
+    top: auto;
+  }
 }
 
 .reviews-filter-row {
@@ -667,5 +672,147 @@ onUnmounted(() => {
   background: #c25404;
   border-color: #c25404;
   color: #fff;
+}
+
+@media (max-width: 768px) {
+  .breadcrumbs-section {
+    padding: 10px 0;
+  }
+
+  .breadcrumbs-list {
+    font-size: 12px;
+    overflow-x: auto;
+    white-space: nowrap;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+  }
+
+  .breadcrumbs-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .reviews-main-title {
+    font-size: clamp(22px, 8vw, 30px);
+  }
+
+  .reviews-subtitle {
+    margin-bottom: 12px;
+  }
+
+  .reviews-intro {
+    margin-bottom: 18px;
+  }
+
+  .reviews-filter-row {
+    margin-bottom: 12px;
+  }
+
+  .review-card {
+    padding: 16px 0;
+  }
+
+  .review-product-thumb {
+    width: 68px;
+    height: 68px;
+  }
+
+  .reviews-summary-box {
+    border-radius: 12px;
+    padding: 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .reviews-page {
+    padding-bottom: 36px;
+  }
+
+  .review-card-header {
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .review-avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .review-name {
+    font-size: 15px;
+  }
+
+  .review-rating-row {
+    gap: 8px;
+  }
+
+  .review-location-date {
+    font-size: 12px;
+  }
+
+  .review-text {
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+
+  .review-modal-overlay {
+    padding: 12px;
+  }
+
+  .review-modal {
+    border-radius: 12px;
+    padding: 18px 14px 14px;
+    max-height: 94vh;
+  }
+
+  .review-modal-title {
+    margin-bottom: 12px;
+    font-size: 18px;
+  }
+
+  .review-modal-close {
+    top: 10px;
+    right: 10px;
+    width: 30px;
+    height: 30px;
+    font-size: 20px;
+  }
+
+  .review-modal-form {
+    gap: 12px;
+  }
+
+  .review-modal-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .review-input,
+  .review-textarea {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+
+  .review-textarea {
+    min-height: 98px;
+  }
+
+  .review-rating-num {
+    width: 36px;
+    height: 36px;
+    font-size: 15px;
+  }
+
+  .review-modal-actions {
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 2px;
+  }
+
+  .review-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 10px 14px;
+    font-size: 12px;
+  }
 }
 </style>
