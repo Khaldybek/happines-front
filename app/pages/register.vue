@@ -5,8 +5,12 @@
         <AuthInputField label="ФИО" placeholder="Введите ваше ФИО" />
 
         <div class="grid-2">
-          <AuthInputField label="Страна" placeholder="Выберите стану" type="select" :options="countries" />
-          <AuthInputField label="Город" placeholder="Выберите город" type="select" :options="cities" />
+          <CountryCitySelect
+            v-model:country-id="countryId"
+            v-model:city-id="cityId"
+            :countries="countries"
+            :loading="countriesPending"
+          />
         </div>
 
         <div class="grid-2">
@@ -31,8 +35,11 @@ definePageMeta({ layout: false })
 
 useHead({ title: 'Регистрация — Happiness' })
 
-const countries = ['Казахстан', 'Россия', 'Кыргызстан', 'Узбекистан']
-const cities = ['Алматы', 'Астана', 'Шымкент', 'Тараз']
+const { data: countriesData, pending: countriesPending } = useCountries()
+const countries = computed(() => countriesData.value?.data ?? [])
+
+const countryId = ref<number | null>(null)
+const cityId = ref<number | null>(null)
 </script>
 
 <style scoped>
@@ -47,6 +54,10 @@ const cities = ['Алматы', 'Астана', 'Шымкент', 'Тараз']
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14px;
+}
+
+.grid-2 :deep(.cc-group) {
+  margin-bottom: 0;
 }
 
 .cta-wrap {
