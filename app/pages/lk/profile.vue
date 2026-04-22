@@ -37,6 +37,8 @@
                   @change="onPhotoChange"
                 >
               </div>
+              <p v-if="photoHintError" class="field-hint-error photo-hint" role="alert">{{ photoHintError }}</p>
+              <p v-else-if="fieldErr('photo')" class="field-hint-error photo-hint" role="alert">{{ fieldErr('photo') }}</p>
 
               <!-- Loading state -->
               <div v-if="fetchPending" class="form-skeleton">
@@ -190,7 +192,9 @@
                 <p v-if="updateError" class="form-error" role="alert">{{ updateError }}</p>
 
                 <!-- Success message -->
-                <p v-if="updateSuccess" class="form-success" role="status">Профиль успешно обновлён</p>
+                <p v-if="updateSuccess" class="form-success" role="status">
+                  {{ updateSuccessMessage || 'Профиль успешно обновлён' }}
+                </p>
 
                 <!-- Submit -->
                 <div class="form-actions field-full">
@@ -223,6 +227,7 @@ const {
   updateError,
   updateFieldErrors,
   updateSuccess,
+  updateSuccessMessage,
   updateProfile,
   clearUpdateStatus,
 } = useProfile()
@@ -252,6 +257,9 @@ const showPassword = ref(false)
 const photoFile = ref<File | null>(null)
 const avatarPreview = ref<string | null>(null)
 const photoInputRef = ref<HTMLInputElement | null>(null)
+/** Лимит как в UpdateProfileRequest на бэкенде (4096 КБ). */
+const MAX_PROFILE_PHOTO_BYTES = 4096 * 1024
+const photoHintError = ref('')
 
 // Fill form when profile loads
 watch(profile, (p) => {
@@ -271,8 +279,15 @@ function onCountryChange() {
 }
 
 function onPhotoChange(e: Event) {
-  const file = (e.target as HTMLInputElement).files?.[0]
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0]
   if (!file) return
+  if (file.size > MAX_PROFILE_PHOTO_BYTES) {
+    photoHintError.value = 'Размер фото не больше 4 МБ (4096 КБ)'
+    input.value = ''
+    return
+  }
+  photoHintError.value = ''
   photoFile.value = file
   avatarPreview.value = URL.createObjectURL(file)
 }
@@ -284,6 +299,12 @@ function fieldErr(field: string): string {
 // ── Submit ───────────────────────────────────────────────────────────────────
 async function handleSubmit() {
   clearUpdateStatus()
+  photoHintError.value = ''
+
+  if (photoFile.value && photoFile.value.size > MAX_PROFILE_PHOTO_BYTES) {
+    photoHintError.value = 'Размер фото не больше 4 МБ (4096 КБ)'
+    return
+  }
 
   const payload: Record<string, unknown> = {
     full_name: form.full_name,
@@ -309,6 +330,7 @@ async function handleSubmit() {
     form.password = ''
     showPassword.value = false
     photoFile.value = null
+    photoHintError.value = ''
   }
 }
 </script>
@@ -465,6 +487,11 @@ async function handleSubmit() {
   padding-left: 14px;
   font-size: 13px;
   color: #e05656;
+}
+
+.photo-hint {
+  margin: 4px 0 12px;
+  padding-left: 0;
 }
 
 select.field-input {

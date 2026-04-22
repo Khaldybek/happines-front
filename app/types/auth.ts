@@ -1,6 +1,8 @@
 export interface AuthUserCountry {
   id: number
   title: string
+  code?: string
+  currency_code?: string
 }
 
 export interface AuthUserCity {
@@ -19,6 +21,12 @@ export interface AuthUser {
   city: AuthUserCity | null
   street: string | null
   house_number: string | null
+}
+
+/** Ответ GET/POST/PATCH `/api/V1/user/profile` — пользователь во вложенном `user`, плюс текст сообщения. */
+export interface UserProfileResponse {
+  user: AuthUser
+  message?: string
 }
 
 export interface AuthLoginResponse {
@@ -44,7 +52,11 @@ export interface RegisterPayload {
   city_id: number | null
 }
 
-/** Данные для обновления профиля (все поля необязательны) */
+/**
+ * Тело для POST или PATCH `/api/V1/user/profile` (auth:sanctum, Bearer token).
+ * Отправляется как multipart/form-data; файл аватара — поле `photo` (image, до 4096 КБ на бэкенде).
+ * Остальные поля при необходимости в том же запросе.
+ */
 export interface ProfileUpdatePayload {
   full_name?: string
   phone?: string
