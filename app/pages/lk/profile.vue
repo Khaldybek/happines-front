@@ -106,7 +106,7 @@
                         :key="c.id"
                         :value="c.id"
                       >
-                        {{ c.title }}
+                        {{ c.name }}
                       </option>
                     </select>
                   </span>
@@ -131,7 +131,7 @@
                         :key="city.id"
                         :value="city.id"
                       >
-                        {{ city.title }}
+                        {{ city.name }}
                       </option>
                     </select>
                   </span>
@@ -229,7 +229,7 @@ const {
 
 // ── Countries ────────────────────────────────────────────────────────────────
 const { data: countriesData, pending: countriesPending } = useCountries()
-const countriesList = computed<Country[]>(() => countriesData.value?.data ?? [])
+const countriesList = computed<Country[]>(() => countriesData.value?.countries ?? [])
 
 const availableCities = computed(() => {
   if (!form.country_id) return []

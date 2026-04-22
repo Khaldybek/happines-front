@@ -86,7 +86,7 @@ const authStore = useAuthStore()
 const router = useRouter()
 
 const { data: countriesData, pending: countriesPending } = useCountries()
-const countries = computed(() => countriesData.value?.data ?? [])
+const countries = computed(() => countriesData.value?.countries ?? [])
 
 const countryId = ref<number | null>(null)
 const cityId = ref<number | null>(null)

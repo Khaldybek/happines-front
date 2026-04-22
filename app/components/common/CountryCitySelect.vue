@@ -15,7 +15,7 @@
             {{ loading ? 'Загрузка...' : 'Выберите страну' }}
           </option>
           <option v-for="c in countries" :key="c.id" :value="c.id">
-            {{ c.title }}
+            {{ c.name }}
           </option>
         </select>
         <span class="cc-chevron" aria-hidden="true">
@@ -40,7 +40,7 @@
             {{ !countryId ? 'Сначала выберите страну' : availableCities.length ? 'Выберите город' : 'Нет городов' }}
           </option>
           <option v-for="city in availableCities" :key="city.id" :value="city.id">
-            {{ city.title }}
+            {{ city.name }}
           </option>
         </select>
         <span class="cc-chevron" aria-hidden="true">

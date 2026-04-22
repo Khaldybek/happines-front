@@ -1,14 +1,17 @@
+/** GET /api/V1/countries — список стран с вложенными городами */
+
 export interface City {
   id: number
-  title: string
+  name: string
 }
 
 export interface Country {
   id: number
-  title: string
+  name: string
   cities: City[]
 }
 
 export interface CountriesResponse {
-  data: Country[]
+  success: boolean
+  countries: Country[]
 }

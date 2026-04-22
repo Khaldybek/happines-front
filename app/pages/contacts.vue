@@ -147,7 +147,7 @@ definePageMeta({
 
 const { data } = useContactsPage()
 const { data: countriesData, pending: countriesPending } = useCountries()
-const countries = computed(() => countriesData.value?.data ?? [])
+const countries = computed(() => countriesData.value?.countries ?? [])
 
 const pageData = computed(() => data.value ?? null)
 
