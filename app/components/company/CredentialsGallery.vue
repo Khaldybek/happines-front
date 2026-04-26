@@ -290,7 +290,7 @@ function goNextPage() {
   text-align: center;
   line-height: 0.98;
   letter-spacing: 0.01em;
-  font-size: clamp(28px, 5.2vw, 110px);
+  font-size: clamp(24px, 4.5vw, 96px);
   font-weight: 900;
   text-transform: uppercase;
   padding: 0 4px;
@@ -315,10 +315,10 @@ function goNextPage() {
   max-width: 820px;
   padding: 0 4px;
   text-align: center;
-  font-size: clamp(14px, 1.1vw, 17px);
+  font-size: clamp(16px, 1.3vw, 19px);
   line-height: 1.5;
   color: #1a1a1a;
-  font-weight: 400;
+  font-weight: 700;
 }
 
 .filters-year-row {
@@ -621,8 +621,9 @@ a.credential-card--link:hover .credential-title {
 
   .credentials-subtitle {
     margin: 14px auto 20px;
-    font-size: clamp(15px, 2.2vw, 20px);
+    font-size: clamp(16px, 2.2vw, 20px);
     line-height: 1.3;
+    font-weight: 700;
   }
 
   .filters-year-row {
@@ -668,7 +669,7 @@ a.credential-card--link:hover .credential-title {
   }
 
   .credentials-title {
-    font-size: clamp(22px, 6.2vw, 40px);
+    font-size: clamp(20px, 5.5vw, 36px);
     line-height: 1.05;
   }
 
@@ -684,7 +685,8 @@ a.credential-card--link:hover .credential-title {
   .credentials-subtitle {
     margin: 12px auto 16px;
     padding: 0 2px;
-    font-size: 15px;
+    font-size: 16px;
+    font-weight: 700;
   }
 
   .filters-year-row {
@@ -732,7 +734,7 @@ a.credential-card--link:hover .credential-title {
   }
 
   .credentials-title {
-    font-size: clamp(20px, 5.4vw, 32px);
+    font-size: clamp(19px, 5vw, 30px);
   }
 
   .hero-image {
