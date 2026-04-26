@@ -1,5 +1,6 @@
 import type { ProductPageResponse } from '~/types/productPage'
 import { getApiLangForRequest } from '~/composables/useApiLangQuery'
+import { optionalBearerJsonHeaders } from '~/composables/useApiBearerOptional'
 import { deepFixMediaUrls } from '~/utils/resolveMediaUrl'
 
 function apiBaseUrl(): string {
@@ -21,7 +22,7 @@ export function useProductPage(slug: MaybeRefOrGetter<string>) {
       if (!safeSlug) return null
       try {
         const data = await $fetch<ProductPageResponse>(url, {
-          headers: { Accept: 'application/json' },
+          headers: optionalBearerJsonHeaders(),
           query: { slug: safeSlug, ...getApiLangForRequest(route) },
         })
         return deepFixMediaUrls(data, baseUrl)
@@ -32,7 +33,11 @@ export function useProductPage(slug: MaybeRefOrGetter<string>) {
     },
     {
       server: true,
-      watch: [() => route.query.lang, () => route.params.slug],
+      watch: [
+        () => route.query.lang,
+        () => route.params.slug,
+        () => useCookie<string | null>('auth_token').value,
+      ],
     },
   )
 }

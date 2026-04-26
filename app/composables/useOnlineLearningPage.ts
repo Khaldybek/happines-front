@@ -1,4 +1,4 @@
-import type { CatalogPageResponse } from '~/types/catalogPage'
+import type { OnlineLearningPageResponse } from '~/types/onlineLearningPage'
 import { getApiLangForRequest } from '~/composables/useApiLangQuery'
 import { optionalBearerJsonHeaders } from '~/composables/useApiBearerOptional'
 import { deepFixMediaUrls } from '~/utils/resolveMediaUrl'
@@ -10,21 +10,20 @@ function apiBaseUrl(): string {
     .replace(/\/+$/, '')
 }
 
-export function catalogPageUrl(slug: string): string {
-  const safe = String(slug || '').trim()
-  return `${apiBaseUrl()}/api/V1/pages/catalog/${encodeURIComponent(safe)}`
+export function onlineLearningPageUrl(): string {
+  return `${apiBaseUrl()}/api/V1/pages/online-learning`
 }
 
-export function useCatalogPage(slug: string) {
+export function useOnlineLearningPage() {
   const route = useRoute()
   const baseUrl = apiBaseUrl()
-  const url = catalogPageUrl(slug)
+  const url = onlineLearningPageUrl()
 
   return useAsyncData(
-    `catalog-page:${slug}`,
+    () => `online-learning:${String(route.query.lang ?? '')}:${useCookie<string | null>('auth_token').value ?? ''}`,
     async () => {
       try {
-        const data = await $fetch<CatalogPageResponse>(url, {
+        const data = await $fetch<OnlineLearningPageResponse>(url, {
           headers: optionalBearerJsonHeaders(),
           query: getApiLangForRequest(route),
         })
@@ -36,11 +35,7 @@ export function useCatalogPage(slug: string) {
     },
     {
       server: true,
-      watch: [
-        () => route.query.lang,
-        () => useCookie<string | null>('auth_token').value,
-      ],
+      watch: [() => route.query.lang, () => useCookie<string | null>('auth_token').value],
     },
   )
 }
-

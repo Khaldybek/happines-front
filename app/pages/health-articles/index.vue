@@ -15,68 +15,82 @@
       <div class="container">
         <h1 class="health-articles-title">СТАТЬИ О ЗДОРОВЬЕ</h1>
 
-        <div class="health-articles-grid">
-          <NuxtLink
-            v-for="(item, i) in displayedArticles"
-            :key="`${item.slug}-${i}`"
-            :to="`/health-articles/${item.slug}`"
-            class="health-article-card"
-            @mouseenter="hoveredIndex = i"
-            @mouseleave="hoveredIndex = null"
-          >
-            <div class="health-article-card-img">
-              <img :src="item.image" :alt="item.title">
-            </div>
-            <div class="health-article-card-content">
-              <span
-                v-if="hoveredIndex === i"
-                class="health-article-card-hover-icon"
-                aria-hidden="true"
-              >
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 2c-.55 0-1 .45-1 1v7H9.5C8.67 10 8 10.67 8 11.5v1h-.5C6.67 12.5 6 13.17 6 14v5c0 .83.67 1.5 1.5 1.5h9c.83 0 1.5-.67 1.5-1.5v-5c0-.83-.67-1.5-1.5-1.5H16v-1c0-.83-.67-1.5-1.5-1.5H13V3c0-.55-.45-1-1-1z"/></svg>
-              </span>
-              <h2
-                class="health-article-card-title"
-                :class="{ 'is-hovered': hoveredIndex === i }"
-              >
-                {{ item.title }}
-              </h2>
-              <p class="health-article-card-excerpt">{{ item.excerpt }}</p>
-              <span class="health-article-card-date">{{ item.date }}</span>
-            </div>
-          </NuxtLink>
+        <div v-if="pending" class="health-articles-skeleton" aria-busy="true">
+          <div v-for="n in 4" :key="n" class="sk-card" />
         </div>
 
-        <div class="health-articles-pager">
-          <button
-            type="button"
-            class="pager-arrow"
-            aria-label="Предыдущая страница"
-            :disabled="currentPage <= 1"
-            @click="currentPage = Math.max(1, currentPage - 1)"
-          >
-            ‹
-          </button>
-          <button
-            v-for="p in totalPages"
-            :key="p"
-            type="button"
-            class="pager-num"
-            :class="{ 'is-active': p === currentPage }"
-            @click="currentPage = p"
-          >
-            {{ p }}
-          </button>
-          <button
-            type="button"
-            class="pager-arrow"
-            aria-label="Следующая страница"
-            :disabled="currentPage >= totalPages"
-            @click="currentPage = Math.min(totalPages, currentPage + 1)"
-          >
-            ›
-          </button>
-        </div>
+        <p v-else-if="!listPayload" class="health-articles-empty" role="alert">
+          Не удалось загрузить статьи. Попробуйте позже.
+        </p>
+
+        <template v-else>
+          <div v-if="!items.length" class="health-articles-empty">
+            Пока нет опубликованных статей.
+          </div>
+
+          <div v-else class="health-articles-grid">
+            <NuxtLink
+              v-for="(item, i) in items"
+              :key="item.id"
+              :to="`/health-articles/${item.id}`"
+              class="health-article-card"
+              @mouseenter="hoveredIndex = i"
+              @mouseleave="hoveredIndex = null"
+            >
+              <div class="health-article-card-img">
+                <img :src="item.image_url" :alt="item.title">
+              </div>
+              <div class="health-article-card-content">
+                <span
+                  v-if="hoveredIndex === i"
+                  class="health-article-card-hover-icon"
+                  aria-hidden="true"
+                >
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 2c-.55 0-1 .45-1 1v7H9.5C8.67 10 8 10.67 8 11.5v1h-.5C6.67 12.5 6 13.17 6 14v5c0 .83.67 1.5 1.5 1.5h9c.83 0 1.5-.67 1.5-1.5v-5c0-.83-.67-1.5-1.5-1.5H16v-1c0-.83-.67-1.5-1.5-1.5H13V3c0-.55-.45-1-1-1z" /></svg>
+                </span>
+                <h2
+                  class="health-article-card-title"
+                  :class="{ 'is-hovered': hoveredIndex === i }"
+                >
+                  {{ item.title }}
+                </h2>
+                <p class="health-article-card-excerpt">{{ excerpt(item.description) }}</p>
+                <span class="health-article-card-date">{{ formatDate(item.display_date) }}</span>
+              </div>
+            </NuxtLink>
+          </div>
+
+          <div v-if="totalPages > 1" class="health-articles-pager">
+            <button
+              type="button"
+              class="pager-arrow"
+              aria-label="Предыдущая страница"
+              :disabled="currentPage <= 1"
+              @click="goToPage(currentPage - 1)"
+            >
+              ‹
+            </button>
+            <button
+              v-for="p in pageNumbers"
+              :key="p"
+              type="button"
+              class="pager-num"
+              :class="{ 'is-active': p === currentPage }"
+              @click="goToPage(p)"
+            >
+              {{ p }}
+            </button>
+            <button
+              type="button"
+              class="pager-arrow"
+              aria-label="Следующая страница"
+              :disabled="currentPage >= totalPages"
+              @click="goToPage(currentPage + 1)"
+            >
+              ›
+            </button>
+          </div>
+        </template>
       </div>
     </main>
     <TheFooter />
@@ -84,6 +98,9 @@
 </template>
 
 <script setup lang="ts">
+import type { HealthArticleListItem, HealthArticlesListPayload } from '~/types/healthArticlesPage'
+import { healthArticleExcerptFromHtml, formatHealthArticleDisplayDate } from '~/utils/healthArticleText'
+
 definePageMeta({
   layout: false,
 })
@@ -92,62 +109,62 @@ useHead({
   title: 'Статьи о здоровье — Happiness',
 })
 
-const articles = [
-  {
-    slug: 'immunitet-osenyu',
-    title: 'ИММУНИТЕТ ОСЕНЬЮ',
-    excerpt: 'На календаре осень, традиционно нас ожидает смена погоды и золотая листва на деревьях. Говорят, что осенью у многих людей падает активность. Это естественная реакци...',
-    date: '24 декабря 2025',
-    image: '/images/c46ab61af1aebaf89c9801b3ac51c5a7dce3816f.png',
-  },
-  {
-    slug: 'leto-vremya-zdorove-vprok',
-    title: 'ЛЕТО – ВРЕМЯ, ЧТОБЫ ПОЗАБОТИТЬСЯ О СВОЕМ ЗДОРОВЬЕ ВПРОК!',
-    excerpt: 'Щебетание птиц, солнце, зелень, яркие краски. Июль – разгар лета. Время, чтобы позаботиться о своем здоровье впрок. Ведь от того, как проведешь лето, зависит...',
-    date: '24 декабря 2025',
-    image: '/images/e39744b8aca4253a251f6190e55ee1735b42dbd7.png',
-  },
-  {
-    slug: 'immunitet-osenyu',
-    title: 'ИММУНИТЕТ ОСЕНЬЮ',
-    excerpt: 'На календаре осень, традиционно нас ожидает смена погоды и золотая листва на деревьях. Говорят, что осенью у многих людей падает активность. Это естественная реакци...',
-    date: '24 декабря 2025',
-    image: '/images/c46ab61af1aebaf89c9801b3ac51c5a7dce3816f.png',
-  },
-  {
-    slug: 'leto-vremya-zdorove-vprok',
-    title: 'ЛЕТО – ВРЕМЯ, ЧТОБЫ ПОЗАБОТИТЬСЯ О СВОЕМ ЗДОРОВЬЕ ВПРОК!',
-    excerpt: 'Щебетание птиц, солнце, зелень, яркие краски. Июль – разгар лета. Время, чтобы позаботиться о своем здоровье впрок. Ведь от того, как проведешь лето, зависит...',
-    date: '24 декабря 2025',
-    image: '/images/e39744b8aca4253a251f6190e55ee1735b42dbd7.png',
-  },
-  {
-    slug: 'immunitet-osenyu',
-    title: 'ИММУНИТЕТ ОСЕНЬЮ',
-    excerpt: 'На календаре осень, традиционно нас ожидает смена погоды и золотая листва на деревьях. Говорят, что осенью у многих людей падает активность. Это естественная реакци...',
-    date: '24 декабря 2025',
-    image: '/images/c46ab61af1aebaf89c9801b3ac51c5a7dce3816f.png',
-  },
-  {
-    slug: 'leto-vremya-zdorove-vprok',
-    title: 'ЛЕТО – ВРЕМЯ, ЧТОБЫ ПОЗАБОТИТЬСЯ О СВОЕМ ЗДОРОВЬЕ ВПРОК!',
-    excerpt: 'Щебетание птиц, солнце, зелень, яркие краски. Июль – разгар лета. Время, чтобы позаботиться о своем здоровье впрок. Ведь от того, как проведешь лето, зависит...',
-    date: '24 декабря 2025',
-    image: '/images/e39744b8aca4253a251f6190e55ee1735b42dbd7.png',
-  },
-]
+const route = useRoute()
+const router = useRouter()
 
-const currentPage = ref(3)
-const perPage = 4
-const totalPages = 5
+const { data, pending } = useHealthArticlesList()
+
+const listPayload = computed<HealthArticlesListPayload | null>(() => data.value?.health_articles ?? null)
+const items = computed<HealthArticleListItem[]>(() => listPayload.value?.items ?? [])
+
+const pagination = computed(() => listPayload.value?.pagination)
+const totalPages = computed(() => Math.max(1, pagination.value?.last_page ?? 1))
+
+const currentPage = computed(() => {
+  const fromApi = pagination.value?.current_page
+  if (typeof fromApi === 'number' && fromApi >= 1) return fromApi
+  return Math.max(1, Math.floor(Number(route.query.page)) || 1)
+})
+
+/** Номера страниц для пагинатора (окно из 7 кнопок). */
+const pageNumbers = computed(() => {
+  const last = totalPages.value
+  const cur = currentPage.value
+  if (last <= 7) return Array.from({ length: last }, (_, i) => i + 1)
+  let start = cur - 3
+  if (start < 1) start = 1
+  if (start + 6 > last) start = last - 6
+  return Array.from({ length: 7 }, (_, i) => start + i)
+})
+
 const hoveredIndex = ref<number | null>(null)
 
-const displayedArticles = computed(() => {
-  const start = (currentPage.value - 1) * perPage
-  const list = [...articles]
-  while (list.length < perPage * totalPages) list.push(...articles)
-  return list.slice(start, start + perPage)
-})
+function excerpt(html: string) {
+  return healthArticleExcerptFromHtml(html, 220)
+}
+
+function formatDate(iso: string) {
+  return formatHealthArticleDisplayDate(iso)
+}
+
+function goToPage(p: number) {
+  const next = Math.min(Math.max(1, p), totalPages.value)
+  const q = { ...route.query } as Record<string, string | string[] | undefined>
+  if (next <= 1) delete q.page
+  else q.page = String(next)
+  router.push({ path: route.path, query: q })
+}
+
+watch(
+  [listPayload, () => route.query.page],
+  () => {
+    const pag = listPayload.value?.pagination
+    if (!pag || pag.last_page < 1) return
+    const req = Math.max(1, Math.floor(Number(route.query.page)) || 1)
+    if (req > pag.last_page) goToPage(pag.last_page)
+  },
+  { flush: 'post' },
+)
 </script>
 
 <style scoped>
@@ -183,6 +200,37 @@ const displayedArticles = computed(() => {
   text-transform: uppercase;
   letter-spacing: 0.02em;
   color: #dd5f05;
+}
+
+.health-articles-skeleton {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
+  margin-bottom: 48px;
+}
+
+.sk-card {
+  height: 420px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%);
+  background-size: 200% 100%;
+  animation: sk-shimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes sk-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.health-articles-empty {
+  text-align: center;
+  color: #666;
+  padding: 40px 16px;
+  font-size: 17px;
 }
 
 .health-articles-grid {
@@ -244,8 +292,14 @@ const displayedArticles = computed(() => {
 }
 
 @keyframes health-article-wave {
-  0% { opacity: 0; transform: scale(0.8); }
-  100% { opacity: 1; transform: scale(1); }
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .health-article-card-title {
@@ -303,7 +357,10 @@ const displayedArticles = computed(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    color 0.2s;
 }
 
 .pager-arrow:hover:not(:disabled) {
@@ -351,6 +408,15 @@ const displayedArticles = computed(() => {
   .health-articles-title {
     margin-bottom: 18px;
     font-size: clamp(26px, 8vw, 34px);
+  }
+
+  .health-articles-skeleton {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .sk-card {
+    height: 320px;
   }
 
   .health-articles-grid {

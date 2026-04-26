@@ -4,104 +4,35 @@
     <main class="privacy-page">
       <PrivacyBreadcrumbs />
       <div class="container">
-        <h1 class="privacy-title">
-          <span class="title-line title-black">ПОЛИТИКА</span>
-          <span class="title-line title-orange">КОНФИДЕНЦИАЛЬНОСТИ</span>
-        </h1>
-
-        <div class="privacy-content">
-          <div class="privacy-col privacy-col-left">
-            <p class="privacy-intro">
-              На данном сайте используются технологии файлов «cookie» и аналогичные им. Посещая сайт, вы соглашаетесь с правилами использования файлов cookies, в том числе аналитических, рекламных и функциональных. Если вы не согласны с использованием cookies, обратитесь к разделу «Как контролировать или удалять файлы cookies» для получения инструкций.
-            </p>
-            <p>
-              Как и многие другие компании, мы используем технологию файлов «cookie», суть которой заключается в размещении нашим сервером специальных кодов на компьютере посетителя. Такая информация позволяет нам на непрерывной основе определять совокупное количество посетителей сайта и тип программ просмотра интернет-ресурсов и операционных систем, используемых нашими посетителями. Данная информация используется для того, чтобы сделать наш сайт более удобным для Вас. Ни при каких обстоятельствах мы не используем такую информацию для идентификации личности посетителей или предоставления перекрёстных ссылок на любой вид персональной информации, добровольно предоставленной Вами на настоящем сайте или посредством него.
-            </p>
-
-            <h2>Что такое cookies?</h2>
-            <p>
-              Cookies — это небольшие файлы, состоящие из букв и цифр, которые скачиваются на ваш компьютер или мобильное устройство, когда Вы посещаете веб-сайт. Затем cookies отправляются обратно на оригинальный веб-сайт при каждом последующем посещении или на любой веб-сайт, который распознает этот cookie. Использование cookies удобно, так как это позволяет веб-сайту распознать устройство пользователя. Cookies исполняют целый ряд функций: позволяют эффективно перемещаться между страницами, запоминают ваши предпочтения и улучшают опыт взаимодействия с сайтом. Они также могут способствовать тому, что реклама, которую Вы видите онлайн, соответствует вашим интересам.
-            </p>
-            <p>Мы используем два типа cookies:</p>
-            <ul>
-              <li>Основные cookies, передаваемые напрямую на ваш компьютер.</li>
-              <li>Сторонние cookies, передаваемые третьей стороной от нашего лица. Мы используем cookies третьей стороны для упрощения процесса анализа наших веб-сайтов и их использования, а также для активации адаптированной рекламы.</li>
-            </ul>
-
-            <h2>Рекламные cookies</h2>
-            <p>
-              Рекламные cookies собирают информацию о ваших интересах для показа релевантной рекламы, ограничения количества показов и оценки эффективности рекламных кампаний. Они часто устанавливаются рекламными сетями с нашего разрешения и сохраняются до удаления, запоминая посещённые сайты. Эта информация может передаваться другим организациям (рекламодателям, подрядчикам) для выявления общих интересов и поведения на разных сайтах.
-            </p>
-
-            <h2>Другие подобные технологии</h2>
-            <p>
-              Как и многие веб-сайты, мы используем технологии, схожие с cookies, включая local shared objects (флэш-cookies), анализ истории браузера, цифровые отпечатки браузера и пиксельные теги (веб-маяки). Это даёт нам информацию о том, как наши веб-сайты используются посетителями.
-            </p>
-            <p>
-              Наши серверы автоматически считывают ваш IP-адрес при посещении сайта. Мы можем связать эту информацию с доменным именем или именем интернет-провайдера. Мы также собираем «сведения о посещениях» (clickstream data): информацию о вашем компьютере, браузере, операционной системе, страницах посещения, времени на сайте, загрузках и ключевых словах.
-            </p>
-
-            <h2>Как мы используем файлы cookies?</h2>
-            <p>Cookies используются для того, чтобы:</p>
-            <ul>
-              <li>оценивать общее количество посетителей наших сайтов и типы браузеров (Firefox, Safari, Chrome) и операционных систем (Windows, Macintosh);</li>
-              <li>контролировать работу наших сайтов и улучшать их;</li>
-              <li>персонализировать и улучшать ваш опыт взаимодействия в онлайн-среде;</li>
-              <li>разрешить рекламу третьей стороны как на наших сайтах, так и за их пределами.</li>
-            </ul>
-
-            <h2>Какие виды cookies мы используем?</h2>
-            <p>Виды файлов cookies можно разделить на четыре категории: «основные cookies веб-сайта», «функциональные cookies», «аналитические cookies» и «рекламные cookies».</p>
-
-            <h3>Основные cookies веб-сайта</h3>
-            <p>Эти cookies необходимы для навигации по сайту и использования его возможностей. Они не собирают маркетинговую информацию, являются сессионными и не могут быть отключены. Подробнее в разделе «Как контролировать или удалять файлы cookies».</p>
-
-            <h3>Функциональные cookies</h3>
-            <p>Запоминают ваши предпочтения (имя пользователя, язык, регион) для персонализации. Собранные данные могут быть анонимизированы.</p>
-
-            <h3>Функциональные и рекламные cookies</h3>
-            <p>Используются для отображения контента YouTube и сбора данных Google для персонализированной рекламы. См. политику конфиденциальности Google.</p>
-
-            <h3>Аналитические cookies</h3>
-            <p>Мы используем Google Analytics, Яндекс.Метрику и аналогичные сервисы для сбора данных о поведении пользователей (посетители, источники, просмотры страниц) с целью создания отчётов и улучшения сайта.</p>
-          </div>
-
-          <div class="privacy-col privacy-col-right">
-            <h2>Как контролировать или удалять файлы cookies</h2>
-            <p>
-              У вас есть право выбора, принимать или не принимать файлы cookies. Однако при отказе от cookies вы не сможете пользоваться всем функционалом наших веб-сайтов, и сообщения от нас могут стать менее релевантными. Инструмент управления cookies установит на вашем устройстве файл cookie для учёта ваших предпочтений. При удалении cookies с устройства вам придётся сделать выбор снова.
-            </p>
-            <p>
-              Вы можете блокировать cookies, используя ссылки «ограничить сбор данных» или настройки браузера. Деактивация сбора cookie не удаляет уже установленные файлы — их нужно удалить вручную.
-            </p>
-            <ul>
-              <li><strong>Microsoft Internet Explorer:</strong> Сервис → Свойства обозревателя → Конфиденциальность → Настройки</li>
-              <li><strong>Firefox:</strong> Сервис → Параметры → Конфиденциальность → меню Cookies</li>
-              <li><strong>Google Chrome:</strong> Функции → Дополнительные параметры → Конфиденциальность</li>
-              <li><strong>Opera:</strong> Безопасность и Конфиденциальность</li>
-            </ul>
-
-            <h2>Cookies, установленные в прошлом</h2>
-            <p>При деактивации cookies информация, собранная до деактивации, может продолжать использоваться, но новые данные на основе cookies собираться не будут.</p>
-
-            <h2>Другая информация, которую мы собираем</h2>
-            <p>Мы также можем собирать: имя, контактные данные (телефон, email), информацию из опросов и предложений для клиентов.</p>
-
-            <h2>Цели сбора личной информации</h2>
-            <ul>
-              <li>предоставление обратной связи и информации о нашем продукте;</li>
-              <li>улучшение наших продуктов;</li>
-              <li>предоставление специальных предложений;</li>
-              <li>осуществление обслуживания клиентов.</li>
-            </ul>
-
-            <h2>Безопасность</h2>
-            <p>Мы применяем физические, электронные и управленческие процедуры для защиты персональной информации от несанкционированного доступа, изменения, раскрытия или уничтожения.</p>
-
-            <h2>Информационный контроль</h2>
-            <p>Вы имеете право ограничить сбор или запросить удаление своей персональной информации. По вопросам обращайтесь: <a href="mailto:support@happiness.com" class="privacy-link">support@happiness.com</a></p>
-          </div>
+        <div v-if="pending" class="privacy-skeleton" aria-busy="true">
+          <div class="sk-title" />
+          <div v-for="n in 6" :key="n" class="sk-line" />
         </div>
+
+        <template v-else-if="page">
+          <h1 class="privacy-title">
+            <span class="title-line title-black">{{ titleFirst }}</span>
+            <span v-if="titleRest" class="title-line title-orange">{{ titleRest }}</span>
+          </h1>
+
+          <div class="privacy-blocks">
+            <article
+              v-for="block in sortedBlocks"
+              :key="block.id"
+              class="privacy-block"
+            >
+              <h2 v-if="block.title?.trim()" class="privacy-block-title">{{ block.title }}</h2>
+              <div
+                class="privacy-prose"
+                v-html="block.description"
+              />
+            </article>
+          </div>
+        </template>
+
+        <p v-else class="privacy-fallback" role="alert">
+          Не удалось загрузить политику конфиденциальности. Попробуйте обновить страницу позже.
+        </p>
       </div>
     </main>
     <TheFooter />
@@ -109,12 +40,44 @@
 </template>
 
 <script setup lang="ts">
+import type { PrivacyPolicyBlock, PrivacyPolicyPageData } from '~/types/privacyPolicyPage'
+
 definePageMeta({
   layout: false,
 })
 
+const { data, pending } = usePrivacyPolicyPage()
+
+const page = computed<PrivacyPolicyPageData | null>(() => data.value?.data ?? null)
+
+const sortedBlocks = computed<PrivacyPolicyBlock[]>(() => {
+  const blocks = page.value?.blocks ?? []
+  return [...blocks].sort((a, b) => a.position - b.position)
+})
+
+/** Двухстрочный заголовок как раньше: первое слово + остаток. */
+const titleFirst = computed(() => {
+  const t = page.value?.main_title?.trim() ?? ''
+  if (!t) return 'ПОЛИТИКА'
+  const i = t.indexOf(' ')
+  if (i <= 0) return t.toUpperCase()
+  return t.slice(0, i).toUpperCase()
+})
+
+const titleRest = computed(() => {
+  const t = page.value?.main_title?.trim() ?? ''
+  const i = t.indexOf(' ')
+  if (i <= 0) return ''
+  return t.slice(i + 1).trim().toUpperCase()
+})
+
+const headTitle = computed(() => {
+  const t = page.value?.main_title?.trim()
+  return t ? `${t} — Happiness` : 'Политика конфиденциальности — Happiness'
+})
+
 useHead({
-  title: 'Политика конфиденциальности — Happiness',
+  title: () => headTitle.value,
 })
 </script>
 
@@ -123,6 +86,51 @@ useHead({
   background: #fff;
   min-height: 100vh;
   padding-bottom: 60px;
+}
+
+.privacy-skeleton {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px 0;
+}
+
+.sk-title {
+  height: 52px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%);
+  background-size: 200% 100%;
+  animation: sk-shimmer 1.2s ease-in-out infinite;
+  margin-bottom: 32px;
+}
+
+.sk-line {
+  height: 14px;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  background: linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%);
+  background-size: 200% 100%;
+  animation: sk-shimmer 1.2s ease-in-out infinite;
+}
+
+.sk-line:nth-child(3n) {
+  width: 92%;
+}
+
+.sk-line:nth-child(3n + 1) {
+  width: 100%;
+}
+
+.sk-line:nth-child(3n + 2) {
+  width: 85%;
+}
+
+@keyframes sk-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 .privacy-title {
@@ -147,70 +155,77 @@ useHead({
   color: var(--primary-orange);
 }
 
-.privacy-content {
-  display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  gap: 60px;
-  max-width: 1200px;
+.privacy-blocks {
+  max-width: 900px;
   margin: 0 auto;
-}
-
-.privacy-col {
   color: #121212;
   font-size: 16px;
   line-height: 1.7;
 }
 
-.privacy-col h2 {
+.privacy-block {
+  margin-bottom: 40px;
+}
+
+.privacy-block:last-child {
+  margin-bottom: 0;
+}
+
+.privacy-block-title {
   font-size: 20px;
   font-weight: 700;
-  margin: 32px 0 16px 0;
+  margin: 0 0 16px 0;
   color: #121212;
 }
 
-.privacy-col h2:first-child {
+.privacy-block:first-child .privacy-block-title {
   margin-top: 0;
 }
 
-.privacy-col h3 {
+.privacy-fallback {
+  text-align: center;
+  color: #666;
+  padding: 48px 16px;
   font-size: 17px;
-  font-weight: 700;
-  margin: 24px 0 12px 0;
-  color: #121212;
 }
 
-.privacy-col p {
+/* HTML из API */
+.privacy-prose :deep(p) {
   margin: 0 0 16px 0;
 }
 
-.privacy-intro {
-  font-weight: 500;
+.privacy-prose :deep(p:last-child) {
+  margin-bottom: 0;
 }
 
-.privacy-col ul {
+.privacy-prose :deep(ul),
+.privacy-prose :deep(ol) {
   margin: 0 0 16px 0;
   padding-left: 24px;
 }
 
-.privacy-col li {
+.privacy-prose :deep(li) {
   margin-bottom: 8px;
 }
 
-.privacy-link {
+.privacy-prose :deep(strong) {
+  font-weight: 700;
+}
+
+.privacy-prose :deep(a) {
   color: var(--primary-orange);
   text-decoration: underline;
 }
 
-.privacy-link:hover {
+.privacy-prose :deep(a:hover) {
   opacity: 0.9;
 }
 
-@media (max-width: 900px) {
-  .privacy-content {
-    grid-template-columns: 1fr;
-    gap: 26px;
-  }
+.privacy-prose :deep(br) {
+  line-height: inherit;
+}
 
+@media (max-width: 900px) {
   .privacy-title {
     font-size: 36px;
     margin-bottom: 24px;
@@ -228,27 +243,18 @@ useHead({
     margin-bottom: 16px;
   }
 
-  .privacy-col {
+  .privacy-blocks {
     font-size: 14px;
     line-height: 1.5;
   }
 
-  .privacy-col h2 {
+  .privacy-block-title {
     font-size: 16px;
-    margin: 18px 0 8px;
-  }
-
-  .privacy-col h3 {
-    font-size: 15px;
-    margin: 14px 0 8px;
-  }
-
-  .privacy-col p,
-  .privacy-col ul {
     margin-bottom: 10px;
   }
 
-  .privacy-col ul {
+  .privacy-prose :deep(ul),
+  .privacy-prose :deep(ol) {
     padding-left: 18px;
   }
 }

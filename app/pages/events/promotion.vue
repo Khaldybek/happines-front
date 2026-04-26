@@ -28,10 +28,16 @@
               <button
                 type="button"
                 class="promo-tab-arrow"
-              :aria-label="t('prevTab')"
-              @click="scrollTabs(-1)"
+                :disabled="!canScrollTabsLeft"
+                :aria-label="t('prevTab')"
+                :aria-disabled="!canScrollTabsLeft"
+                @click="scrollTabs(-1)"
               >
-                <img src="/images/I16_569_132_85695.svg" alt="" class="promo-tab-arrow-icon">
+                <img
+                  src="/images/I16_569_132_85696.svg"
+                  alt=""
+                  class="promo-tab-arrow-icon promo-tab-arrow-icon--prev"
+                >
               </button>
               <div ref="tabsRef" class="promo-tabs" @scroll="onTabsScroll">
                 <button
@@ -57,7 +63,9 @@
               <button
                 type="button"
                 class="promo-tab-arrow"
+                :disabled="!canScrollTabsRight"
                 :aria-label="t('nextTab')"
+                :aria-disabled="!canScrollTabsRight"
                 @click="scrollTabs(1)"
               >
                 <img src="/images/I16_569_132_85696.svg" alt="" class="promo-tab-arrow-icon">
@@ -233,14 +241,67 @@ const currentSubtitle = computed(() => {
 })
 
 const tabsRef = ref<HTMLElement | null>(null)
+const canScrollTabsLeft = ref(false)
+const canScrollTabsRight = ref(false)
+
+function updateTabScrollEdges() {
+  const el = tabsRef.value
+  if (!el) {
+    canScrollTabsLeft.value = false
+    canScrollTabsRight.value = false
+    return
+  }
+  const { scrollLeft, scrollWidth, clientWidth } = el
+  const maxScroll = Math.max(0, scrollWidth - clientWidth)
+  const eps = 3
+  if (maxScroll <= eps) {
+    canScrollTabsLeft.value = false
+    canScrollTabsRight.value = false
+    return
+  }
+  canScrollTabsLeft.value = scrollLeft > eps
+  canScrollTabsRight.value = scrollLeft < maxScroll - eps
+}
 
 function scrollTabs(direction: number) {
   const el = tabsRef.value
   if (!el) return
+  if (direction < 0 && !canScrollTabsLeft.value) return
+  if (direction > 0 && !canScrollTabsRight.value) return
   el.scrollBy({ left: direction * 200, behavior: 'smooth' })
 }
 
-function onTabsScroll() {}
+function onTabsScroll() {
+  updateTabScrollEdges()
+}
+
+let tabsResizeObserver: ResizeObserver | null = null
+
+onMounted(() => {
+  window.addEventListener('resize', updateTabScrollEdges)
+  nextTick(() => {
+    updateTabScrollEdges()
+    const el = tabsRef.value
+    if (el && typeof ResizeObserver !== 'undefined') {
+      tabsResizeObserver = new ResizeObserver(() => updateTabScrollEdges())
+      tabsResizeObserver.observe(el)
+    }
+  })
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateTabScrollEdges)
+  tabsResizeObserver?.disconnect()
+  tabsResizeObserver = null
+})
+
+watch(
+  [() => pending.value, carouselSorted, longTermBlocks, hasTabs],
+  () => {
+    nextTick(() => updateTabScrollEdges())
+  },
+  { flush: 'post' },
+)
 
 function splitDescription(text: string): string[] {
   return text
@@ -338,8 +399,8 @@ function longTermBlockDate(block: PromotionsLongTermBlock): string {
 
 .promo-tab-arrow {
   flex-shrink: 0;
-  width: 53px;
-  height: 53px;
+  width: 56px;
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -350,14 +411,29 @@ function longTermBlockDate(block: PromotionsLongTermBlock): string {
   cursor: pointer;
   transition: opacity 0.2s;
 }
-.promo-tab-arrow:hover {
+.promo-tab-arrow:hover:not(:disabled) {
   opacity: 0.9;
 }
 
+.promo-tab-arrow:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: #c4b4a8;
+}
+
+.promo-tab-arrow:disabled .promo-tab-arrow-icon {
+  opacity: 0.55;
+}
+
 .promo-tab-arrow-icon {
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
   filter: none;
+}
+
+/* Левая стрелка: тот же asset, что и «вперёд» (85695 — только круг без path) */
+.promo-tab-arrow-icon--prev {
+  transform: scaleX(-1);
 }
 
 .promo-tabs {
@@ -646,13 +722,13 @@ function longTermBlockDate(block: PromotionsLongTermBlock): string {
   }
 
   .promo-tab-arrow {
-    width: 36px;
-    height: 36px;
+    width: 42px;
+    height: 42px;
   }
 
   .promo-tab-arrow-icon {
-    width: 16px;
-    height: 16px;
+    width: 22px;
+    height: 22px;
   }
 
   .promo-tabs {

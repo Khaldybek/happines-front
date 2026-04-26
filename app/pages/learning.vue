@@ -6,85 +6,108 @@
         <div class="container">
           <LearningBreadcrumbs />
 
-          <div class="hero-content">
-            <div class="hero-image-container">
-              <img
-                src="/images/e39744b8aca4253a251f6190e55ee1735b42dbd7.png"
-                alt="Онлайн обучение"
-                class="hero-bg-img"
-              >
-            </div>
-            <h1 class="learning-title">ОНЛАЙН ОБУЧЕНИЕ</h1>
-            <p class="learning-desc">
-              Онлайн-обучение открывает доступ к знаниям в удобное для вас время и в любом месте. Осваивайте новые навыки, повышайте квалификацию и развивайтесь в комфортном темпе.
-            </p>
-
-            <div class="learning-tabs">
-              <button
-                type="button"
-                class="learning-tab"
-                :class="{ 'is-active': activeTab === 'documents' }"
-                @click="activeTab = 'documents'"
-              >
-                ДОКУМЕНТЫ ДЛЯ СКАЧИВАНИЯ
-              </button>
-              <button
-                type="button"
-                class="learning-tab"
-                :class="{ 'is-active': activeTab === 'video' }"
-                @click="activeTab = 'video'"
-              >
-                ВИДЕОАРХИВ
-              </button>
-            </div>
+          <div v-if="pending" class="hero-content learning-skeleton" aria-busy="true">
+            <div class="sk-hero" />
+            <div class="sk-title" />
+            <div v-for="n in 4" :key="n" class="sk-line" />
           </div>
 
-          <div class="learning-content-box">
-            <!-- Документы -->
-            <div v-if="activeTab === 'documents'" class="learning-list learning-documents">
-              <div v-for="(doc, i) in documents" :key="i" class="learning-doc-row">
-                <span class="doc-icon" aria-hidden="true">
-                  <svg width="32" height="40" viewBox="0 0 32 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M0 4a4 4 0 0 1 4-4h16l12 12v28a4 4 0 0 1-4 4H4a4 4 0 0 1-4-4V4z" fill="#DD5F05"/>
-                    <path d="M20 0v12h12L20 0z" fill="#DD5F05" fill-opacity="0.7"/>
-                    <path d="M8 18h16v2H8v-2zm0 6h16v2H8v-2zm0 6h10v2H8v-2z" fill="#fff"/>
-                  </svg>
-                </span>
-                <span class="doc-title">Lorem Ipsum - это текст-"рыба"</span>
-                <button type="button" class="btn-download">
-                  <img src="/images/I16_569_132_85696.svg" alt="" class="btn-download-arrow">
-                  СКАЧАТЬ
-                </button>
+          <p v-else-if="!payload" class="learning-error" role="alert">
+            Не удалось загрузить страницу. Попробуйте позже.
+          </p>
+
+          <template v-else>
+            <div class="hero-content">
+              <div class="hero-image-container">
+                <img
+                  :src="payload.image_url"
+                  :alt="payload.main_title"
+                  class="hero-bg-img"
+                >
               </div>
-            </div>
-            <!-- Видеоархив -->
-            <div v-else class="learning-list learning-videos">
-              <div v-for="(video, i) in videos" :key="i" class="learning-video-row">
-                <div class="video-thumb-wrap">
-                  <img :src="video.thumb" :alt="video.title" class="video-thumb">
-                  <span class="video-play-icon" aria-hidden="true">
-                    <img src="/images/16_561.svg" alt="">
-                  </span>
+              <h1 class="learning-title">{{ payload.main_title }}</h1>
+              <div class="learning-desc learning-prose" v-html="payload.description" />
+
+              <p v-if="!payload.authenticated" class="learning-guest-hint">
+                <NuxtLink to="/login">Войдите</NuxtLink>, чтобы открыть видеоархив и документы для скачивания.
+              </p>
+
+              <template v-else>
+                <div v-if="hasDocuments || hasVideos" class="learning-tabs">
+                  <button
+                    v-if="hasDocuments"
+                    type="button"
+                    class="learning-tab"
+                    :class="{ 'is-active': activeTab === 'documents' }"
+                    @click="activeTab = 'documents'"
+                  >
+                    ДОКУМЕНТЫ ДЛЯ СКАЧИВАНИЯ
+                  </button>
+                  <button
+                    v-if="hasVideos"
+                    type="button"
+                    class="learning-tab"
+                    :class="{ 'is-active': activeTab === 'video' }"
+                    @click="activeTab = 'video'"
+                  >
+                    ВИДЕОАРХИВ
+                  </button>
                 </div>
-                <p class="video-text">{{ video.text }}</p>
-              </div>
+              </template>
             </div>
 
-            <div class="learning-pager">
-              <button type="button" class="pager-arrow" aria-label="Предыдущая страница">‹</button>
-              <button
-                v-for="p in pages"
-                :key="p"
-                type="button"
-                class="pager-item"
-                :class="{ 'is-active': p === currentPage }"
-                @click="currentPage = p"
-              >
-                {{ p }}
-              </button>
-              <button type="button" class="pager-arrow" aria-label="Следующая страница">›</button>
+            <div v-if="payload.authenticated && (hasDocuments || hasVideos)" class="learning-content-box">
+              <div v-if="activeTab === 'documents' && hasDocuments" class="learning-list learning-documents">
+                <div v-for="doc in sortedDocuments" :key="doc.id" class="doc-group">
+                  <h3 v-if="doc.title?.trim()" class="doc-group-title">{{ doc.title }}</h3>
+                  <div
+                    v-for="file in doc.files"
+                    :key="file.id"
+                    class="learning-doc-row"
+                  >
+                    <span class="doc-icon" aria-hidden="true">
+                      <svg width="32" height="40" viewBox="0 0 32 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M0 4a4 4 0 0 1 4-4h16l12 12v28a4 4 0 0 1-4 4H4a4 4 0 0 1-4-4V4z" fill="#DD5F05" />
+                        <path d="M20 0v12h12L20 0z" fill="#DD5F05" fill-opacity="0.7" />
+                        <path d="M8 18h16v2H8v-2zm0 6h16v2H8v-2zm0 6h10v2H8v-2z" fill="#fff" />
+                      </svg>
+                    </span>
+                    <span class="doc-title">{{ file.name }}</span>
+                    <a
+                      :href="file.file_url"
+                      class="btn-download"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <img src="/images/I16_569_132_85696.svg" alt="" class="btn-download-arrow">
+                      СКАЧАТЬ
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <div v-else-if="activeTab === 'video' && hasVideos" class="learning-list learning-videos">
+                <a
+                  v-for="video in sortedVideos"
+                  :key="video.id"
+                  :href="video.video_url"
+                  class="learning-video-row learning-video-link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <div class="video-thumb-wrap">
+                    <div class="video-thumb-placeholder" aria-hidden="true" />
+                    <span class="video-play-icon" aria-hidden="true">
+                      <img src="/images/16_561.svg" alt="">
+                    </span>
+                  </div>
+                  <p class="video-text">{{ video.name }}</p>
+                </a>
+              </div>
+
+              <p v-else class="learning-tab-empty">В этом разделе пока нет материалов.</p>
             </div>
-          </div>
+          </template>
         </div>
       </section>
     </main>
@@ -93,31 +116,119 @@
 </template>
 
 <script setup lang="ts">
+import type {
+  OnlineLearningDocument,
+  OnlineLearningPayload,
+  OnlineLearningVideo,
+} from '~/types/onlineLearningPage'
+
 definePageMeta({
   layout: false,
 })
 
-useHead({
-  title: 'Онлайн обучение — Happiness',
+const { data, pending } = useOnlineLearningPage()
+
+const payload = computed<OnlineLearningPayload | null>(() => data.value?.online_learning ?? null)
+
+const sortedVideos = computed<OnlineLearningVideo[]>(() => {
+  const v = payload.value?.videos ?? []
+  return [...v].sort((a, b) => a.position - b.position)
 })
 
-const activeTab = ref<'documents' | 'video'>('documents')
-const currentPage = ref(3)
-const pages = [1, 2, 3, 4, 5]
+const sortedDocuments = computed(() => {
+  const docs = payload.value?.documents ?? []
+  return [...docs]
+    .sort((a, b) => a.position - b.position)
+    .map((doc: OnlineLearningDocument) => ({
+      ...doc,
+      files: [...(doc.files ?? [])].sort((a, b) => a.position - b.position),
+    }))
+    .filter(d => d.files.length > 0)
+})
 
-const documents = Array.from({ length: 10 }, () => ({}))
-const videoPlaceholder = '/images/c46ab61af1aebaf89c9801b3ac51c5a7dce3816f.png'
-const videos = Array.from({ length: 5 }, () => ({
-  thumb: videoPlaceholder,
-  title: 'Видео',
-  text: 'Lorem Ipsum является стандартной "рыбой" для текстов на латинице с начала XVI века.',
-}))
+const hasVideos = computed(() => sortedVideos.value.length > 0)
+const hasDocuments = computed(() => sortedDocuments.value.length > 0)
+
+const activeTab = ref<'documents' | 'video'>('documents')
+
+watch(
+  [hasDocuments, hasVideos, () => payload.value?.authenticated],
+  () => {
+    if (!payload.value?.authenticated) return
+    if (hasDocuments.value && !hasVideos.value) activeTab.value = 'documents'
+    else if (!hasDocuments.value && hasVideos.value) activeTab.value = 'video'
+    else if (activeTab.value === 'documents' && !hasDocuments.value && hasVideos.value) {
+      activeTab.value = 'video'
+    }
+    else if (activeTab.value === 'video' && !hasVideos.value && hasDocuments.value) {
+      activeTab.value = 'documents'
+    }
+  },
+  { immediate: true },
+)
+
+const headTitle = computed(() => {
+  const t = payload.value?.main_title?.trim()
+  return t ? `${t} — Happiness` : 'Онлайн обучение — Happiness'
+})
+
+useHead({
+  title: () => headTitle.value,
+})
 </script>
 
 <style scoped>
 .learning-page {
   background: #fff;
   padding-bottom: 40px;
+}
+
+.learning-skeleton {
+  padding: 20px 0 40px;
+}
+
+.sk-hero {
+  height: 220px;
+  border-radius: 16px;
+  margin-bottom: 24px;
+  background: linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%);
+  background-size: 200% 100%;
+  animation: sk-shimmer 1.2s ease-in-out infinite;
+}
+
+.sk-title {
+  height: 48px;
+  width: 70%;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  background: linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%);
+  background-size: 200% 100%;
+  animation: sk-shimmer 1.2s ease-in-out infinite;
+}
+
+.sk-line {
+  height: 14px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  background: linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%);
+  background-size: 200% 100%;
+  animation: sk-shimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes sk-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.learning-error {
+  text-align: center;
+  padding: 40px 16px;
+  color: #666;
+  font-size: 17px;
 }
 
 .learning-title {
@@ -136,6 +247,39 @@ const videos = Array.from({ length: 5 }, () => ({
   line-height: 1.4;
   color: #171717;
   margin: 0 0 28px;
+}
+
+.learning-prose :deep(p) {
+  margin: 0 0 12px;
+}
+
+.learning-prose :deep(p:last-child) {
+  margin-bottom: 0;
+}
+
+.learning-prose :deep(ul),
+.learning-prose :deep(ol) {
+  margin: 0 0 12px;
+  padding-left: 1.25rem;
+}
+
+.learning-prose :deep(a) {
+  color: #dd5f05;
+  text-decoration: underline;
+}
+
+.learning-guest-hint {
+  max-width: 900px;
+  margin: 0 0 8px;
+  font-size: 16px;
+  line-height: 1.45;
+  color: #444;
+}
+
+.learning-guest-hint a {
+  color: #dd5f05;
+  font-weight: 700;
+  text-decoration: underline;
 }
 
 .learning-tabs {
@@ -157,7 +301,9 @@ const videos = Array.from({ length: 5 }, () => ({
   border: none;
   color: #7f7f7f;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
 }
 
 .learning-tab.is-active {
@@ -172,11 +318,37 @@ const videos = Array.from({ length: 5 }, () => ({
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
+.learning-tab-empty {
+  margin: 0;
+  text-align: center;
+  font-size: 16px;
+  color: #333;
+}
+
 /* Документы */
 .learning-documents {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 0;
+}
+
+.doc-group {
+  margin-bottom: 8px;
+}
+
+.doc-group:last-child {
+  margin-bottom: 0;
+}
+
+.doc-group-title {
+  margin: 20px 0 8px;
+  font-size: 17px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.doc-group:first-child .doc-group-title {
+  margin-top: 0;
 }
 
 .learning-doc-row {
@@ -225,6 +397,11 @@ const videos = Array.from({ length: 5 }, () => ({
   cursor: pointer;
   flex-shrink: 0;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  text-decoration: none;
+}
+
+.btn-download:hover {
+  background: #fff5ed;
 }
 
 .btn-download-arrow {
@@ -238,6 +415,11 @@ const videos = Array.from({ length: 5 }, () => ({
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+.learning-video-link {
+  text-decoration: none;
+  color: inherit;
 }
 
 .learning-video-row {
@@ -256,10 +438,10 @@ const videos = Array.from({ length: 5 }, () => ({
   background: #333;
 }
 
-.video-thumb {
+.video-thumb-placeholder {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  background: linear-gradient(135deg, #4a6a3a 0%, #2d4a22 100%);
 }
 
 .video-play-icon {
@@ -286,39 +468,8 @@ const videos = Array.from({ length: 5 }, () => ({
   min-width: 0;
 }
 
-/* Пагинация */
-.learning-pager {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  margin-top: 28px;
-  padding-top: 20px;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-.pager-arrow,
-.pager-item {
-  min-width: 36px;
-  height: 36px;
-  padding: 0 10px;
-  border-radius: 999px;
-  border: 1px solid #c4c4c4;
-  background: #fff;
-  color: #7f7f7f;
-  font-size: 15px;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: border-color 0.2s, background 0.2s, color 0.2s;
-}
-
-.pager-item.is-active {
-  border-color: #8ec44e;
-  background: #8ec44e;
-  color: #fff;
+.learning-video-link:hover .video-text {
+  color: #dd5f05;
 }
 
 @media (max-width: 768px) {
@@ -366,6 +517,10 @@ const videos = Array.from({ length: 5 }, () => ({
     margin-bottom: 14px;
     font-size: 14px;
     line-height: 1.35;
+  }
+
+  .learning-guest-hint {
+    font-size: 14px;
   }
 
   .learning-tabs {
@@ -428,20 +583,6 @@ const videos = Array.from({ length: 5 }, () => ({
   .video-text {
     font-size: 14px;
     line-height: 1.35;
-  }
-
-  .learning-pager {
-    margin-top: 12px;
-    padding-top: 12px;
-    gap: 6px;
-  }
-
-  .pager-arrow,
-  .pager-item {
-    min-width: 32px;
-    height: 32px;
-    padding: 0 8px;
-    font-size: 13px;
   }
 }
 </style>
