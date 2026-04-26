@@ -16,11 +16,12 @@ export function onlineLearningPageUrl(): string {
 
 export function useOnlineLearningPage() {
   const route = useRoute()
+  const authToken = useCookie<string | null>('auth_token')
   const baseUrl = apiBaseUrl()
   const url = onlineLearningPageUrl()
 
   return useAsyncData(
-    () => `online-learning:${String(route.query.lang ?? '')}:${useCookie<string | null>('auth_token').value ?? ''}`,
+    'online-learning-page',
     async () => {
       try {
         const data = await $fetch<OnlineLearningPageResponse>(url, {
@@ -35,7 +36,7 @@ export function useOnlineLearningPage() {
     },
     {
       server: true,
-      watch: [() => route.query.lang, () => useCookie<string | null>('auth_token').value],
+      watch: [() => route.query.lang, () => authToken.value],
     },
   )
 }

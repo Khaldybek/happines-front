@@ -28,9 +28,16 @@
               <h1 class="learning-title">{{ payload.main_title }}</h1>
               <div class="learning-desc learning-prose" v-html="payload.description" />
 
-              <p v-if="!payload.authenticated" class="learning-guest-hint">
-                <NuxtLink to="/login">Войдите</NuxtLink>, чтобы открыть видеоархив и документы для скачивания.
-              </p>
+              <div v-if="!payload.authenticated" class="learning-guest-cta">
+                <NuxtLink to="/register" class="learning-register-btn">
+                  <span class="learning-register-btn-arrow" aria-hidden="true" />
+                  <span>Зарегистрироваться</span>
+                </NuxtLink>
+                <p class="learning-guest-login-hint">
+                  Уже есть аккаунт?
+                  <NuxtLink to="/login" class="learning-guest-login-link">Войдите</NuxtLink>, чтобы открыть видеоархив и документы.
+                </p>
+              </div>
 
               <template v-else>
                 <div v-if="hasDocuments || hasVideos" class="learning-tabs">
@@ -268,15 +275,67 @@ useHead({
   text-decoration: underline;
 }
 
-.learning-guest-hint {
+.learning-guest-cta {
   max-width: 900px;
-  margin: 0 0 8px;
+  margin: 8px 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+}
+
+.learning-register-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #dd5f05;
+  color: #fff;
+  border-radius: 999px;
+  padding: 2px 22px 2px 2px;
+  font-size: clamp(13px, 0.9vw, 16px);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  box-shadow: 0 2px 10px rgba(221, 95, 5, 0.25);
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.learning-register-btn:hover {
+  background: #c65505;
+  box-shadow: 0 3px 14px rgba(221, 95, 5, 0.35);
+}
+
+.learning-register-btn-arrow {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #dd5f05;
+  border: 2px solid rgba(255, 255, 255, 0.95);
+  position: relative;
+}
+
+.learning-register-btn-arrow::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  border-top: 2px solid #fff;
+  border-right: 2px solid #fff;
+  transform: translate(-62%, -50%) rotate(45deg);
+}
+
+.learning-guest-login-hint {
+  margin: 0;
   font-size: 16px;
   line-height: 1.45;
   color: #444;
 }
 
-.learning-guest-hint a {
+.learning-guest-login-link {
   color: #dd5f05;
   font-weight: 700;
   text-decoration: underline;
@@ -519,7 +578,17 @@ useHead({
     line-height: 1.35;
   }
 
-  .learning-guest-hint {
+  .learning-guest-cta {
+    gap: 14px;
+    align-items: stretch;
+  }
+
+  .learning-register-btn {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .learning-guest-login-hint {
     font-size: 14px;
   }
 

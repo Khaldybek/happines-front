@@ -2,89 +2,111 @@
   <section class="happiness-today-section">
     <div class="container">
       <h2 class="happiness-title">
-        <span class="happiness-title-accent">HAPPINESS</span>
-        <span>СЕГОДНЯ</span>
+        <span class="happiness-title-accent">{{ titleAccent }}</span>
+        <span v-if="titleRest">{{ titleRest }}</span>
       </h2>
 
-      <div class="cards-grid">
-        <article class="card card-1">
+      <div v-if="sortedBlocks.length" class="cards-grid">
+        <article
+          v-for="(block, i) in sortedBlocks"
+          :key="block.id"
+          class="card"
+          :class="cardClass(i)"
+        >
+          <div v-if="i > 0" class="card-fire">
+            <img src="/fire.svg" alt="">
+          </div>
           <div class="card-content">
-            <h3>Продукция HAPPINESS</h3>
-            <p>Натуральные формулы на стыке традиционной китайской медицины и современных биотехнологий — для ежедневной поддержки организма.</p>
-            <ul>
-              <li>Каталог / хиты / наборы</li>
-              <li>Контроль качества и стандарты</li>
-              <li>Удобная покупка онлайн</li>
+            <h3>{{ block.title }}</h3>
+            <p>{{ block.description }}</p>
+            <ul v-if="criteriaList(block).length">
+              <li v-for="(c, j) in criteriaList(block)" :key="`${block.id}-c-${j}`">{{ c.text }}</li>
             </ul>
           </div>
-          <div class="card-footer">
-            <NuxtLink to="/products" class="action-btn">
-              <span class="action-arrow" aria-hidden="true"></span>
-              <span>Перейти в каталог</span>
+          <div v-if="ctaFor(block)" class="card-footer">
+            <NuxtLink
+              v-if="ctaFor(block)!.kind === 'internal'"
+              :to="ctaFor(block)!.to"
+              class="action-btn"
+            >
+              <span class="action-arrow" aria-hidden="true" />
+              <span>{{ block.link_name || 'Подробнее' }}</span>
             </NuxtLink>
-          </div>
-        </article>
-
-        <article class="card card-2">
-          <div class="card-fire"><img src="/fire.svg" alt=""></div>
-          <div class="card-content">
-            <h3>Онлайн обучение</h3>
-            <p>Система обучения для партнёров: знания о продуктах, инструменты продвижения и поддержка, чтобы уверенно развивать результат.</p>
-            <ul>
-              <li>Курсы и материалы</li>
-              <li>Практика и наставничество</li>
-              <li>Готовые инструменты для работы</li>
-            </ul>
-          </div>
-          <div class="card-footer">
-            <NuxtLink to="/learning" class="action-btn">
-              <span class="action-arrow" aria-hidden="true"></span>
-              <span>Перейти к обучению</span>
-            </NuxtLink>
-          </div>
-        </article>
-
-        <article class="card card-3">
-          <div class="card-fire"><img src="/fire.svg" alt=""></div>
-          <div class="card-content">
-            <h3>Возможности для партнёров</h3>
-            <p>Маркетинговая программа и понятная модель развития: доход, бонусы и карьерный рост в сильном сообществе.</p>
-            <ul>
-              <li>Еженедельные выплаты</li>
-              <li>Денежное вознаграждение</li>
-              <li>Бонусы и поощрения</li>
-            </ul>
-          </div>
-          <div class="card-footer">
-            <NuxtLink to="/business" class="action-btn">
-              <span class="action-arrow" aria-hidden="true"></span>
-              <span>Стать партнёром</span>
-            </NuxtLink>
-          </div>
-        </article>
-
-        <article class="card card-4">
-          <div class="card-fire"><img src="/fire.svg" alt=""></div>
-          <div class="card-content">
-            <h3>События и промоушены</h3>
-            <p>Поездки, встречи и программы признания, которые объединяют партнёров и ускоряют рост через опыт и комьюнити.</p>
-            <ul>
-              <li>Промоушены и поездки</li>
-              <li>Новости и отчёты</li>
-              <li>Истории партнёров</li>
-            </ul>
-          </div>
-          <div class="card-footer">
-            <NuxtLink to="/events" class="action-btn">
-              <span class="action-arrow" aria-hidden="true"></span>
-              <span>Смотреть события</span>
-            </NuxtLink>
+            <a
+              v-else-if="ctaFor(block)!.kind === 'external'"
+              :href="ctaFor(block)!.href"
+              class="action-btn"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span class="action-arrow" aria-hidden="true" />
+              <span>{{ block.link_name || 'Подробнее' }}</span>
+            </a>
           </div>
         </article>
       </div>
     </div>
   </section>
 </template>
+
+<script setup lang="ts">
+import { computed } from 'vue'
+import type { AboutBlock5Card, AboutBlock5Criterion } from '~/types/aboutPage'
+import { normalizeAboutText } from '~/utils/aboutText'
+import { resolveAboutCtaLink, type AboutCtaResolved } from '~/utils/aboutCtaLink'
+
+const props = withDefaults(
+  defineProps<{
+    sectionTitle?: string | null
+    blocks?: AboutBlock5Card[] | null
+  }>(),
+  {
+    sectionTitle: 'HAPPINESS сегодня',
+    blocks: () => [],
+  },
+)
+
+const titleBits = computed(() => {
+  const raw = normalizeAboutText(props.sectionTitle) || 'HAPPINESS сегодня'
+  const parts = raw.trim().split(/\s+/).filter(Boolean)
+  if (parts.length >= 2) {
+    return {
+      accent: parts[0].toUpperCase(),
+      rest: ` ${parts.slice(1).join(' ').toUpperCase()}`,
+    }
+  }
+  return { accent: raw.toUpperCase(), rest: '' }
+})
+
+const titleAccent = computed(() => titleBits.value.accent)
+const titleRest = computed(() => titleBits.value.rest)
+
+const sortedBlocks = computed(() => {
+  const list = props.blocks ?? []
+  return [...list].sort((a, b) => a.position - b.position).map(b => ({
+    ...b,
+    title: normalizeAboutText(b.title),
+    description: normalizeAboutText(b.description),
+  }))
+})
+
+function cardClass(i: number): string {
+  const n = (i % 4) + 1
+  return `card-${n}`
+}
+
+function criteriaList(block: AboutBlock5Card): AboutBlock5Criterion[] {
+  const c = block.criteria ?? []
+  return [...c].sort((a, b) => a.position - b.position).map(x => ({
+    ...x,
+    text: normalizeAboutText(x.text),
+  }))
+}
+
+function ctaFor(block: AboutBlock5Card): AboutCtaResolved | null {
+  return resolveAboutCtaLink(block.link)
+}
+</script>
 
 <style scoped>
 .happiness-today-section {
@@ -184,6 +206,7 @@
   font-size: clamp(13px, 0.82vw, 16px);
   font-weight: 800;
   text-transform: uppercase;
+  text-decoration: none;
 }
 
 .action-arrow {

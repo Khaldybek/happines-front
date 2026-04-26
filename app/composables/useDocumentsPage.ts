@@ -1,4 +1,4 @@
-import type { CatalogPageResponse } from '~/types/catalogPage'
+import type { DocumentsPageResponse } from '~/types/documentsPage'
 import { getApiLangForRequest } from '~/composables/useApiLangQuery'
 import { optionalBearerJsonHeaders } from '~/composables/useApiBearerOptional'
 import { deepFixMediaUrls } from '~/utils/resolveMediaUrl'
@@ -10,22 +10,20 @@ function apiBaseUrl(): string {
     .replace(/\/+$/, '')
 }
 
-export function catalogPageUrl(slug: string): string {
-  const safe = String(slug || '').trim()
-  return `${apiBaseUrl()}/api/V1/pages/catalog/${encodeURIComponent(safe)}`
+export function documentsPageUrl(): string {
+  return `${apiBaseUrl()}/api/V1/pages/documents`
 }
 
-export function useCatalogPage(slug: string) {
+export function useDocumentsPage() {
   const route = useRoute()
-  const authToken = useCookie<string | null>('auth_token')
   const baseUrl = apiBaseUrl()
-  const url = catalogPageUrl(slug)
+  const url = documentsPageUrl()
 
   return useAsyncData(
-    `catalog-page:${slug}`,
+    'documents-page',
     async () => {
       try {
-        const data = await $fetch<CatalogPageResponse>(url, {
+        const data = await $fetch<DocumentsPageResponse>(url, {
           headers: optionalBearerJsonHeaders(),
           query: getApiLangForRequest(route),
         })
@@ -37,8 +35,7 @@ export function useCatalogPage(slug: string) {
     },
     {
       server: true,
-      watch: [() => route.query.lang, () => authToken.value],
+      watch: [() => route.query.lang],
     },
   )
 }
-

@@ -12,6 +12,7 @@ function apiBaseUrl(): string {
 
 export function useProductPage(slug: MaybeRefOrGetter<string>) {
   const route = useRoute()
+  const authToken = useCookie<string | null>('auth_token')
   const baseUrl = apiBaseUrl()
   const url = `${baseUrl}/api/V1/pages/product`
 
@@ -36,7 +37,7 @@ export function useProductPage(slug: MaybeRefOrGetter<string>) {
       watch: [
         () => route.query.lang,
         () => route.params.slug,
-        () => useCookie<string | null>('auth_token').value,
+        () => authToken.value,
       ],
     },
   )

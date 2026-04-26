@@ -1,26 +1,82 @@
 <template>
   <section class="about-company-section">
     <div class="container">
-      <h2 class="section-title about-section-title">О КОМПАНИИ</h2>
+      <h2 class="section-title about-section-title">{{ sectionTitle }}</h2>
       <div class="about-card">
         <div class="about-content">
           <div class="about-image">
-            <img src="/images/e39744b8aca4253a251f6190e55ee1735b42dbd7.png" alt="Президент корпорации Шен Лунг HAPPINESS">
+            <img :src="imageSrc" :alt="imageAlt">
           </div>
           <div class="about-text">
-            <h3>Президент корпорации Шен Лунг HAPPINESS<br>Чжоу Вэньцин</h3>
-            <p>Счастье — это цель, к которой стремится каждый. Я создал HAPPINESS, чтобы дарить людям здоровье, успех и радость — потому что наша миссия проста: создавать счастье».</p>
-            <p>Мы развиваем бренд через собственный современный научно-исследовательский центр и центр контроля качества, следуя международным стандартам, и последовательно реализуем стратегию «Оздоровление нации».</p>
-            <NuxtLink to="/catalog" class="btn btn-orange about-catalog-btn">
+            <h3>{{ secondaryTitle }}</h3>
+            <p class="about-desc">{{ description }}</p>
+            <NuxtLink
+              v-if="cta?.kind === 'internal'"
+              :to="cta.to"
+              class="btn btn-orange about-catalog-btn"
+            >
               <img src="/images/I16_569_132_85696.svg" alt="" class="btn-arrow">
-              Перейти в каталог
+              {{ linkLabel }}
             </NuxtLink>
+            <a
+              v-else-if="cta?.kind === 'external'"
+              :href="cta.href"
+              class="btn btn-orange about-catalog-btn"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img src="/images/I16_569_132_85696.svg" alt="" class="btn-arrow">
+              {{ linkLabel }}
+            </a>
           </div>
         </div>
       </div>
     </div>
   </section>
 </template>
+
+<script setup lang="ts">
+import { computed } from 'vue'
+import { normalizeAboutText } from '~/utils/aboutText'
+import { resolveAboutCtaLink } from '~/utils/aboutCtaLink'
+
+const props = withDefaults(
+  defineProps<{
+    sectionTitle?: string | null
+    secondaryTitle?: string | null
+    description?: string | null
+    imageUrl?: string | null
+    link?: string | null
+    linkName?: string | null
+  }>(),
+  {
+    sectionTitle: 'О КОМПАНИИ',
+    secondaryTitle: 'Президент корпорации Шен Лунг HAPPINESS\nЧжоу Вэньцин',
+    description: '',
+    imageUrl: '/images/e39744b8aca4253a251f6190e55ee1735b42dbd7.png',
+    link: null,
+    linkName: 'Перейти в каталог',
+  },
+)
+
+const sectionTitle = computed(() => String(props.sectionTitle || 'О КОМПАНИИ').trim() || 'О КОМПАНИИ')
+const secondaryTitle = computed(() => normalizeAboutText(props.secondaryTitle))
+const description = computed(() => normalizeAboutText(props.description))
+const imageSrc = computed(() => String(props.imageUrl || '').trim() || '/images/e39744b8aca4253a251f6190e55ee1735b42dbd7.png')
+const imageAlt = computed(() => secondaryTitle.value.replace(/\n/g, ' ').slice(0, 120))
+
+const linkLabel = computed(() => String(props.linkName || 'Перейти в каталог').trim() || 'Перейти в каталог')
+
+const cta = computed(() => {
+  const resolved = resolveAboutCtaLink(props.link)
+  if (resolved) return resolved
+  if (props.linkName?.trim() && !props.link?.trim()) {
+    return { kind: 'internal' as const, to: '/catalog' }
+  }
+  return null
+})
+
+</script>
 
 <style scoped>
 .about-company-section {
@@ -78,13 +134,15 @@
   font-weight: 700;
   color: #121212;
   line-height: 1.4;
+  white-space: pre-line;
 }
 
-.about-text p {
+.about-desc {
   color: #121212;
   font-size: 16px;
   line-height: 1.6;
   margin: 0;
+  white-space: pre-line;
 }
 
 .about-catalog-btn {

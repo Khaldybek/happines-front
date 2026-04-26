@@ -6,10 +6,22 @@
 
       <section class="business-hero">
         <div class="container">
-          <div class="hero-wrapper">
+          <div
+            class="hero-wrapper"
+            :class="{ 'hero-wrapper--embed': !!heroYoutubeEmbedSrc }"
+          >
+            <iframe
+              v-if="heroYoutubeEmbedSrc"
+              :src="heroYoutubeEmbedSrc"
+              class="hero-embed"
+              title="Видео о бизнесе HAPPINESS"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+              loading="lazy"
+            />
             <video
-              v-if="heroVideoUrl"
-              :src="heroVideoUrl"
+              v-else-if="heroDirectVideoUrl"
+              :src="heroDirectVideoUrl"
               class="hero-img hero-video"
               autoplay
               muted
@@ -17,10 +29,19 @@
               playsinline
               preload="metadata"
             />
-            <img v-else :src="heroImage" alt="Команда HAPPINESS" class="hero-img">
-            <button v-if="!heroVideoUrl" type="button" class="play-btn" aria-label="Смотреть видео">
-              <img src="/images/16_561.svg" alt="" class="play-icon">
-            </button>
+            <template v-else>
+              <img :src="heroImage" alt="Команда HAPPINESS" class="hero-img">
+              <a
+                v-if="heroVideoPageUrl"
+                :href="heroVideoPageUrl"
+                class="play-btn"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Открыть видео в новой вкладке"
+              >
+                <img src="/images/16_561.svg" alt="" class="play-icon">
+              </a>
+            </template>
           </div>
         </div>
       </section>
@@ -66,13 +87,20 @@
             <div class="video-grid">
               <div
                 v-for="(video, i) in videoItems"
-                :key="i"
+                :key="`${i}-${video.pageUrl || 'x'}`"
                 class="video-thumb"
                 :class="videoThumbClass(i)"
               >
+                <img
+                  v-if="video.youtubeThumbUrl"
+                  :src="video.youtubeThumbUrl"
+                  alt=""
+                  class="video-thumb-img"
+                  loading="lazy"
+                >
                 <video
-                  v-if="video.url"
-                  :src="video.url"
+                  v-else-if="video.directUrl"
+                  :src="video.directUrl"
                   class="video-thumb-img"
                   autoplay
                   loop
@@ -86,8 +114,19 @@
                   alt="Видео превью"
                   class="video-thumb-img"
                 >
-                <span class="video-thumb-overlay" aria-hidden="true"></span>
-                <button type="button" class="video-play" aria-label="Смотреть видео"></button>
+                <span
+                  v-if="video.youtubeThumbUrl || (!video.directUrl && !video.youtubeThumbUrl)"
+                  class="video-thumb-overlay"
+                  aria-hidden="true"
+                />
+                <a
+                  v-if="showPartnerVideoLink(video)"
+                  :href="video.pageUrl"
+                  class="video-play"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  :aria-label="video.youtubeThumbUrl ? 'Смотреть на YouTube' : 'Открыть видео'"
+                />
               </div>
             </div>
           </div>
@@ -155,6 +194,13 @@
 </template>
 
 <script setup lang="ts">
+import {
+  isDirectVideoFileUrl,
+  parseYoutubeVideoId,
+  youtubeNoCookieEmbedSrc,
+  youtubePosterUrl,
+} from '~/utils/videoUrl'
+
 definePageMeta({
   layout: false,
 })
@@ -170,9 +216,20 @@ const heroImage = computed(() => {
   return /\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(raw) ? raw : HERO_PLACEHOLDER
 })
 
-const heroVideoUrl = computed(() => {
-  const raw = String(pageData.value?.hero_video_url || '').trim()
-  return raw || ''
+/** Ссылка на ролик с API (YouTube, файл и т.д.). */
+const heroVideoPageUrl = computed(() => String(pageData.value?.hero_video_url || '').trim())
+
+const heroYoutubeId = computed(() => parseYoutubeVideoId(heroVideoPageUrl.value))
+
+const heroYoutubeEmbedSrc = computed(() => {
+  const id = heroYoutubeId.value
+  return id ? youtubeNoCookieEmbedSrc(id) : ''
+})
+
+const heroDirectVideoUrl = computed(() => {
+  const u = heroVideoPageUrl.value
+  if (!u || heroYoutubeId.value) return ''
+  return isDirectVideoFileUrl(u) ? u : ''
 })
 
 const mainTitle = computed(
@@ -213,18 +270,54 @@ function videoThumbClass(index: number) {
   return 'video-thumb--sm video-thumb--rb'
 }
 
-const videoItems = computed(() => {
+interface PartnerVideoItem {
+  /** Исходная ссылка с API (YouTube, файл и т.д.). */
+  pageUrl: string
+  /** Превью YouTube; пусто, если не YouTube. */
+  youtubeThumbUrl: string
+  /** Прямой URL видеофайла для <video>. */
+  directUrl: string
+}
+
+function mapPartnerVideo(raw: unknown): PartnerVideoItem {
+  const pageUrl = String(raw ?? '').trim()
+  if (!pageUrl) {
+    return { pageUrl: '', youtubeThumbUrl: '', directUrl: '' }
+  }
+  const ytId = parseYoutubeVideoId(pageUrl)
+  if (ytId) {
+    return {
+      pageUrl,
+      youtubeThumbUrl: youtubePosterUrl(ytId),
+      directUrl: '',
+    }
+  }
+  if (isDirectVideoFileUrl(pageUrl)) {
+    return { pageUrl, youtubeThumbUrl: '', directUrl: pageUrl }
+  }
+  return { pageUrl, youtubeThumbUrl: '', directUrl: '' }
+}
+
+const videoItems = computed<PartnerVideoItem[]>(() => {
   const list = pageData.value?.videos ?? []
   if (!list.length) {
     return [
-      { url: '' },
-      { url: '' },
-      { url: '' },
-      { url: '' },
+      { pageUrl: '', youtubeThumbUrl: '', directUrl: '' },
+      { pageUrl: '', youtubeThumbUrl: '', directUrl: '' },
+      { pageUrl: '', youtubeThumbUrl: '', directUrl: '' },
+      { pageUrl: '', youtubeThumbUrl: '', directUrl: '' },
     ]
   }
-  return list.map((url) => ({ url }))
+  return list.map(mapPartnerVideo)
 })
+
+/** Показать кнопку-ссылку: YouTube или неизвестный URL, но не чистый mp4 без отдельной страницы. */
+function showPartnerVideoLink(video: PartnerVideoItem): boolean {
+  return Boolean(
+    video.pageUrl
+    && (video.youtubeThumbUrl || (!video.directUrl && !video.youtubeThumbUrl)),
+  )
+}
 
 const reviews = [
   {
@@ -305,6 +398,26 @@ function toggleFaq(index: number) {
   height: 420px;
 }
 
+/*
+ * На всю ширину .container. Не задаём max-height вместе с aspect-ratio иначе
+ * браузер уменьшает ширину под высоту — блок «прилипает» влево, справа пусто.
+ */
+.hero-wrapper--embed {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  min-height: 200px;
+}
+
+.hero-embed {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 200px;
+  border: 0;
+  background: #111;
+}
+
 .hero-img {
   width: 100%;
   height: 100%;
@@ -330,6 +443,8 @@ function toggleFaq(index: number) {
   align-items: center;
   justify-content: center;
   padding: 0;
+  text-decoration: none;
+  color: inherit;
 }
 
 .play-icon {
@@ -354,6 +469,7 @@ function toggleFaq(index: number) {
 
 .business-desc {
   font-size: 18px;
+  font-weight: 600;
   color: #121212;
   text-align: center;
   max-width: 800px;
@@ -374,39 +490,20 @@ function toggleFaq(index: number) {
 .benefit-card {
   position: relative;
   border-radius: 32px;
-  padding: 90px 24px 28px;
+  padding: 90px 28px 32px;
   min-height: 210px;
   display: flex;
+  flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  text-align: center;
+  text-align: left;
   color: #fff;
   font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
-  line-height: 1.2;
+  line-height: 1.25;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  overflow: hidden;
-}
-
-.benefit-card::before,
-.benefit-card::after {
-  content: "";
-  position: absolute;
-  top: 26px;
-  width: 54px;
-  height: 54px;
-  border-radius: 50%;
-  background: inherit;
-  z-index: 0;
-}
-
-.benefit-card::before {
-  left: -18px;
-}
-
-.benefit-card::after {
-  right: -18px;
+  overflow: visible;
 }
 
 .benefit-icon {
@@ -437,8 +534,9 @@ function toggleFaq(index: number) {
   position: relative;
   z-index: 1;
   display: block;
+  width: 100%;
   color: #fff;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.02em;
 }
 
 .benefit-card--blue { background: var(--primary-blue); }
@@ -578,6 +676,9 @@ function toggleFaq(index: number) {
   cursor: pointer;
   padding: 0;
   z-index: 1;
+  display: block;
+  text-decoration: none;
+  box-sizing: border-box;
 }
 
 .video-play::before {
@@ -966,11 +1067,6 @@ function toggleFaq(index: number) {
     top: -30px;
   }
 
-  .benefit-card::before,
-  .benefit-card::after {
-    display: none;
-  }
-
   .partners-cta-row {
     flex-direction: column;
     align-items: stretch;
@@ -1082,6 +1178,14 @@ function toggleFaq(index: number) {
   .hero-wrapper {
     height: 220px;
     border-radius: 14px;
+  }
+
+  .hero-wrapper--embed {
+    min-height: 160px;
+  }
+
+  .hero-embed {
+    min-height: 160px;
   }
 
   .play-btn {

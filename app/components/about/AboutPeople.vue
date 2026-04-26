@@ -2,45 +2,160 @@
   <section class="people-section">
     <div class="container">
       <h2 class="people-title">
-        <span class="title-orange">ЛЮДИ И</span>
-        <span class="title-black"> СООБЩЕСТВО</span>
+        <span class="title-orange">{{ titleAccent }}</span>
+        <span class="title-black">{{ titleRest }}</span>
       </h2>
-      <p class="people-intro">HAPPINESS — это команда и партнёры, которые развивают культуру здоровья и качества, поддерживая друг друга в каждом регионе.</p>
+      <p class="people-intro">{{ intro }}</p>
 
       <div class="people-layout">
         <div class="people-left">
-          <h3 class="people-subheading">Команда, которая отвечает за качество</h3>
-          <p class="people-desc">От разработки формул до сервиса и обучения — каждый этап контролируется профильными специалистами.</p>
-          <NuxtLink to="/about" class="btn btn-orange people-btn">
+          <h3 class="people-subheading">{{ secondaryTitle }}</h3>
+          <p class="people-desc">{{ secondaryDescription }}</p>
+          <NuxtLink
+            v-if="cta?.kind === 'internal'"
+            :to="cta.to"
+            class="btn btn-orange people-btn"
+          >
             <span class="btn-icon-wrap">
               <img src="/images/I16_569_132_85696.svg" alt="" class="btn-arrow">
             </span>
-            Подробнее
+            {{ linkLabel }}
           </NuxtLink>
+          <a
+            v-else-if="cta?.kind === 'external'"
+            :href="cta.href"
+            class="btn btn-orange people-btn"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span class="btn-icon-wrap">
+              <img src="/images/I16_569_132_85696.svg" alt="" class="btn-arrow">
+            </span>
+            {{ linkLabel }}
+          </a>
         </div>
 
-        <div class="people-blocks">
-          <div class="people-block block-blue">
-            <h4>R&D И ТЕХНОЛОГИИ</h4>
-            <p>Разрабатываем и совершенствуем формулы, соединяя традиционный опыт и современные решения.</p>
-          </div>
-          <div class="people-block block-orange">
-            <h4>КОНТРОЛЬ КАЧЕСТВА</h4>
-            <p>Проверяем сырьё и продукцию, соблюдаем стандарты и обеспечиваем стабильность качества.</p>
-          </div>
-          <div class="people-block block-green">
-            <h4>СЕРВИС И ПОДДЕРЖКА</h4>
-            <p>Помогаем с заказами, консультациями и навигацией по сервисам — быстро и по делу.</p>
-          </div>
-          <div class="people-block block-yellow">
-            <h4>ОБУЧЕНИЕ ПАРТНЁРОВ</h4>
-            <p>Даём систему обучения, материалы и сопровождение, чтобы партнёр рос уверенно и этично.</p>
+        <div v-if="miniBlocks.length" class="people-blocks">
+          <div
+            v-for="(mini, i) in miniBlocks"
+            :key="mini.key"
+            class="people-block"
+            :class="miniClass(i)"
+          >
+            <h4>{{ mini.title }}</h4>
+            <p>{{ mini.description }}</p>
           </div>
         </div>
       </div>
     </div>
   </section>
 </template>
+
+<script setup lang="ts">
+import { computed } from 'vue'
+import type { AboutBlock6Mini } from '~/types/aboutPage'
+import { normalizeAboutText } from '~/utils/aboutText'
+import { resolveAboutCtaLink, type AboutCtaResolved } from '~/utils/aboutCtaLink'
+
+const STATIC_MINIS: { title: string, description: string }[] = [
+  {
+    title: 'R&D И ТЕХНОЛОГИИ',
+    description: 'Разрабатываем и совершенствуем формулы, соединяя традиционный опыт и современные решения.',
+  },
+  {
+    title: 'КОНТРОЛЬ КАЧЕСТВА',
+    description: 'Проверяем сырьё и продукцию, соблюдаем стандарты и обеспечиваем стабильность качества.',
+  },
+  {
+    title: 'СЕРВИС И ПОДДЕРЖКА',
+    description: 'Помогаем с заказами, консультациями и навигацией по сервисам — быстро и по делу.',
+  },
+  {
+    title: 'ОБУЧЕНИЕ ПАРТНЁРОВ',
+    description: 'Даём систему обучения, материалы и сопровождение, чтобы партнёр рос уверенно и этично.',
+  },
+]
+
+const props = withDefaults(
+  defineProps<{
+    title?: string | null
+    description?: string | null
+    secondaryTitle?: string | null
+    secondaryDescription?: string | null
+    link?: string | null
+    linkName?: string | null
+    minis?: AboutBlock6Mini[] | null
+  }>(),
+  {
+    title: 'Люди и сообщество',
+    description: '',
+    secondaryTitle: '',
+    secondaryDescription: '',
+    link: null,
+    linkName: 'Подробнее',
+    minis: () => [],
+  },
+)
+
+const titleNorm = computed(() => normalizeAboutText(props.title) || 'Люди и сообщество')
+
+const titleSplit = computed(() => {
+  const t = titleNorm.value
+  const lower = t.toLowerCase()
+  const msgIdx = lower.indexOf('сообщество')
+  if (msgIdx > 0) {
+    const accent = t.slice(0, msgIdx).trim()
+    const rest = t.slice(msgIdx).trim()
+    return {
+      accent: accent.toUpperCase(),
+      rest: ` ${rest.toUpperCase()}`,
+    }
+  }
+  const parts = t.split(/\s+/).filter(Boolean)
+  if (parts.length >= 2) {
+    return {
+      accent: parts[0].toUpperCase(),
+      rest: ` ${parts.slice(1).join(' ').toUpperCase()}`,
+    }
+  }
+  return { accent: t.toUpperCase(), rest: '' }
+})
+
+const titleAccent = computed(() => titleSplit.value.accent)
+const titleRest = computed(() => titleSplit.value.rest)
+
+const intro = computed(() => normalizeAboutText(props.description))
+const secondaryTitle = computed(() => normalizeAboutText(props.secondaryTitle))
+const secondaryDescription = computed(() => normalizeAboutText(props.secondaryDescription))
+
+const linkLabel = computed(() => String(props.linkName || 'Подробнее').trim() || 'Подробнее')
+
+const cta = computed((): AboutCtaResolved | null => resolveAboutCtaLink(props.link))
+
+const miniBlocks = computed(() => {
+  const fromApi = (props.minis ?? [])
+    .filter(m => m.title?.trim() || m.description?.trim())
+    .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
+    .map((m, i) => ({
+      key: m.id ?? i,
+      title: normalizeAboutText(m.title).toUpperCase(),
+      description: normalizeAboutText(m.description),
+    }))
+
+  if (fromApi.length) return fromApi
+
+  return STATIC_MINIS.map((m, i) => ({
+    key: `static-${i}`,
+    title: m.title,
+    description: m.description,
+  }))
+})
+
+function miniClass(i: number): string {
+  const classes = ['block-blue', 'block-orange', 'block-green', 'block-yellow']
+  return classes[i % classes.length]
+}
+</script>
 
 <style scoped>
 .people-section {
@@ -74,6 +189,7 @@
   max-width: 980px;
   text-align: center;
   letter-spacing: -0.01em;
+  white-space: pre-line;
 }
 
 .people-layout {
@@ -95,6 +211,7 @@
   line-height: 0.98;
   letter-spacing: -0.02em;
   max-width: 620px;
+  white-space: pre-line;
 }
 
 .people-desc {
@@ -104,6 +221,7 @@
   margin: 0 0 clamp(24px, 2.8vw, 42px);
   max-width: 640px;
   letter-spacing: -0.01em;
+  white-space: pre-line;
 }
 
 .people-btn {
@@ -117,6 +235,7 @@
   font-weight: 700;
   letter-spacing: 0.01em;
   line-height: 1;
+  text-decoration: none;
 }
 
 .btn-icon-wrap {
