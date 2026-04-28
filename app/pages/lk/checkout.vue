@@ -173,14 +173,39 @@
               <button
                 type="button"
                 class="pay-btn"
-                :disabled="orderPending || !selectedDelivery || !selectedPayment"
+                :disabled="orderPending || tiptopPending || !selectedDelivery || !selectedPayment"
                 @click="handlePlaceOrder"
               >
                 <span class="pay-arrow">
-                  <span v-if="orderPending" class="pay-spinner"></span>
+                  <span v-if="orderPending || tiptopPending" class="pay-spinner"></span>
                 </span>
-                <span>{{ orderPending ? 'ОФОРМЛЯЕМ...' : 'ОПЛАТИТЬ' }}</span>
+                <span>{{ orderPending ? 'ОФОРМЛЯЕМ...' : tiptopPending ? 'ПРОВЕРЯЕМ ОПЛАТУ...' : 'ОПЛАТИТЬ' }}</span>
               </button>
+
+              <div v-if="tiptopActiveOrderId" class="tiptop-status-box">
+                <p class="tiptop-status-title">Статус оплаты TipTop</p>
+                <p class="tiptop-status-text" :class="`is-${tiptopFlowState}`">{{ tiptopStatusText }}</p>
+                <p v-if="tiptopStatusReason" class="tiptop-status-reason">{{ tiptopStatusReason }}</p>
+                <div class="tiptop-status-actions">
+                  <button
+                    type="button"
+                    class="tiptop-action"
+                    :disabled="tiptopPending"
+                    @click="checkTiptopStatus(tiptopActiveOrderId)"
+                  >
+                    Проверить статус оплаты
+                  </button>
+                  <button
+                    v-if="canRetryTiptop"
+                    type="button"
+                    class="tiptop-action is-primary"
+                    :disabled="tiptopPending"
+                    @click="retryTiptopPayment"
+                  >
+                    Попробовать оплатить снова
+                  </button>
+                </div>
+              </div>
             </aside>
           </div>
         </div>
@@ -193,6 +218,7 @@
 <script setup lang="ts">
 import type { CheckoutDeliveryMethod, CheckoutPaymentMethod, CheckoutUserAddress } from '~/types/checkoutPage'
 import type { PlacedOrder } from '~/types/checkoutPage'
+import type { TiptopPaymentStatusResponse } from '~/types/tiptopPay'
 import { useCartStore } from '~/stores/useCartStore'
 
 definePageMeta({ layout: false })
@@ -239,6 +265,13 @@ const formattedAddress = computed(() => {
 const selectedDelivery = ref<number | null>(null)
 const selectedPickup = ref<number | null>(null)
 const selectedPayment = ref<number | null>(null)
+
+const TIPTOP_PENDING_ORDER_KEY = 'tiptop-pending-order-id'
+const tiptopMethod = computed(() => paymentMethods.value.find(m => m.code === 'tiptop') ?? null)
+const selectedPaymentMethod = computed(
+  () => paymentMethods.value.find(m => m.id === selectedPayment.value) ?? null,
+)
+const isTiptopSelected = computed(() => selectedPaymentMethod.value?.code === 'tiptop')
 
 watch(deliveryMethods, (methods) => {
   if (methods.length && selectedDelivery.value === null) {
@@ -289,19 +322,164 @@ function formatPrice(value: number) {
 
 // ── Order placement ───────────────────────────────────────────────────────────
 const { pending: orderPending, error: orderError, fieldErrors: orderFieldErrors, placeOrder } = useOrderPlace()
+const { getWidgetConfig, getPaymentStatus, launchWidget } = useTiptopPay()
 
 const placedOrder = useState<PlacedOrder | null>('placed-order', () => null)
+const tiptopPending = ref(false)
+const tiptopStatusReason = ref('')
+const tiptopFlowState = ref<'idle' | 'order_created' | 'payment_pending' | 'paid' | 'failed'>('idle')
+const tiptopActiveOrderId = ref<number | null>(null)
+
+const canRetryTiptop = computed(
+  () => !!tiptopActiveOrderId.value && (tiptopFlowState.value === 'failed' || tiptopFlowState.value === 'payment_pending'),
+)
+
+const tiptopStatusText = computed(() => {
+  switch (tiptopFlowState.value) {
+    case 'order_created':
+      return 'Заказ создан. Запускаем оплату.'
+    case 'payment_pending':
+      return 'Оплата не завершена. Проверьте статус или повторите попытку.'
+    case 'paid':
+      return 'Оплата подтверждена.'
+    case 'failed':
+      return 'Оплата не прошла или была отменена.'
+    default:
+      return 'Ожидание оплаты.'
+  }
+})
+
+if (import.meta.client) {
+  const saved = Number(localStorage.getItem(TIPTOP_PENDING_ORDER_KEY) || '')
+  if (Number.isFinite(saved) && saved > 0) {
+    tiptopActiveOrderId.value = saved
+    tiptopFlowState.value = 'payment_pending'
+  }
+}
+
+onMounted(async () => {
+  if (!tiptopActiveOrderId.value) return
+  await checkTiptopStatus(tiptopActiveOrderId.value)
+})
+
+function persistTiptopOrderId(orderId: number | null) {
+  if (!import.meta.client) return
+  if (orderId && orderId > 0) localStorage.setItem(TIPTOP_PENDING_ORDER_KEY, String(orderId))
+  else localStorage.removeItem(TIPTOP_PENDING_ORDER_KEY)
+}
+
+function tiptopReasonFromStatus(status: TiptopPaymentStatusResponse | null): string {
+  return (
+    status?.payment?.reason
+    || status?.payment?.message
+    || status?.reason
+    || status?.message
+    || ''
+  )
+}
+
+async function finalizePaidOrderAndNavigate(order: PlacedOrder) {
+  placedOrder.value = order
+  tiptopFlowState.value = 'paid'
+  tiptopStatusReason.value = ''
+  tiptopActiveOrderId.value = null
+  persistTiptopOrderId(null)
+  cartStore.clear()
+  checkoutCart.value = []
+  await router.push('/lk/payment')
+}
+
+async function checkTiptopStatus(orderId: number): Promise<boolean> {
+  tiptopPending.value = true
+  try {
+    const status = await getPaymentStatus(orderId)
+    if (!status) {
+      tiptopFlowState.value = 'failed'
+      tiptopStatusReason.value = 'Не удалось получить статус оплаты. Проверьте сеть и повторите.'
+      return false
+    }
+    if (status.paid === 'yes') {
+      tiptopFlowState.value = 'paid'
+      tiptopStatusReason.value = ''
+      return true
+    }
+    tiptopFlowState.value = 'payment_pending'
+    tiptopStatusReason.value = tiptopReasonFromStatus(status) || 'Платеж пока не подтвержден.'
+    return false
+  }
+  finally {
+    tiptopPending.value = false
+  }
+}
+
+async function startTiptopPayment(order: PlacedOrder) {
+  tiptopPending.value = true
+  tiptopFlowState.value = 'order_created'
+  tiptopStatusReason.value = ''
+  tiptopActiveOrderId.value = order.id
+  persistTiptopOrderId(order.id)
+
+  try {
+    const widgetConfig = await getWidgetConfig(order.id)
+    if (!widgetConfig?.success) {
+      tiptopFlowState.value = 'failed'
+      tiptopStatusReason.value = 'Не удалось запустить TipTop. Проверьте статус оплаты и повторите.'
+      return
+    }
+
+    const launched = await launchWidget(widgetConfig.widget_url, widgetConfig.config || {})
+    if (!launched.opened) {
+      tiptopFlowState.value = 'failed'
+      tiptopStatusReason.value = 'Виджет TipTop не открылся. Нажмите «Проверить статус оплаты».'
+      return
+    }
+
+    tiptopFlowState.value = 'payment_pending'
+    // Не считаем callback окончательным: обязательно подтверждаем через backend status.
+    const paidNow = await checkTiptopStatus(order.id)
+    if (paidNow) await finalizePaidOrderAndNavigate(order)
+  }
+  finally {
+    tiptopPending.value = false
+  }
+}
+
+async function retryTiptopPayment() {
+  if (!tiptopActiveOrderId.value) return
+  tiptopPending.value = true
+  try {
+    const widgetConfig = await getWidgetConfig(tiptopActiveOrderId.value)
+    if (!widgetConfig?.success) {
+      tiptopFlowState.value = 'failed'
+      tiptopStatusReason.value = 'Не удалось повторно открыть TipTop.'
+      return
+    }
+    const launched = await launchWidget(widgetConfig.widget_url, widgetConfig.config || {})
+    if (!launched.opened) {
+      tiptopFlowState.value = 'failed'
+      tiptopStatusReason.value = 'Виджет TipTop не открылся.'
+      return
+    }
+    tiptopFlowState.value = 'payment_pending'
+    await checkTiptopStatus(tiptopActiveOrderId.value)
+  }
+  finally {
+    tiptopPending.value = false
+  }
+}
 
 async function handlePlaceOrder() {
   if (!selectedDelivery.value || !selectedPayment.value) return
+  if (isTiptopSelected.value && !tiptopMethod.value) {
+    orderError.value = 'Метод оплаты TipTop сейчас недоступен.'
+    return
+  }
 
-  // Build products from checkoutCart; fall back to cartStore if cart state is empty
   const sourceItems = checkoutCart.value.length
     ? checkoutCart.value
     : cartStore.items.map(i => ({ id: i.id, qty: i.qty, total: i.pricePerUnit * i.qty }))
 
   const products = sourceItems.map(it => ({ id: it.id, quantity: it.qty }))
-
   if (!products.length) {
     orderError.value = 'Корзина пуста'
     return
@@ -318,12 +496,14 @@ async function handlePlaceOrder() {
     products,
   })
 
-  if (result) {
-    placedOrder.value = result.order
-    cartStore.clear()
-    checkoutCart.value = []
-    await router.push('/lk/payment')
+  if (!result) return
+
+  if (isTiptopSelected.value) {
+    await startTiptopPayment(result.order)
+    return
   }
+
+  await finalizePaidOrderAndNavigate(result.order)
 }
 </script>
 
@@ -716,6 +896,75 @@ async function handlePlaceOrder() {
   border: 1px solid #f5c6c6;
   color: #c0392b;
   font-size: clamp(14px, 1.8vw, 16px);
+}
+
+.tiptop-status-box {
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid #e6e6e6;
+  border-radius: 14px;
+  background: #fafafa;
+}
+
+.tiptop-status-title {
+  margin: 0 0 4px;
+  font-size: 14px;
+  color: #222;
+  font-weight: 700;
+}
+
+.tiptop-status-text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.35;
+  color: #444;
+}
+
+.tiptop-status-text.is-paid {
+  color: #2f8f3a;
+}
+
+.tiptop-status-text.is-failed {
+  color: #c0392b;
+}
+
+.tiptop-status-text.is-order_created,
+.tiptop-status-text.is-payment_pending {
+  color: #8a5a1f;
+}
+
+.tiptop-status-reason {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: #666;
+}
+
+.tiptop-status-actions {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tiptop-action {
+  border: 1px solid #cfcfcf;
+  background: #fff;
+  color: #333;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.tiptop-action:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.tiptop-action.is-primary {
+  border-color: #e28133;
+  background: #e28133;
+  color: #fff;
 }
 
 /* ── Pay button ── */
