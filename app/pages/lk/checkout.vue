@@ -191,7 +191,7 @@
                     type="button"
                     class="tiptop-action"
                     :disabled="tiptopPending"
-                    @click="checkTiptopStatus(tiptopActiveOrderId)"
+                    @click="handleManualTiptopStatusCheck"
                   >
                     Проверить статус оплаты
                   </button>
@@ -272,6 +272,8 @@ const selectedPaymentMethod = computed(
   () => paymentMethods.value.find(m => m.id === selectedPayment.value) ?? null,
 )
 const isTiptopSelected = computed(() => selectedPaymentMethod.value?.code === 'tiptop')
+const isQontoSelected = computed(() => selectedPaymentMethod.value?.code === 'qonto')
+const isPaymeSelected = computed(() => selectedPaymentMethod.value?.code === 'payme')
 
 watch(deliveryMethods, (methods) => {
   if (methods.length && selectedDelivery.value === null) {
@@ -325,6 +327,11 @@ const { pending: orderPending, error: orderError, fieldErrors: orderFieldErrors,
 const { getWidgetConfig, getPaymentStatus, launchWidget } = useTiptopPay()
 
 const placedOrder = useState<PlacedOrder | null>('placed-order', () => null)
+const placedOrderPaymentCode = useState<string | null>('placed-order-payment-code', () => null)
+const placedOrderFlowState = useState<'order_created' | 'payment_pending' | 'payment_success' | 'payment_failed' | null>(
+  'placed-order-flow-state',
+  () => null,
+)
 const tiptopPending = ref(false)
 const tiptopStatusReason = ref('')
 const tiptopFlowState = ref<'idle' | 'order_created' | 'payment_pending' | 'paid' | 'failed'>('idle')
@@ -359,7 +366,8 @@ if (import.meta.client) {
 
 onMounted(async () => {
   if (!tiptopActiveOrderId.value) return
-  await checkTiptopStatus(tiptopActiveOrderId.value)
+  const paid = await checkTiptopStatus(tiptopActiveOrderId.value)
+  if (paid) await finalizePaidOrderAndNavigate()
 })
 
 function persistTiptopOrderId(orderId: number | null) {
@@ -378,12 +386,23 @@ function tiptopReasonFromStatus(status: TiptopPaymentStatusResponse | null): str
   )
 }
 
-async function finalizePaidOrderAndNavigate(order: PlacedOrder) {
-  placedOrder.value = order
+async function finalizePaidOrderAndNavigate(order?: PlacedOrder) {
+  if (order) placedOrder.value = order
+  placedOrderPaymentCode.value = selectedPaymentMethod.value?.code ?? 'tiptop'
+  placedOrderFlowState.value = 'payment_success'
   tiptopFlowState.value = 'paid'
   tiptopStatusReason.value = ''
   tiptopActiveOrderId.value = null
   persistTiptopOrderId(null)
+  cartStore.clear()
+  checkoutCart.value = []
+  await router.push('/lk/payment')
+}
+
+async function finalizeManualPendingAndNavigate(order: PlacedOrder, paymentCode: 'qonto' | 'payme') {
+  placedOrder.value = order
+  placedOrderPaymentCode.value = paymentCode
+  placedOrderFlowState.value = 'payment_pending'
   cartStore.clear()
   checkoutCart.value = []
   await router.push('/lk/payment')
@@ -430,7 +449,7 @@ async function startTiptopPayment(order: PlacedOrder) {
     const launched = await launchWidget(widgetConfig.widget_url, widgetConfig.config || {})
     if (!launched.opened) {
       tiptopFlowState.value = 'failed'
-      tiptopStatusReason.value = 'Виджет TipTop не открылся. Нажмите «Проверить статус оплаты».'
+      tiptopStatusReason.value = launched.reason || 'Виджет TipTop не открылся. Нажмите «Проверить статус оплаты».'
       return
     }
 
@@ -457,15 +476,22 @@ async function retryTiptopPayment() {
     const launched = await launchWidget(widgetConfig.widget_url, widgetConfig.config || {})
     if (!launched.opened) {
       tiptopFlowState.value = 'failed'
-      tiptopStatusReason.value = 'Виджет TipTop не открылся.'
+      tiptopStatusReason.value = launched.reason || 'Виджет TipTop не открылся.'
       return
     }
     tiptopFlowState.value = 'payment_pending'
-    await checkTiptopStatus(tiptopActiveOrderId.value)
+    const paid = await checkTiptopStatus(tiptopActiveOrderId.value)
+    if (paid) await finalizePaidOrderAndNavigate()
   }
   finally {
     tiptopPending.value = false
   }
+}
+
+async function handleManualTiptopStatusCheck() {
+  if (!tiptopActiveOrderId.value) return
+  const paid = await checkTiptopStatus(tiptopActiveOrderId.value)
+  if (paid) await finalizePaidOrderAndNavigate()
 }
 
 async function handlePlaceOrder() {
@@ -500,6 +526,16 @@ async function handlePlaceOrder() {
 
   if (isTiptopSelected.value) {
     await startTiptopPayment(result.order)
+    return
+  }
+
+  if (isQontoSelected.value) {
+    await finalizeManualPendingAndNavigate(result.order, 'qonto')
+    return
+  }
+
+  if (isPaymeSelected.value) {
+    await finalizeManualPendingAndNavigate(result.order, 'payme')
     return
   }
 

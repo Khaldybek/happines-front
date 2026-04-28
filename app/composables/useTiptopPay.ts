@@ -4,7 +4,7 @@ import type {
 } from '~/types/tiptopPay'
 import { optionalBearerJsonHeaders } from '~/composables/useApiBearerOptional'
 
-let scriptLoadPromise: Promise<void> | null = null
+const scriptLoadByUrl = new Map<string, Promise<void>>()
 
 function apiBaseUrl(): string {
   const config = useRuntimeConfig()
@@ -22,12 +22,34 @@ function extractHostedUrl(config: Record<string, unknown>): string | null {
   return null
 }
 
-async function ensureScript(widgetUrl: string): Promise<void> {
-  if (!widgetUrl) return
-  if (scriptLoadPromise) return scriptLoadPromise
+function normalizeWidgetConfig(config: Record<string, unknown>): Record<string, unknown> {
+  const normalized = { ...config }
+  // Some integrations use publicTerminalId, while widget may expect publicId.
+  if (!normalized.publicId && typeof normalized.publicTerminalId === 'string') {
+    normalized.publicId = normalized.publicTerminalId
+  }
+  return normalized
+}
 
-  scriptLoadPromise = new Promise((resolve, reject) => {
-    const existing = document.querySelector<HTMLScriptElement>(`script[src="${widgetUrl}"]`)
+function hasValidAmount(config: Record<string, unknown>): boolean {
+  const amount = config.amount
+  if (typeof amount === 'number') return Number.isFinite(amount) && amount > 0
+  if (typeof amount === 'string') {
+    const n = Number(amount)
+    return Number.isFinite(n) && n > 0
+  }
+  return false
+}
+
+async function ensureScript(widgetUrl: string): Promise<void> {
+  const src = String(widgetUrl || '').trim()
+  if (!src) return
+
+  const cached = scriptLoadByUrl.get(src)
+  if (cached) return cached
+
+  const loadPromise = new Promise<void>((resolve, reject) => {
+    const existing = document.querySelector<HTMLScriptElement>(`script[src="${src}"]`)
     if (existing) {
       if (existing.dataset.loaded === '1') {
         resolve()
@@ -39,7 +61,7 @@ async function ensureScript(widgetUrl: string): Promise<void> {
     }
 
     const script = document.createElement('script')
-    script.src = widgetUrl
+    script.src = src
     script.async = true
     script.onload = () => {
       script.dataset.loaded = '1'
@@ -49,7 +71,16 @@ async function ensureScript(widgetUrl: string): Promise<void> {
     document.head.appendChild(script)
   })
 
-  return scriptLoadPromise
+  scriptLoadByUrl.set(src, loadPromise)
+
+  try {
+    await loadPromise
+  }
+  catch (error) {
+    // Allow retries after temporary network/script errors.
+    scriptLoadByUrl.delete(src)
+    throw error
+  }
 }
 
 export function useTiptopPay() {
@@ -79,10 +110,21 @@ export function useTiptopPay() {
     }
   }
 
-  async function launchWidget(widgetUrl: string, config: Record<string, unknown>): Promise<{ opened: boolean, via: 'widget' | 'popup' | 'none' }> {
+  async function launchWidget(
+    widgetUrl: string,
+    config: Record<string, unknown>,
+  ): Promise<{ opened: boolean, via: 'widget' | 'popup' | 'none', reason?: string }> {
     if (!import.meta.client) return { opened: false, via: 'none' }
 
-    const hostedUrl = extractHostedUrl(config)
+    const normalizedConfig = normalizeWidgetConfig(config)
+    const hostedUrl = extractHostedUrl(normalizedConfig)
+    if (!hasValidAmount(normalizedConfig)) {
+      return {
+        opened: false,
+        via: 'none',
+        reason: 'В конфиге TipTop отсутствует сумма оплаты (amount).',
+      }
+    }
     await ensureScript(widgetUrl)
 
     const w = window as unknown as Record<string, unknown>
@@ -91,14 +133,14 @@ export function useTiptopPay() {
     if (TipTopPayWidget) {
       const instance = new TipTopPayWidget()
       if (instance?.open) {
-        instance.open(config)
+        instance.open(normalizedConfig)
         return { opened: true, via: 'widget' }
       }
     }
 
     const tipTopPay = w.TipTopPay as { open?: (cfg: unknown) => void } | undefined
     if (tipTopPay?.open) {
-      tipTopPay.open(config)
+      tipTopPay.open(normalizedConfig)
       return { opened: true, via: 'widget' }
     }
 

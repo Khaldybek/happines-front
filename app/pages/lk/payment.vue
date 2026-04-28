@@ -7,13 +7,17 @@
       <section class="payment-content">
         <div class="container">
           <article class="success-card">
-            <h1>БЛАГОДАРИМ ЗА ПОКУПКУ!</h1>
+            <h1>{{ titleText }}</h1>
 
             <div class="success-icon" aria-hidden="true">
-              <span class="icon-heart">♡</span>
+              <span class="icon-heart">{{ iconText }}</span>
             </div>
 
-            <p v-if="placedOrder">
+            <p v-if="isManualPending && placedOrder">
+              Заказ <strong>#{{ placedOrder.id }}</strong> создан.<br>
+              {{ manualPendingLeadText }}
+            </p>
+            <p v-else-if="placedOrder">
               Заказ <strong>#{{ placedOrder.id }}</strong> успешно оформлен.<br>
               Вы можете следить за статусом в личном кабинете.
             </p>
@@ -22,9 +26,19 @@
               своего заказа в личном кабинете
             </p>
 
+            <div v-if="isManualPending && placedOrder" class="qonto-instruction-box">
+              <p class="qonto-instruction-title">{{ instructionTitle }}</p>
+              <p class="qonto-instruction-row"><span>Номер заказа:</span> <strong>#{{ placedOrder.id }}</strong></p>
+              <p class="qonto-instruction-row"><span>Сумма заказа:</span> <strong>{{ formatPrice(placedOrder.total_price) }}</strong></p>
+              <p class="qonto-instruction-row"><span>Статус:</span> <strong class="qonto-status">Ожидает оплату</strong></p>
+              <p class="qonto-instruction-note">
+                {{ manualPendingFootnote }}
+              </p>
+            </div>
+
             <NuxtLink to="/lk/orders" class="success-btn">
               <span class="success-arrow"></span>
-              <span>ПЕРЕЙТИ В ЛИЧНЫЙ КАБИНЕТ</span>
+              <span>{{ ctaText }}</span>
             </NuxtLink>
           </article>
         </div>
@@ -38,17 +52,53 @@
 import type { PlacedOrder } from '~/types/checkoutPage'
 
 definePageMeta({ layout: false })
-useHead({ title: 'Личный кабинет — Заказ оформлен' })
 
-const breadcrumbs = [
+const placedOrder = useState<PlacedOrder | null>('placed-order', () => null)
+const placedOrderPaymentCode = useState<string | null>('placed-order-payment-code', () => null)
+const placedOrderFlowState = useState<'order_created' | 'payment_pending' | 'payment_success' | 'payment_failed' | null>(
+  'placed-order-flow-state',
+  () => null,
+)
+
+const isQontoPending = computed(() => placedOrderPaymentCode.value === 'qonto' && placedOrderFlowState.value === 'payment_pending')
+const isPaymePending = computed(() => placedOrderPaymentCode.value === 'payme' && placedOrderFlowState.value === 'payment_pending')
+const isManualPending = computed(() => isQontoPending.value || isPaymePending.value)
+const manualPendingCode = computed(() => (isQontoPending.value ? 'qonto' : isPaymePending.value ? 'payme' : null))
+
+const titleText = computed(() => (isManualPending.value ? 'ЗАКАЗ СОЗДАН' : 'БЛАГОДАРИМ ЗА ПОКУПКУ!'))
+const iconText = computed(() => (isManualPending.value ? '⏳' : '♡'))
+const ctaText = computed(() => (isManualPending.value ? 'ПЕРЕЙТИ К МОИМ ЗАКАЗАМ' : 'ПЕРЕЙТИ В ЛИЧНЫЙ КАБИНЕТ'))
+const instructionTitle = computed(() => (manualPendingCode.value === 'payme' ? 'Инструкция по оплате (Payme)' : 'Инструкция по оплате (Qonto)'))
+const manualPendingLeadText = computed(() =>
+  manualPendingCode.value === 'payme'
+    ? 'Оплата Payme обрабатывается после создания заказа. Ожидайте подтверждение оплаты.'
+    : 'Выполните банковский перевод через Qonto, чтобы завершить оплату.',
+)
+const manualPendingFootnote = computed(() =>
+  manualPendingCode.value === 'payme'
+    ? 'После обработки платежа на стороне Paycom и бэка статус заказа обновится в истории заказов.'
+    : 'После поступления платежа заказ будет подтвержден. Статус обновится в истории заказов.',
+)
+
+const breadcrumbs = computed(() => [
   { label: 'Главная', to: '/' },
   { label: 'Личный кабинет', to: '/lk/orders' },
   { label: 'Моя корзина', to: '/lk/cart' },
   { label: 'Оформление заказа', to: '/lk/checkout' },
-  { label: 'Заказ оформлен' },
-]
+  { label: isManualPending.value ? 'Ожидание оплаты' : 'Заказ оформлен' },
+])
 
-const placedOrder = useState<PlacedOrder | null>('placed-order', () => null)
+const pageTitle = computed(
+  () => (isManualPending.value ? 'Личный кабинет — Заказ ожидает оплату' : 'Личный кабинет — Заказ оформлен'),
+)
+
+useHead({
+  title: () => pageTitle.value,
+})
+
+function formatPrice(value: number) {
+  return `${value.toLocaleString('ru-RU')} ₸`
+}
 </script>
 
 <style scoped>
@@ -132,6 +182,46 @@ const placedOrder = useState<PlacedOrder | null>('placed-order', () => null)
   font-size: clamp(16px, 2.5vw, 28px);
   line-height: 1.4;
   white-space: pre-line;
+}
+
+.qonto-instruction-box {
+  margin: 18px auto 0;
+  max-width: 680px;
+  text-align: left;
+  border: 1px solid #e7e7e7;
+  border-radius: 18px;
+  padding: 14px 16px;
+  background: #fafafa;
+}
+
+.qonto-instruction-title {
+  margin: 0 0 8px;
+  font-size: 16px;
+  line-height: 1.35;
+  color: #1e1e1e;
+  font-weight: 700;
+}
+
+.qonto-instruction-row {
+  margin: 0 0 6px;
+  font-size: 15px;
+  line-height: 1.4;
+  color: #2f2f2f;
+}
+
+.qonto-instruction-row span {
+  color: #666;
+}
+
+.qonto-status {
+  color: #a36824;
+}
+
+.qonto-instruction-note {
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: #555;
 }
 
 .success-btn {
@@ -239,6 +329,20 @@ const placedOrder = useState<PlacedOrder | null>('placed-order', () => null)
   .success-card p {
     font-size: clamp(15px, 4vw, 20px);
     max-width: 100%;
+  }
+
+  .qonto-instruction-box {
+    margin-top: 14px;
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  .qonto-instruction-title {
+    font-size: 15px;
+  }
+
+  .qonto-instruction-row {
+    font-size: 14px;
   }
 
   .success-btn {
